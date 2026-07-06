@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   MapPin,
   Plus,
@@ -8,7 +8,7 @@ import {
   Star,
   UtensilsCrossed,
 } from "lucide-react";
-import { Modal, AddRestaurantForm } from "../components";
+import { Modal, LogVisitForm } from "../components";
 import { useRecentEntries, useMyRestaurants } from "../hooks/useDiaryData";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -238,10 +238,9 @@ function EntryCard({ entry }) {
 }
 
 export function HomePage() {
-  const navigate = useNavigate();
   const { data: entries, isLoading: loadingEntries } = useRecentEntries(20);
   const { data: restaurants } = useMyRestaurants();
-  const [showAddModal, setShowAddModal] = useState(false);
+  const [showVisitModal, setShowVisitModal] = useState(false);
 
   const totalPlaces = restaurants?.length ?? 0;
   const totalEntries = entries?.length ?? 0;
@@ -378,10 +377,10 @@ export function HomePage() {
               Tap the + button to log your first restaurant visit.
             </p>
             <button
-              onClick={() => setShowAddModal(true)}
+              onClick={() => setShowVisitModal(true)}
               className="rounded-full bg-[#1C1107] px-6 py-2.5 text-xs font-semibold tracking-wide text-[#A5CF83]"
             >
-              Add a place
+              Log a visit
             </button>
           </div>
         )}
@@ -396,21 +395,21 @@ export function HomePage() {
 
       {/* ── FAB ──────────────────────────────────────────────────── */}
       <button
-        onClick={() => setShowAddModal(true)}
+        onClick={() => setShowVisitModal(true)}
         aria-label="Log a new visit"
         className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#1C1107] shadow-[0_4px_20px_rgba(28,17,7,0.35)] transition hover:scale-105"
       >
         <Plus size={24} color="#A5CF83" />
       </button>
     </div>
-    {showAddModal && (
-  <Modal onClose={() => setShowAddModal(false)}>
-    <AddRestaurantForm onClose={() => setShowAddModal(false)} />
-  </Modal>
-)}
-</>
+      {showVisitModal && (
+        <Modal onClose={() => setShowVisitModal(false)}>
+          <LogVisitForm
+            restaurants={restaurants ?? []}
+            onClose={() => setShowVisitModal(false)}
+          />
+        </Modal>
+      )}
+    </>
   );
-  
 }
-
-

@@ -17,20 +17,10 @@ export function NavBar() {
   }
 
   return (
-    <div
-      className="relative min-h-screen bg-[#F5F0E8]"
-    >
+    <div className="relative min-h-screen bg-[#F5F0E8]">
       {/* ── STICKY PILL NAV ──────────────────────────────────────── */}
-      <div className="sticky top-3 z-50 flex justify-center pointer-events-none">
+      <div className="sticky top-3 z-50 flex justify-center pointer-events-auto">
         <div className="flex items-center gap-1 bg-foreground/90 backdrop-blur-md rounded-2xl px-2 py-2 shadow-xl border border-white/10">
-          <span className="hidden sm:block px-3 text-xs font-semibold text-[#A5CF83] tracking-[0.12em] uppercase mr-1">
-            Eaten&amp;Noted
-          </span>
-
-
-          <div className="hidden sm:block h-4 w-px bg-white/10 mr-1" />
-
-     
           {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}
@@ -49,7 +39,6 @@ export function NavBar() {
               <span className="hidden sm:inline">{label}</span>
             </NavLink>
           ))}
-
 
           <div className="h-4 w-px bg-white/10 mx-1" />
 

@@ -29,15 +29,19 @@ export function AddRestaurantForm({ onClose }) {
   const { data: barangays = [], isLoading: loadingBarangays } =
     useBarangaysByCity(form.cityCode);
 
-  const cityOptions = cities.map((city) => ({
-    value: city.code,
-    label: city.name,
-  }));
+  const cityOptions = [...cities]
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((city) => ({
+      value: city.code,
+      label: city.name,
+    }));
 
-  const barangayOptions = barangays.map((brgy) => ({
-    value: brgy.name,
-    label: brgy.name,
-  }));
+  const barangayOptions = [...barangays]
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map((brgy) => ({
+      value: brgy.name,
+      label: brgy.name,
+    }));
 
   function handleChange(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -148,13 +152,7 @@ export function AddRestaurantForm({ onClose }) {
             onChange={(value) => handleChange("barangay", value)}
             required
             disabled={!form.cityCode || loadingBarangays}
-            placeholder={
-              !form.cityCode
-                ? "City first"
-                : loadingBarangays
-                  ? "Loading..."
-                  : "Select barangay"
-            }
+            placeholder={loadingBarangays ? "Loading..." : "Select barangay"}
             options={barangayOptions}
           />
         </div>

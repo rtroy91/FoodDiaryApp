@@ -1,19 +1,19 @@
-import { useQuery } from '@tanstack/react-query';
-import { getBataanCitiesMunicipalities, getBarangaysByCity } from '../api/psgc';
+import { useQuery } from "@tanstack/react-query";
+import { getCitiesOfBataan, getBarangaysByCity } from "../api/psgc";
 
 export function useBataanCities() {
   return useQuery({
-    queryKey: ['psgc', 'bataan-cities'],
-    queryFn: getBataanCitiesMunicipalities,
-    staleTime: Infinity // this reference data never changes during a session
+    queryKey: ["psgc", "bataan-cities"],
+    queryFn: getCitiesOfBataan,
+    staleTime: Infinity,
   });
 }
 
 export function useBarangaysByCity(cityCode) {
   return useQuery({
-    queryKey: ['psgc', 'barangays', cityCode],
+    queryKey: ["psgc", "barangays", cityCode],
     queryFn: () => getBarangaysByCity(cityCode),
     enabled: Boolean(cityCode),
-    staleTime: Infinity
+    staleTime: Infinity,
   });
 }
