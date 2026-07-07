@@ -5,7 +5,7 @@ namespace FoodDiary.Api.Interfaces;
 
 public interface IRestaurantService
 {
-    Task<IEnumerable<RestaurantResponse>> GetAllAsync(Guid userId);
+    Task<List<RestaurantResponse>> GetRestaurantLists();
     //Task<IEnumerable<RestaurantResponse>> GetNearbyAsync(Guid userId, double lat, double lng, double radiusKm);
     Task<IEnumerable<RestaurantResponse>> GetMostVisitedAsync(Guid userId, int limit);
     Task<RestaurantResponse?> GetByIdAsync(Guid id, Guid userId);

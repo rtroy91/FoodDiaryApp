@@ -20,9 +20,6 @@ public class FoodDiaryContext : DbContext
 
         // Restaurants
         modelBuilder.Entity<Restaurant>()
-            .HasIndex(r => r.UserId);
-
-        modelBuilder.Entity<Restaurant>()
             .HasMany(r => r.Entries)
             .WithOne(e => e.Restaurant)
             .HasForeignKey(e => e.RestaurantId)

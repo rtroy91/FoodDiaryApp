@@ -89,7 +89,7 @@ export function RegisterPage() {
                 Create your account
               </h2>
 
-              <p className="mt-2 text-sm text-[#7A6A54]">
+              <p className="mt-2 text-sm text-stone-500">
                 Already have one?
                 <Link to="/login" className="ml-1 font-semibold text-[#E04B39]">
                   Sign in

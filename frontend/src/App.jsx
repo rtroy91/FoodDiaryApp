@@ -3,6 +3,7 @@ import { NavBar } from './components/NavBar';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { HomePage } from './pages/HomePage';
 import { DiscoverPage } from './pages/DiscoverPage';
+import { EntriesPage } from './pages/EntriesPage';
 import { MostVisitedPage } from './pages/MostVisitedPage';
 import { RestaurantDetailPage } from './pages/RestaurantDetailPage';
 import { AddRestaurantForm } from './components/AddRestaurantForm';
@@ -25,6 +26,7 @@ export default function App() {
           }
         >
           <Route index element={<HomePage />} />
+          <Route path="entries" element={<EntriesPage />} />
           <Route path="discover" element={<DiscoverPage />} />
           <Route path="most-visited" element={<MostVisitedPage />} />
           <Route path="add-restaurant" element={<AddRestaurantForm />} />

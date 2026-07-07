@@ -31,14 +31,31 @@ public class EntryService : IEntryService
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<EntryResponse>> GetRecentAsync(Guid userId, int limit)
+    public async Task<List<EntryResponse>> GetRecentEntries(Guid userId, int limit)
     {
         return await _context.Entries
             .Include(e => e.Restaurant)
             .Where(e => e.UserId == userId)
             .OrderByDescending(e => e.VisitedAt)
             .Take(limit)
-            .Select(e => MapToResponse(e))
+            .Select(e => new EntryResponse
+            {
+                Id = e.Id,
+                VisitedAt = e.VisitedAt,
+                Rating = e.Rating,
+                Caption = e.Caption,
+                PhotoUrl = e.PhotoUrl,
+                Restaurant = e.Restaurant == null ? null : new EntryRestaurantResponse
+                {
+                    Id = e.Restaurant.Id,
+                    Name = e.Restaurant.Name,
+                    Address = e.Restaurant.Address,
+                    Barangay = e.Restaurant.Barangay,
+                    City = e.Restaurant.City,
+                    Province = e.Restaurant.Province,
+                    Category = e.Restaurant.Category
+                }
+            })
             .ToListAsync();
     }
 
@@ -55,7 +72,7 @@ public class EntryService : IEntryService
     {
         // Business rule: the restaurant must belong to this user
         var restaurant = await _context.Restaurants
-            .FirstOrDefaultAsync(r => r.Id == request.RestaurantId && r.UserId == userId)
+            .FirstOrDefaultAsync(r => r.Id == request.RestaurantId)
             ?? throw new KeyNotFoundException("Restaurant not found.");
 
         var entry = new Entry
@@ -110,12 +127,12 @@ public class EntryService : IEntryService
     private static EntryResponse MapToResponse(Entry e) => new()
     {
         Id = e.Id,
-        RestaurantId = e.RestaurantId,
-        RestaurantName = e.Restaurant?.Name ?? string.Empty,
+        // RestaurantId = e.RestaurantId,
+        // RestaurantName = e.Restaurant?.Name ?? string.Empty,
         VisitedAt = e.VisitedAt,
         Rating = e.Rating,
         Caption = e.Caption,
         PhotoUrl = e.PhotoUrl,
-        CreatedAt = e.CreatedAt
+        //CreatedAt = e.CreatedAt
     };
 }

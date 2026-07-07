@@ -91,7 +91,7 @@ export function AddRestaurantForm({ onClose }) {
         <button
           type="button"
           onClick={() => onClose?.()}
-          className="flex h-8 w-8 items-center justify-center rounded-full text-[#7A6A54] transition hover:bg-[#F5F0E8] hover:text-[#1C1107]"
+          className="flex h-8 w-8 items-center justify-center rounded-full text-stone-500 transition hover:bg-[#F5F0E8] hover:text-[#1C1107]"
           aria-label="Close"
         >
           <X size={18} />

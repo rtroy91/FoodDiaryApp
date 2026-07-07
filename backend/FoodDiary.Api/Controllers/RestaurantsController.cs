@@ -18,12 +18,10 @@ public class RestaurantsController : ControllerBase
         _restaurantService = restaurantService;
     }
 
-    /// <summary>Get all restaurants belonging to the current user.</summary>
-    [HttpGet]
-    public async Task<IActionResult> GetAll()
+    [HttpGet("restaurant-lists")]
+    public async Task<IActionResult> GetRestaurantLists()
     {
-        var userId = GetUserId();
-        var result = await _restaurantService.GetAllAsync(userId);
+        var result = await _restaurantService.GetRestaurantLists();
         return Ok(result);
     }
 

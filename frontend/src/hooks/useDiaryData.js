@@ -9,10 +9,10 @@ export function useMostVisited(limit = 10) {
   });
 }
 
-export function useMyRestaurants() {
+export function useRestaurantLists() {
   return useQuery({
     queryKey: ['restaurants', 'mine'],
-    queryFn: restaurantsApi.getMyRestaurants
+    queryFn: restaurantsApi.GetRestaurantLists
   });
 }
 
@@ -37,6 +37,13 @@ export function useEntries(restaurantId) {
     queryKey: ['entries', restaurantId],
     queryFn: () => entriesApi.getEntries(restaurantId),
     enabled: Boolean(restaurantId)
+  });
+}
+
+export function useAllEntries() {
+  return useQuery({
+    queryKey: ['entries', 'all'],
+    queryFn: () => entriesApi.getEntries()
   });
 }
 

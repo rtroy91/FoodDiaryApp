@@ -9,9 +9,9 @@ public class RestaurantResponse
     public string? City { get; set; }
     public string? Province { get; set; }
     public string? Category { get; set; }
-    public double Latitude { get; set; }
-    public double Longitude { get; set; }
-    public int VisitCount { get; set; }
-    public double? AverageRating { get; set; }
+    // public double Latitude { get; set; }
+    // public double Longitude { get; set; }
+    // public int VisitCount { get; set; }
+    //public double? AverageRating { get; set; }
     public DateTime CreatedAt { get; set; }
 }

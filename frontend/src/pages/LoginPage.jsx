@@ -57,7 +57,7 @@ export function LoginPage() {
                 Sign in
               </h2>
 
-              <p className="mt-2 text-sm text-[#7A6A54]">
+              <p className="mt-2 text-sm text-stone-500">
                 No Account?
                 <Link
                   to="/register"
@@ -97,11 +97,11 @@ export function LoginPage() {
                 </button>
                 
               </FormInput>
-              <p className="flex justify-end text-xs text-[#7A6A54] hover:text-[#E04B39] cursor-pointer">
+              <p className="flex justify-end text-xs text-stone-500 hover:text-[#E04B39] cursor-pointer">
                 Forgot Password?
               </p>
 
-              <p className="text-xs text-[#7A6A54] hover:text-[#E04B39] cursor-pointer">
+              <p className="text-xs text-stone-500 hover:text-[#E04B39] cursor-pointer">
                 Remember Me?
               </p>
 

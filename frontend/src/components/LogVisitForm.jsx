@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Star, Upload, X } from "lucide-react";
 import { FormInput } from "./FormInput";
 import { SelectInput } from "./SelectInput";
+import { useCreateEntry } from "../hooks/useDiaryData";
 
 function formatVisitDate(date) {
   return date.toLocaleDateString("en-PH", {
@@ -19,7 +20,10 @@ function formatVisitTime(date) {
 }
 
 export function LogVisitForm({ restaurants = [], onClose }) {
+  const createEntry = useCreateEntry();
+
   const now = new Date();
+  const [errorMessage, setErrorMessage] = useState(null);
   const [form, setForm] = useState({
     restaurantId: "",
     rating: 0,
@@ -35,8 +39,24 @@ export function LogVisitForm({ restaurants = [], onClose }) {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
+    setErrorMessage(null);
+
+    try {
+      const restaurant = await createEntry.mutateAsync({
+        restaurantId: form.restaurantId,
+        visitedAt: new Date().toISOString(),
+        rating: form.rating,
+        caption: form.caption,
+        photoUrl: null,
+      });
+
+      onClose?.();
+      navigate(`/restaurants/${restaurant.id}`);
+    } catch {
+      setErrorMessage("Could not save the log. Try again.");
+    }
   }
 
   return (
@@ -51,7 +71,7 @@ export function LogVisitForm({ restaurants = [], onClose }) {
         <button
           type="button"
           onClick={() => onClose?.()}
-          className="flex h-8 w-8 items-center justify-center rounded-full text-[#7A6A54] transition hover:bg-[#F5F0E8] hover:text-[#1C1107]"
+          className="flex h-8 w-8 items-center justify-center rounded-full text-stone-500 transition hover:bg-[#F5F0E8] hover:text-[#1C1107]"
           aria-label="Close"
         >
           <X size={18} />
@@ -123,7 +143,7 @@ export function LogVisitForm({ restaurants = [], onClose }) {
           >
             Upload Photo
           </span>
-          <div className="flex cursor-pointer items-center gap-3 rounded-2xl border border-dashed border-[#D8CDBB] bg-[#F5EEE4] px-4 py-4 text-sm text-[#7A6A54] transition hover:border-[#E04B39]/30">
+          <div className="flex cursor-pointer items-center gap-3 rounded-2xl border border-dashed border-[#D8CDBB] bg-[#F5EEE4] px-4 py-4 text-sm text-stone-500 transition hover:border-[#E04B39]/30">
             <Upload size={18} />
             <span>Choose a photo</span>
             <input type="file" accept="image/*" className="hidden" />
@@ -132,9 +152,10 @@ export function LogVisitForm({ restaurants = [], onClose }) {
 
         <button
           type="submit"
+          disabled={createEntry.isPending}
           className="w-full rounded-2xl bg-[#E04B39] py-3.5 text-sm font-semibold text-white transition hover:bg-[#c93c2f]"
         >
-          Log Visit
+          {createEntry.isPending ? "Saving..." : "Log Visit"}
         </button>
       </form>
     </div>

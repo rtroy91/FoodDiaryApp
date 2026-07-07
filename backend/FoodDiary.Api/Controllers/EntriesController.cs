@@ -27,12 +27,11 @@ public class EntriesController : ControllerBase
         return Ok(result);
     }
 
-    /// <summary>Get the most recent N entries across all restaurants.</summary>
-    [HttpGet("recent")]
-    public async Task<IActionResult> GetRecent([FromQuery] int limit = 20)
+    [HttpGet("recent-entries")]
+    public async Task<IActionResult> GetRecentEntries([FromQuery] int limit = 20)
     {
         var userId = GetUserId();
-        var result = await _entryService.GetRecentAsync(userId, limit);
+        var result = await _entryService.GetRecentEntries(userId, limit);
         return Ok(result);
     }
 
