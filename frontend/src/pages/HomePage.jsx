@@ -2,16 +2,25 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import {
   MapPin,
-  Plus,
   Clock,
+  ChevronLeft,
   ChevronRight,
   Star,
-  UtensilsCrossed,
+  Plus,
 } from "lucide-react";
-import { Modal, LogVisitForm, StatCard, EntryCard } from "../components";
-import { useRecentEntries, useRestaurantLists } from "../hooks/useDiaryData";
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+import {
+  Modal,
+  LogVisitForm,
+  StatCard,
+  EntryCard,
+  NoEntriesState,
+} from "../components";
+import { getCurrentUser } from "../api/auth";
+import {
+  useAllEntries,
+  useRecentEntries,
+  useRestaurantLists,
+} from "../hooks/useDiaryData";
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -19,8 +28,6 @@ function getGreeting() {
   if (h < 18) return "Good afternoon";
   return "Good evening";
 }
-
-
 
 function formatDate(d) {
   return d.toLocaleDateString("en-PH", {
@@ -35,82 +42,70 @@ function avg(arr) {
   return arr.reduce((s, n) => s + n, 0) / arr.length;
 }
 
-function findOnThisDay(entries) {
-  if (!entries?.length) return null;
-  const today = new Date();
-  return (
-    entries.find((e) => {
-      const d = new Date(e.visitedAt);
-      return (
-        d.getDate() === today.getDate() &&
-        d.getMonth() === today.getMonth() &&
-        d.getFullYear() < today.getFullYear()
-      );
-    }) ?? null
-  );
+function countUniqueVisitedPlaces(entries = []) {
+  const ids = new Set();
+
+  entries.forEach((entry) => {
+    const restaurant = entry.restaurant;
+    const key =
+      restaurant?.id ??
+      entry.restaurantId ??
+      [
+        restaurant?.name,
+        restaurant?.barangay,
+        restaurant?.city,
+        restaurant?.province,
+      ]
+        .filter(Boolean)
+        .join("|");
+
+    if (key) ids.add(key);
+  });
+
+  return ids.size;
 }
-
-function OnThisDayBanner({ entry }) {
-  const yearsAgo =
-    new Date().getFullYear() - new Date(entry.visitedAt).getFullYear();
-
-  return (
-    <div className="mb-6 flex cursor-pointer items-center gap-3 rounded-[14px] border border-white/6 bg-[#2A1E0F] px-4 py-3.5">
-      {/* icon */}
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-[#F0E76F]/12">
-        <Clock size={17} color="#F0E76F" />
-      </div>
-
-      {/* text */}
-      <div className="flex-1">
-        <p className="mb-0.5 text-[9px] font-semibold uppercase tracking-[0.15em] text-[#F0E76F]">
-          {yearsAgo} year{yearsAgo !== 1 ? "s" : ""} ago today
-        </p>
-        <p className="text-xs leading-snug text-white/70">
-          You visited{" "}
-          <span className="font-semibold text-white">
-            {entry.restaurantName}
-          </span>
-          {entry.rating && (
-            <>
-              {" "}
-              and rated it{" "}
-              <span className="font-semibold text-[#E89951]">
-                {entry.rating}★
-              </span>
-            </>
-          )}
-        </p>
-      </div>
-
-      <ChevronRight size={16} color="rgba(255,255,255,0.25)" />
-    </div>
-  );
-}
-
-
 
 export function HomePage() {
   const { data: entries, isLoading: loadingEntries } = useRecentEntries(10);
+  const { data: allEntries } = useAllEntries();
   const { data: restaurants } = useRestaurantLists();
 
   const [showVisitModal, setShowVisitModal] = useState(false);
+  const [activeEntryIndex, setActiveEntryIndex] = useState(0);
 
-  const totalPlaces = restaurants?.length ?? 0;
-  const totalEntries = entries?.length ?? 0;
-  const avgRating = avg(entries?.map((e) => e.rating) ?? []);
-  const onThisDay = findOnThisDay(entries ?? []);
-  const userName = "Sora"; // TODO: replace with value from auth context
+  const totalPlaces = countUniqueVisitedPlaces(allEntries ?? []);
+  const totalEntries = allEntries?.length ?? 0;
+  const avgRating = avg(allEntries?.map((e) => e.rating) ?? []);
+  const currentUser = getCurrentUser();
+  const userName =
+    currentUser?.displayName || currentUser?.email?.split("@")[0] || "there";
+  const recentEntries = entries ?? [];
+  const activeEntry =
+    recentEntries.length > 0
+      ? recentEntries[activeEntryIndex % recentEntries.length]
+      : null;
+
+  function showPreviousEntry() {
+    setActiveEntryIndex((current) =>
+      recentEntries.length
+        ? (current - 1 + recentEntries.length) % recentEntries.length
+        : 0,
+    );
+  }
+
+  function showNextEntry() {
+    setActiveEntryIndex((current) =>
+      recentEntries.length ? (current + 1) % recentEntries.length : 0,
+    );
+  }
 
   return (
     <>
       <div
-        className="relative min-h-screen bg-[#F5F0E8]"
+        className="relative h-dvh overflow-hidden bg-[#F5F0E8]"
         style={{ fontFamily: '"Geist Mono", monospace' }}
       >
-        {/* ── DARK HEADER BAND ─────────────────────────────────────── */}
         <div className="relative h-48 overflow-hidden bg-[#1C1107]">
-          {/* Memphis geometry */}
           <svg
             className="absolute inset-0 h-full w-full"
             viewBox="0 0 560 164"
@@ -142,7 +137,6 @@ export function HomePage() {
             <circle cx="200" cy="140" r="10" fill="#F0E76F" opacity="0.08" />
           </svg>
 
-          {/* Greeting + date */}
           <div className="relative z-10 mx-auto flex max-w-140 items-end justify-between px-5 pt-20 pb-7">
             <div>
               <p
@@ -150,10 +144,11 @@ export function HomePage() {
                 style={{ fontFamily: '"Fraunces", serif' }}
               >
                 {getGreeting()},{" "}
-                
-                <span className="italic text-[#F0E76F]">{userName}</span> 👋
+                <span className="italic text-[#F0E76F]">{userName}</span>
               </p>
-              <p className="mt-1 font-['Plus_Jakarta_Sans'] text-sm text-white/55">Here's your food history at a glance.</p>
+              <p className="mt-1 font-['Plus_Jakarta_Sans'] text-sm text-white/55">
+                Here's your food history at a glance.
+              </p>
             </div>
 
             <div className="text-right">
@@ -170,10 +165,22 @@ export function HomePage() {
           </div>
         </div>
 
-        <div className="mx-auto max-w-140 px-4 pb-28">
-          <div className="relative z-20 mb-6 -mt-7 grid grid-cols-3 gap-2.5">
-            <StatCard value={totalPlaces} label="Places Visited" icon={MapPin} iconColor="#e63922" iconBgColor="#fde8e5" />
-            <StatCard value={totalEntries} label="Total Entries" icon={Clock} iconColor="#2b5fc4" iconBgColor="#e3eaf8" />
+        <div className="mx-auto max-w-140 px-4">
+          <div className="relative z-20 mb-4 -mt-7 grid grid-cols-3 gap-2.5">
+            <StatCard
+              value={totalPlaces}
+              label="Places Visited"
+              icon={MapPin}
+              iconColor="#e63922"
+              iconBgColor="#fde8e5"
+            />
+            <StatCard
+              value={totalEntries}
+              label="Total Entries"
+              icon={Clock}
+              iconColor="#2b5fc4"
+              iconBgColor="#e3eaf8"
+            />
             <StatCard
               value={avgRating > 0 ? avgRating.toFixed(1) : "—"}
               label="Avg Rating"
@@ -183,21 +190,9 @@ export function HomePage() {
             />
           </div>
 
-          {/* ON THIS DAY */}
-          {onThisDay && (
-            <>
-              <div className="mb-2.5 flex items-center justify-between">
-                <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-stone-500">
-                  On this day
-                </span>
-              </div>
-              <OnThisDayBanner entry={onThisDay} />
-            </>
-          )}
-
-          <div className="mb-3 flex items-center justify-between">
+          <div className="mb-2.5 flex items-center justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-widest text-stone-500">
-              Recent entries
+              Recent entry
             </span>
             <Link
               to="/entries"
@@ -207,55 +202,75 @@ export function HomePage() {
             </Link>
           </div>
 
-          {/* Loading */}
           {loadingEntries && (
             <p className="py-10 text-center text-sm text-stone-500">
               Loading your diary…
             </p>
           )}
 
-          {/* Empty state */}
           {!loadingEntries && !entries?.length && (
-            <div className="rounded-2xl border border-[#E8DFC8] bg-[#FFFBF4] px-5 py-12 text-center">
-              <UtensilsCrossed
-                size={36}
-                color="#C8B89A"
-                className="mx-auto mb-3"
-              />
-              <p
-                className="mb-1.5 text-xl text-[#1C1107]"
-                style={{ fontFamily: '"Fraunces", serif' }}
-              >
-                No entries yet
-              </p>
-              <p className="mb-4 text-xs text-stone-500">
-                Tap the + button to log your first restaurant visit.
-              </p>
+            <NoEntriesState onAddPost={() => setShowVisitModal(true)} />
+          )}
+
+          {!loadingEntries && activeEntry && (
+            <div className="relative left-1/2 w-[min(calc(100vw-2rem),34rem)] -translate-x-1/2 pb-2">
+              <div className="grid grid-cols-[44px_minmax(0,1fr)_44px] items-center gap-3">
+                <button
+                  type="button"
+                  onClick={showPreviousEntry}
+                  aria-label="Show previous entry"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-[#DDE5EF] bg-white text-[#253248] shadow-[0_2px_8px_rgba(28,42,61,0.08)] transition hover:bg-[#F7FAFD]"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+
+                <div className="min-w-0">
+                  <EntryCard entry={activeEntry} featured />
+                </div>
+
+                <button
+                  type="button"
+                  onClick={showNextEntry}
+                  aria-label="Show next entry"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-[#DDE5EF] bg-white text-[#253248] shadow-[0_2px_8px_rgba(28,42,61,0.08)] transition hover:bg-[#F7FAFD]"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </div>
+
+              <div className="mt-4 flex justify-center gap-2">
+                {recentEntries.map((entry, index) => {
+                  const isActive =
+                    index === activeEntryIndex % recentEntries.length;
+
+                  return (
+                    <button
+                      key={entry.id}
+                      type="button"
+                      onClick={() => setActiveEntryIndex(index)}
+                      aria-label={`Show entry ${index + 1}`}
+                      aria-current={isActive ? "true" : undefined}
+                      className={`h-2.5 rounded-full transition ${
+                        isActive
+                          ? "w-6 bg-[#1C1107]"
+                          : "w-2.5 bg-[#D6C8AD] hover:bg-[#BBAA8A]"
+                      }`}
+                    />
+                  );
+                })}
+              </div>
+
               <button
+                type="button"
                 onClick={() => setShowVisitModal(true)}
-                className="rounded-full bg-[#1C1107] px-6 py-2.5 text-xs font-semibold tracking-wide text-[#A5CF83]"
+                className="mx-auto mt-3 flex h-11 w-full max-w-xs items-center justify-center gap-2 rounded-xl bg-[#E04B39] py-3.5 text-sm font-semibold text-white transition hover:bg-[#c93c2f]"
               >
-                Log a visit
+                <Plus size={16} />
+                Add Post
               </button>
             </div>
           )}
-
-          {/* Feed */}
-          <div className="flex flex-col gap-3">
-            {entries?.map((entry) => (
-              <EntryCard key={entry.id} entry={entry} />
-            ))}
-          </div>
         </div>
-
-        {/* ── FAB ──────────────────────────────────────────────────── */}
-        <button
-          onClick={() => setShowVisitModal(true)}
-          aria-label="Log a new visit"
-          className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#1C1107] shadow-[0_4px_20px_rgba(28,17,7,0.35)] transition hover:scale-105"
-        >
-          <Plus size={24} color="#A5CF83" />
-        </button>
       </div>
       {showVisitModal && (
         <Modal onClose={() => setShowVisitModal(false)}>

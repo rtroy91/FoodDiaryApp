@@ -1,14 +1,15 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { NavBar } from './components/NavBar';
-import { ProtectedRoute } from './components/ProtectedRoute';
-import { HomePage } from './pages/HomePage';
-import { DiscoverPage } from './pages/DiscoverPage';
-import { EntriesPage } from './pages/EntriesPage';
-import { MostVisitedPage } from './pages/MostVisitedPage';
-import { RestaurantDetailPage } from './pages/RestaurantDetailPage';
-import { AddRestaurantForm } from './components/AddRestaurantForm';
-import { LoginPage } from './pages/LoginPage';
-import { RegisterPage } from './pages/RegisterPage';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { NavBar } from "./components/NavBar";
+import { ProtectedRoute } from "./components/ProtectedRoute";
+import { HomePage } from "./pages/HomePage";
+import { DiscoverPage } from "./pages/DiscoverPage";
+import { EntriesPage } from "./pages/EntriesPage";
+import { EntryDetailPage } from "./pages/EntryDetailPage";
+import { FoodPlacePage } from "./pages/FoodPlacePage";
+import { FoodPlaceDetailPage } from "./pages/FoodPlaceDetailPage";
+import { AddRestaurantForm } from "./components/AddRestaurantForm";
+import { LoginPage } from "./pages/LoginPage";
+import { RegisterPage } from "./pages/RegisterPage";
 
 export default function App() {
   return (
@@ -27,10 +28,11 @@ export default function App() {
         >
           <Route index element={<HomePage />} />
           <Route path="entries" element={<EntriesPage />} />
+          <Route path="entries/:id" element={<EntryDetailPage />} />
           <Route path="discover" element={<DiscoverPage />} />
-          <Route path="most-visited" element={<MostVisitedPage />} />
+          <Route path="food-places" element={<FoodPlacePage />} />
           <Route path="add-restaurant" element={<AddRestaurantForm />} />
-          <Route path="restaurants/:id" element={<RestaurantDetailPage />} />
+          <Route path="place-details/:id" element={<FoodPlaceDetailPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

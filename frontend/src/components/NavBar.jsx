@@ -1,15 +1,16 @@
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Home, MapPin, Trophy, LogOut } from "lucide-react";
 import { logout } from "../api/auth";
 
 const NAV_ITEMS = [
   { to: "/", label: "Home", icon: Home, end: true },
   { to: "/discover", label: "Discover", icon: MapPin, end: false },
-  { to: "/most-visited", label: "Most Visited", icon: Trophy, end: false },
+  { to: "/food-places", label: "Food Places", icon: Trophy, end: false },
 ];
 
 export function NavBar() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   function handleLogout() {
     logout();
@@ -17,23 +18,26 @@ export function NavBar() {
   }
 
   return (
-    <div className="relative min-h-screen bg-[#F5F0E8]">
+    <div className="relative h-dvh overflow-hidden bg-[#F5F0E8]">
       {/* ── STICKY PILL NAV ──────────────────────────────────────── */}
-      <div className="sticky top-3 z-50 flex justify-center pointer-events-auto">
-        <div className="flex items-center gap-1 bg-foreground/90 backdrop-blur-md rounded-2xl px-2 py-2 shadow-xl border border-white/10">
+      <div className="pointer-events-none fixed inset-x-0 top-3 z-50 flex justify-center">
+        <div className="pointer-events-auto flex items-center gap-1 bg-foreground/90 backdrop-blur-md rounded-2xl px-2 py-2 shadow-xl border border-white/10">
           {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}
               to={to}
               end={end}
-              className={({ isActive }) =>
-                [
+              className={({ isActive }) => {
+                const isHomeActive =
+                  to === "/" && location.pathname.startsWith("/entries");
+
+                return [
                   "flex items-center gap-1.5 rounded-full px-3.5 py-2 text-xs font-semibold transition-all duration-200",
-                  isActive
+                  isActive || isHomeActive
                     ? "bg-[#A5CF83] text-[#1C1107]"
                     : "text-white/50 hover:text-white/90",
-                ].join(" ")
-              }
+                ].join(" ");
+              }}
             >
               <Icon size={13} />
               <span className="hidden sm:inline">{label}</span>
@@ -52,7 +56,7 @@ export function NavBar() {
           </button>
         </div>
       </div>
-      <main className="-mt-14">
+      <main className="h-full">
         <Outlet />
       </main>
     </div>

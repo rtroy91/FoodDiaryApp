@@ -1,6 +1,14 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Clock, MapPin, Star, UtensilsCrossed } from "lucide-react";
-import { EntryCard, StatCard } from "../components";
+import { ArrowLeft, Clock, MapPin, Star } from "lucide-react";
+import {
+  EntryCard,
+  LogVisitForm,
+  Modal,
+  NoEntriesState,
+  StatCard,
+} from "../components";
+import { getCurrentUser } from "../api/auth";
 import { useAllEntries, useRestaurantLists } from "../hooks/useDiaryData";
 
 function getGreeting() {
@@ -23,21 +31,48 @@ function avg(arr) {
   return arr.reduce((s, n) => s + n, 0) / arr.length;
 }
 
+function countUniqueVisitedPlaces(entries = []) {
+  const ids = new Set();
+
+  entries.forEach((entry) => {
+    const restaurant = entry.restaurant;
+    const key =
+      restaurant?.id ??
+      entry.restaurantId ??
+      [
+        restaurant?.name,
+        restaurant?.barangay,
+        restaurant?.city,
+        restaurant?.province,
+      ]
+        .filter(Boolean)
+        .join("|");
+
+    if (key) ids.add(key);
+  });
+
+  return ids.size;
+}
+
 export function EntriesPage() {
   const { data: entries, isLoading } = useAllEntries();
   const { data: restaurants } = useRestaurantLists();
+  const [showVisitModal, setShowVisitModal] = useState(false);
 
-  const totalPlaces = restaurants?.length ?? 0;
+  const totalPlaces = countUniqueVisitedPlaces(entries ?? []);
   const totalEntries = entries?.length ?? 0;
   const avgRating = avg(entries?.map((e) => e.rating) ?? []);
-  const userName = "Sora";
+  const currentUser = getCurrentUser();
+  const userName =
+    currentUser?.displayName || currentUser?.email?.split("@")[0] || "there";
 
   return (
-    <div
-      className="min-h-screen bg-[#F5F0E8]"
-      style={{ fontFamily: '"Geist Mono", monospace' }}
-    >
-      <div className="relative h-48 overflow-hidden bg-[#1C1107]">
+    <>
+      <div
+        className="flex h-dvh flex-col overflow-hidden bg-[#F5F0E8]"
+        style={{ fontFamily: '"Geist Mono", monospace' }}
+      >
+      <div className="relative h-48 shrink-0 overflow-hidden bg-[#1C1107]">
         <svg
           className="absolute inset-0 h-full w-full"
           viewBox="0 0 560 164"
@@ -97,8 +132,8 @@ export function EntriesPage() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-140 px-4">
-        <div className="relative z-20 mb-8 -mt-7 grid grid-cols-3 gap-2.5">
+      <div className="mx-auto w-full max-w-140 shrink-0 px-4">
+        <div className="relative z-20 mb-6 -mt-7 grid grid-cols-3 gap-2.5">
           <StatCard
             value={totalPlaces}
             label="Places Visited"
@@ -114,7 +149,7 @@ export function EntriesPage() {
             iconBgColor="#e3eaf8"
           />
           <StatCard
-            value={avgRating > 0 ? avgRating.toFixed(1) : "-"}
+            value={avgRating > 0 ? avgRating.toFixed(1) : "—"}
             label="Avg Rating"
             icon={Star}
             iconColor="#B8960A"
@@ -123,10 +158,10 @@ export function EntriesPage() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-6xl px-4 pb-24">
-        <div className="mb-3 flex items-center justify-between">
+      <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col px-4 pb-4">
+        <div className="mb-3 flex shrink-0 items-center justify-between">
           <span className="text-[10px] font-semibold uppercase tracking-widest text-stone-500">
-            All entries
+            All posts
           </span>
           <Link
             to="/"
@@ -144,32 +179,28 @@ export function EntriesPage() {
         )}
 
         {!isLoading && !entries?.length && (
-          <div className="rounded-2xl border border-[#E8DFC8] bg-[#FFFBF4] px-5 py-12 text-center">
-            <UtensilsCrossed
-              size={36}
-              color="#C8B89A"
-              className="mx-auto mb-3"
-            />
-            <p
-              className="mb-1.5 text-xl text-[#1C1107]"
-              style={{ fontFamily: '"Fraunces", serif' }}
-            >
-              No entries yet
-            </p>
-            <p className="text-xs text-stone-500">
-              Your logged restaurant visits will show up here.
-            </p>
-          </div>
+          <NoEntriesState onAddPost={() => setShowVisitModal(true)} />
         )}
 
         {!isLoading && entries?.length > 0 && (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {entries.map((entry) => (
-              <EntryCard key={entry.id} entry={entry} />
-            ))}
+          <div className="min-h-0 flex-1 overflow-y-auto pb-24 pr-1">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {entries.map((entry) => (
+                <EntryCard key={entry.id} entry={entry} />
+              ))}
+            </div>
           </div>
         )}
       </div>
-    </div>
+      </div>
+      {showVisitModal && (
+        <Modal onClose={() => setShowVisitModal(false)}>
+          <LogVisitForm
+            restaurants={restaurants ?? []}
+            onClose={() => setShowVisitModal(false)}
+          />
+        </Modal>
+      )}
+    </>
   );
 }

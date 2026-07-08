@@ -6,6 +6,7 @@ export { AddRestaurantForm } from "./AddRestaurantForm";
 export { LogVisitForm } from "./LogVisitForm";
 export { StatCard } from "./StatCard";
 export { EntryCard } from "./EntryCard";
+export { NoEntriesState } from "./NoEntriesState";
 export { PageHeader } from "./PageHeader";
 export { FoodPlaceCard } from "./FoodPlaceCard";
 export { DiscoverMap } from "./DiscoverMap";    

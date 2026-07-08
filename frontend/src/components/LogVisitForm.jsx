@@ -53,7 +53,7 @@ export function LogVisitForm({ restaurants = [], onClose }) {
       });
 
       onClose?.();
-      navigate(`/restaurants/${restaurant.id}`);
+      navigate(`/place-details/${restaurant.id}`);
     } catch {
       setErrorMessage("Could not save the log. Try again.");
     }

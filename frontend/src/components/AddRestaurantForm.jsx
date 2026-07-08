@@ -1,10 +1,105 @@
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { X } from "lucide-react";
+import L from "leaflet";
+import {
+  MapContainer,
+  Marker,
+  TileLayer,
+  useMap,
+  useMapEvents,
+} from "react-leaflet";
+import { LocateFixed, MapPin, Search, X } from "lucide-react";
 import { useCreateRestaurant } from "../hooks/useDiaryData";
 import { useBataanCities, useBarangaysByCity } from "../hooks/usePsgc";
 import { BATAAN_PROVINCE_NAME } from "../api/psgc";
 import { FormInput, SelectInput } from "../components";
+
+const BATAAN_CENTER = { lat: 14.676, lon: 120.536 };
+const BATAAN_ZOOM = 10;
+
+function makePinIcon() {
+  return L.divIcon({
+    className: "",
+    iconSize: [38, 38],
+    iconAnchor: [19, 38],
+    html: `
+      <span style="
+        display:block;
+        width:38px;
+        height:38px;
+        border-radius:999px 999px 999px 4px;
+        background:#E04B39;
+        border:4px solid #F0E76F;
+        box-shadow:0 10px 22px rgba(28,17,7,0.28);
+        transform:rotate(-45deg);
+      ">
+        <span style="
+          display:block;
+          width:8px;
+          height:8px;
+          margin:11px auto 0;
+          border-radius:999px;
+          background:#FFFBF4;
+        "></span>
+      </span>
+    `,
+  });
+}
+
+function PinMapController({ pinLocation, onMovePin }) {
+  const map = useMap();
+  const hasMounted = useRef(false);
+
+  useEffect(() => {
+    if (!hasMounted.current) {
+      hasMounted.current = true;
+      return;
+    }
+
+    map.flyTo([pinLocation.lat, pinLocation.lon], Math.max(map.getZoom(), 13), {
+      duration: 0.45,
+    });
+  }, [map, pinLocation]);
+
+  useMapEvents({
+    click(e) {
+      onMovePin({ lat: e.latlng.lat, lon: e.latlng.lng });
+    },
+  });
+
+  return null;
+}
+
+function LocationPinMap({ pinLocation, onMovePin }) {
+  const pinIcon = useMemo(() => makePinIcon(), []);
+
+  return (
+    <MapContainer
+      center={[pinLocation.lat, pinLocation.lon]}
+      zoom={BATAAN_ZOOM}
+      scrollWheelZoom
+      className="h-64 w-full"
+    >
+      <TileLayer
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
+      <PinMapController pinLocation={pinLocation} onMovePin={onMovePin} />
+      <Marker
+        draggable
+        position={[pinLocation.lat, pinLocation.lon]}
+        icon={pinIcon}
+        eventHandlers={{
+          dragend(e) {
+            const marker = e.target;
+            const next = marker.getLatLng();
+            onMovePin({ lat: next.lat, lon: next.lng });
+          },
+        }}
+      />
+    </MapContainer>
+  );
+}
 
 export function AddRestaurantForm({ onClose }) {
   const navigate = useNavigate();
@@ -23,8 +118,16 @@ export function AddRestaurantForm({ onClose }) {
     cityName: "",
     barangay: "",
     category: "",
+    latitude: null,
+    longitude: null,
   });
   const [errorMessage, setErrorMessage] = useState(null);
+  const [showPinModal, setShowPinModal] = useState(false);
+  const [locationSearch, setLocationSearch] = useState("");
+  const [locationResults, setLocationResults] = useState([]);
+  const [locationStatus, setLocationStatus] = useState("");
+  const [pinLocation, setPinLocation] = useState(BATAAN_CENTER);
+  const [pendingBarangay, setPendingBarangay] = useState("");
 
   const { data: barangays = [], isLoading: loadingBarangays } =
     useBarangaysByCity(form.cityCode);
@@ -43,6 +146,20 @@ export function AddRestaurantForm({ onClose }) {
       label: brgy.name,
     }));
 
+  useEffect(() => {
+    if (!pendingBarangay || !barangays.length) return;
+
+    const match = findBestLocationMatch(
+      pendingBarangay,
+      barangays.map((item) => item.name),
+    );
+
+    if (match) {
+      handleChange("barangay", match);
+      setPendingBarangay("");
+    }
+  }, [barangays, pendingBarangay]);
+
   function handleChange(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
@@ -58,6 +175,176 @@ export function AddRestaurantForm({ onClose }) {
     }));
   }
 
+  function normalizeLocationText(value) {
+    return (value ?? "")
+      .toLowerCase()
+      .replace(/\bcity\b|\bmunicipality\b|\bof\b|\bbrgy\b|\bbarangay\b/g, "")
+      .replace(/[^a-z0-9]/g, "");
+  }
+
+  function findBestLocationMatch(value, options) {
+    const normalizedValue = normalizeLocationText(value);
+    if (!normalizedValue) return "";
+
+    return (
+      options.find((option) => {
+        const normalizedOption = normalizeLocationText(option);
+        return (
+          normalizedValue === normalizedOption ||
+          normalizedValue.includes(normalizedOption) ||
+          normalizedOption.includes(normalizedValue)
+        );
+      }) ?? ""
+    );
+  }
+
+  function getAddressParts(result) {
+    const address = result?.address ?? {};
+    return {
+      city:
+        address.city ??
+        address.town ??
+        address.municipality ??
+        address.county ??
+        "",
+      barangay:
+        address.suburb ??
+        address.neighbourhood ??
+        address.quarter ??
+        address.village ??
+        address.hamlet ??
+        "",
+    };
+  }
+
+  function applyPinnedLocation(result) {
+    const { city, barangay } = getAddressParts(result);
+    const cityMatch = findBestLocationMatch(
+      city,
+      cities.map((item) => item.name),
+    );
+
+    setForm((prev) => ({
+      ...prev,
+      address: result.display_name ?? prev.address,
+      cityCode: cityMatch
+        ? (cities.find((item) => item.name === cityMatch)?.code ??
+          prev.cityCode)
+        : prev.cityCode,
+      cityName: cityMatch || prev.cityName,
+      barangay: "",
+      latitude: result.lat ? Number(result.lat) : prev.latitude,
+      longitude: result.lon ? Number(result.lon) : prev.longitude,
+    }));
+
+    setPendingBarangay(barangay);
+    setShowPinModal(false);
+  }
+
+  async function reverseGeocodePin(location) {
+    const params = new URLSearchParams({
+      lat: String(location.lat),
+      lon: String(location.lon),
+      format: "jsonv2",
+      addressdetails: "1",
+    });
+
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?${params.toString()}`,
+    );
+
+    return response.json();
+  }
+
+  async function confirmPinnedLocation() {
+    setLocationStatus("Reading pinned address...");
+
+    try {
+      const result = await reverseGeocodePin(pinLocation);
+
+      if (!result?.display_name) {
+        setLocationStatus("Could not read an address from this pin.");
+        return;
+      }
+
+      applyPinnedLocation({
+        ...result,
+        lat: String(pinLocation.lat),
+        lon: String(pinLocation.lon),
+      });
+      setLocationStatus("");
+    } catch {
+      setLocationStatus("Could not read this pinned address.");
+    }
+  }
+
+  async function searchPinnedLocation(e) {
+    e?.preventDefault();
+    if (!locationSearch.trim()) return;
+
+    setLocationStatus("Searching...");
+    setLocationResults([]);
+
+    try {
+      const params = new URLSearchParams({
+        q: `${locationSearch}, Bataan, Philippines`,
+        format: "jsonv2",
+        addressdetails: "1",
+        limit: "5",
+        countrycodes: "ph",
+      });
+
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?${params.toString()}`,
+      );
+      const data = await response.json();
+      setLocationResults(Array.isArray(data) ? data : []);
+      setLocationStatus(data?.length ? "" : "No matching location found.");
+    } catch {
+      setLocationStatus("Could not search the map right now.");
+    }
+  }
+
+  function useCurrentLocation() {
+    if (!navigator.geolocation) {
+      setLocationStatus("Location is not available in this browser.");
+      return;
+    }
+
+    setLocationStatus("Finding your location...");
+    navigator.geolocation.getCurrentPosition(
+      async ({ coords }) => {
+        try {
+          const params = new URLSearchParams({
+            lat: String(coords.latitude),
+            lon: String(coords.longitude),
+            format: "jsonv2",
+            addressdetails: "1",
+          });
+
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?${params.toString()}`,
+          );
+          const data = await response.json();
+          if (data?.display_name) {
+            setPinLocation({
+              lat: Number(coords.latitude),
+              lon: Number(coords.longitude),
+            });
+            setLocationResults([data]);
+          } else {
+            setLocationResults([]);
+          }
+          setLocationStatus(data?.display_name ? "" : "No address found.");
+        } catch {
+          setLocationStatus("Could not read this location.");
+        }
+      },
+      () => setLocationStatus("Allow location access to pin your spot."),
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     setErrorMessage(null);
@@ -70,10 +357,12 @@ export function AddRestaurantForm({ onClose }) {
         city: form.cityName,
         province: BATAAN_PROVINCE_NAME,
         category: form.category,
+        latitude: form.latitude,
+        longitude: form.longitude,
       });
 
       onClose?.();
-      navigate(`/restaurants/${restaurant.id}`);
+      navigate(`/place-details/${restaurant.id}`);
     } catch {
       setErrorMessage("Could not save this place. Try again.");
     }
@@ -107,12 +396,35 @@ export function AddRestaurantForm({ onClose }) {
           required
         />
 
-        <FormInput
-          label="Address"
-          value={form.address}
-          onChange={(value) => handleChange("address", value)}
-          placeholder="Street, building, landmark"
-        />
+        <div>
+          <div className="mb-1.5 flex items-center justify-between gap-3">
+            <label className="text-[11px] font-semibold uppercase tracking-widest text-[#7A6A54]">
+              Address
+            </label>
+          </div>
+          <div className="flex rounded-2xl border border-[#E8DFC8] bg-[#FFFBF4] transition focus-within:border-[#E89951]">
+            <input
+              value={form.address}
+              onChange={(e) => handleChange("address", e.target.value)}
+              placeholder="Street, building, landmark"
+              className="min-w-0 flex-1 rounded-l-2xl bg-transparent px-4 py-3 text-sm text-[#1C1107] outline-none"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPinModal(true)}
+              className="flex w-12 shrink-0 items-center justify-center rounded-r-2xl text-[#E89951] transition hover:bg-[#F5F0E8]"
+              aria-label="Pin location"
+              title="Pin location"
+            >
+              <MapPin size={17} />
+            </button>
+          </div>
+          {form.latitude && form.longitude && (
+            <p className="mt-1 text-[10px] text-stone-500">
+              Pinned at {form.latitude.toFixed(5)}, {form.longitude.toFixed(5)}
+            </p>
+          )}
+        </div>
 
         <FormInput
           label="Category"
@@ -173,6 +485,117 @@ export function AddRestaurantForm({ onClose }) {
           {createRestaurant.isPending ? "Saving..." : "Add Place"}
         </button>
       </form>
+
+      {showPinModal && (
+        <div className="fixed inset-0 z-60 flex items-start justify-center bg-black/40 px-4 py-10 pt-24 backdrop-blur-sm">
+          <div className="w-full max-w-lg rounded-3xl bg-white shadow-[0_8px_40px_rgba(28,17,7,0.18)]">
+            <div className="flex items-center justify-between border-b border-[#F0EAE0] px-5 py-4">
+              <div>
+                <h3
+                  className="text-lg font-semibold text-[#1C1107]"
+                  style={{ fontFamily: '"Fraunces", serif' }}
+                >
+                  Pin location
+                </h3>
+                <p className="mt-0.5 text-xs text-stone-500">
+                  Move the pin, then use it to fill the location details.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowPinModal(false)}
+                className="flex h-8 w-8 items-center justify-center rounded-full text-stone-500 transition hover:bg-[#F5F0E8] hover:text-[#1C1107]"
+                aria-label="Close pin location"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="space-y-4 px-5 py-5">
+              <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
+                <label className="flex h-12 items-center gap-3 rounded-2xl border border-[#E8DFC8] bg-[#FFFBF4] px-4">
+                  <Search size={16} className="shrink-0 text-stone-400" />
+                  <input
+                    value={locationSearch}
+                    onChange={(e) => setLocationSearch(e.target.value)}
+                    placeholder="Search a place or street"
+                    className="min-w-0 flex-1 bg-transparent text-sm text-[#1C1107] outline-none placeholder:text-stone-400"
+                  />
+                </label>
+                <button
+                  type="button"
+                  onClick={searchPinnedLocation}
+                  className="inline-flex h-12 items-center justify-center rounded-2xl bg-[#1C1107] px-4 text-xs font-semibold text-[#A5CF83]"
+                >
+                  Search
+                </button>
+              </div>
+
+              <button
+                type="button"
+                onClick={useCurrentLocation}
+                className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-2xl border border-[#E8DFC8] bg-[#FFFBF4] text-xs font-semibold text-[#1C1107]"
+              >
+                <LocateFixed size={15} />
+                Use current location
+              </button>
+
+              <div className="relative overflow-hidden rounded-2xl border border-[#E8DFC8] bg-[#F5F0E8]">
+                <LocationPinMap
+                  pinLocation={pinLocation}
+                  onMovePin={setPinLocation}
+                />
+                <div className="absolute bottom-3 left-3 rounded-full bg-white/90 px-3 py-1.5 text-[10px] font-semibold text-stone-600 shadow">
+                  Click the map or drag the pin
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-[10px] text-stone-500">
+                  {pinLocation.lat.toFixed(5)}, {pinLocation.lon.toFixed(5)}
+                </p>
+                <button
+                  type="button"
+                  onClick={confirmPinnedLocation}
+                  className="rounded-2xl bg-[#E04B39] px-4 py-2.5 text-xs font-semibold text-white"
+                >
+                  Use this pin
+                </button>
+              </div>
+
+              {locationStatus && (
+                <p className="text-center text-xs text-stone-500">
+                  {locationStatus}
+                </p>
+              )}
+
+              <div className="max-h-64 space-y-2 overflow-auto">
+                {locationResults.map((result) => (
+                  <button
+                    key={`${result.place_id}-${result.lat}-${result.lon}`}
+                    type="button"
+                    onClick={() => {
+                      setPinLocation({
+                        lat: Number(result.lat),
+                        lon: Number(result.lon),
+                      });
+                      setLocationStatus("");
+                    }}
+                    className="w-full rounded-2xl border border-[#E8DFC8] bg-[#FFFBF4] px-4 py-3 text-left transition hover:border-[#E89951]"
+                  >
+                    <p className="text-sm font-semibold text-[#1C1107]">
+                      {result.name || result.display_name?.split(",")[0]}
+                    </p>
+                    <p className="mt-1 text-xs leading-snug text-stone-500">
+                      {result.display_name}
+                    </p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
