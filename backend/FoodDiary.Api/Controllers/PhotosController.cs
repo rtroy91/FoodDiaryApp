@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using FoodDiary.Api.DTOs.Requests;
 using FoodDiary.Api.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,13 +17,25 @@ public class PhotosController : ControllerBase
         _photoService = photoService;
     }
 
-    /// <summary>Generate a pre-signed blob upload URL for direct client-side upload.</summary>
-    [HttpPost("upload-url")]
-    public async Task<IActionResult> GetUploadUrl([FromBody] UploadUrlRequest request)
+    /// <summary>Upload a diary photo to local backend storage.</summary>
+    [HttpPost("upload")]
+    [RequestSizeLimit(5 * 1024 * 1024)]
+    public async Task<IActionResult> Upload([FromForm] IFormFile? photo)
     {
-        var userId = GetUserId();
-        var result = await _photoService.GenerateUploadUrlAsync(userId, request);
-        return Ok(result);
+        if (photo is null)
+            return BadRequest(new { message = "Photo file is required." });
+
+        try
+        {
+            var userId = GetUserId();
+            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+            var result = await _photoService.UploadAsync(userId, photo, baseUrl);
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
     private Guid GetUserId() =>

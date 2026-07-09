@@ -84,6 +84,7 @@ if (app.Environment.IsDevelopment())
 
 // app.UseHttpsRedirection(); // Comment out if running on HTTP locally
 app.UseCors("Frontend");
+app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import {
   Modal,
-  LogVisitForm,
+  PublishDiaryForm,
   StatCard,
   EntryCard,
   NoEntriesState,
@@ -192,7 +192,7 @@ export function HomePage() {
 
           <div className="mb-2.5 flex items-center justify-between">
             <span className="text-[10px] font-semibold uppercase tracking-widest text-stone-500">
-              Recent entry
+              Recent post
             </span>
             <Link
               to="/entries"
@@ -273,8 +273,12 @@ export function HomePage() {
         </div>
       </div>
       {showVisitModal && (
-        <Modal onClose={() => setShowVisitModal(false)}>
-          <LogVisitForm
+        <Modal
+          onClose={() => setShowVisitModal(false)}
+          closeOnBackdrop={false}
+          closeOnEscape={false}
+        >
+          <PublishDiaryForm
             restaurants={restaurants ?? []}
             onClose={() => setShowVisitModal(false)}
           />

@@ -10,10 +10,12 @@ namespace FoodDiary.Api.Services;
 public class EntryService : IEntryService
 {
     private readonly FoodDiaryContext _context;
+    private readonly IPhotoService _photoService;
 
-    public EntryService(FoodDiaryContext context)
+    public EntryService(FoodDiaryContext context, IPhotoService photoService)
     {
         _context = context;
+        _photoService = photoService;
     }
 
     public async Task<IEnumerable<EntryResponse>> GetAllAsync(Guid userId, Guid? restaurantId)
@@ -117,8 +119,11 @@ public class EntryService : IEntryService
 
         if (entry is null) return false;
 
+        var photoUrl = entry.PhotoUrl;
         _context.Entries.Remove(entry);
         await _context.SaveChangesAsync();
+        await _photoService.DeleteAsync(photoUrl);
+
         return true;
     }
 

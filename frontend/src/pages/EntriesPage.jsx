@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, Clock, MapPin, Star } from "lucide-react";
 import {
   EntryCard,
-  LogVisitForm,
+  PublishDiaryForm,
   Modal,
   NoEntriesState,
   StatCard,
@@ -72,130 +72,134 @@ export function EntriesPage() {
         className="flex h-dvh flex-col overflow-hidden bg-[#F5F0E8]"
         style={{ fontFamily: '"Geist Mono", monospace' }}
       >
-      <div className="relative h-48 shrink-0 overflow-hidden bg-[#1C1107]">
-        <svg
-          className="absolute inset-0 h-full w-full"
-          viewBox="0 0 560 164"
-          xmlns="http://www.w3.org/2000/svg"
-          preserveAspectRatio="xMidYMid slice"
-          aria-hidden="true"
-        >
-          <circle cx="480" cy="30" r="60" fill="#A5CF83" opacity="0.08" />
-          <circle cx="500" cy="90" r="30" fill="#F0E76F" opacity="0.08" />
-          <rect
-            x="20"
-            y="100"
-            width="40"
-            height="40"
-            fill="#ECB65F"
-            opacity="0.08"
-            transform="rotate(15 40 120)"
-          />
-          <circle cx="60" cy="40" r="18" fill="#E89951" opacity="0.08" />
-          <rect
-            x="380"
-            y="120"
-            width="20"
-            height="20"
-            fill="#A5CF83"
-            opacity="0.08"
-            transform="rotate(30 390 130)"
-          />
-          <circle cx="200" cy="140" r="10" fill="#F0E76F" opacity="0.08" />
-        </svg>
-
-        <div className="relative z-10 mx-auto flex max-w-140 items-end justify-between px-5 pt-20 pb-7">
-          <div>
-            <p
-              className="text-3xl font-light leading-tight text-white"
-              style={{ fontFamily: '"Fraunces", serif' }}
-            >
-              {getGreeting()},{" "}
-              <span className="italic text-[#F0E76F]">{userName}</span>
-            </p>
-            <p className="mt-1 font-['Plus_Jakarta_Sans'] text-sm text-white/55">
-              Here's your food history at a glance.
-            </p>
-          </div>
-
-          <div className="text-right">
-            <p
-              className="text-[36px] font-light leading-none text-white/12"
-              style={{ fontFamily: '"Fraunces", serif' }}
-            >
-              {String(new Date().getDate()).padStart(2, "0")}
-            </p>
-            <p className="text-[10px] uppercase tracking-widest text-white/[0.28]">
-              {formatDate(new Date())}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="mx-auto w-full max-w-140 shrink-0 px-4">
-        <div className="relative z-20 mb-6 -mt-7 grid grid-cols-3 gap-2.5">
-          <StatCard
-            value={totalPlaces}
-            label="Places Visited"
-            icon={MapPin}
-            iconColor="#e63922"
-            iconBgColor="#fde8e5"
-          />
-          <StatCard
-            value={totalEntries}
-            label="Total Entries"
-            icon={Clock}
-            iconColor="#2b5fc4"
-            iconBgColor="#e3eaf8"
-          />
-          <StatCard
-            value={avgRating > 0 ? avgRating.toFixed(1) : "—"}
-            label="Avg Rating"
-            icon={Star}
-            iconColor="#B8960A"
-            iconBgColor="#FEF6C7"
-          />
-        </div>
-      </div>
-
-      <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col px-4 pb-4">
-        <div className="mb-3 flex shrink-0 items-center justify-between">
-          <span className="text-[10px] font-semibold uppercase tracking-widest text-stone-500">
-            All posts
-          </span>
-          <Link
-            to="/"
-            className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#E89951] no-underline"
+        <div className="relative h-48 shrink-0 overflow-hidden bg-[#1C1107]">
+          <svg
+            className="absolute inset-0 h-full w-full"
+            viewBox="0 0 560 164"
+            xmlns="http://www.w3.org/2000/svg"
+            preserveAspectRatio="xMidYMid slice"
+            aria-hidden="true"
           >
-            <ArrowLeft size={13} />
-            Home
-          </Link>
-        </div>
+            <circle cx="480" cy="30" r="60" fill="#A5CF83" opacity="0.08" />
+            <circle cx="500" cy="90" r="30" fill="#F0E76F" opacity="0.08" />
+            <rect
+              x="20"
+              y="100"
+              width="40"
+              height="40"
+              fill="#ECB65F"
+              opacity="0.08"
+              transform="rotate(15 40 120)"
+            />
+            <circle cx="60" cy="40" r="18" fill="#E89951" opacity="0.08" />
+            <rect
+              x="380"
+              y="120"
+              width="20"
+              height="20"
+              fill="#A5CF83"
+              opacity="0.08"
+              transform="rotate(30 390 130)"
+            />
+            <circle cx="200" cy="140" r="10" fill="#F0E76F" opacity="0.08" />
+          </svg>
 
-        {isLoading && (
-          <p className="py-14 text-center text-sm text-stone-500">
-            Loading your diary...
-          </p>
-        )}
+          <div className="relative z-10 mx-auto flex max-w-140 items-end justify-between px-5 pt-20 pb-7">
+            <div>
+              <p
+                className="text-3xl font-light leading-tight text-white"
+                style={{ fontFamily: '"Fraunces", serif' }}
+              >
+                {getGreeting()},{" "}
+                <span className="italic text-[#F0E76F]">{userName}</span>
+              </p>
+              <p className="mt-1 font-['Plus_Jakarta_Sans'] text-sm text-white/55">
+                Here's your food history at a glance.
+              </p>
+            </div>
 
-        {!isLoading && !entries?.length && (
-          <NoEntriesState onAddPost={() => setShowVisitModal(true)} />
-        )}
-
-        {!isLoading && entries?.length > 0 && (
-          <div className="min-h-0 flex-1 overflow-y-auto pb-24 pr-1">
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {entries.map((entry) => (
-                <EntryCard key={entry.id} entry={entry} />
-              ))}
+            <div className="text-right">
+              <p
+                className="text-[36px] font-light leading-none text-white/12"
+                style={{ fontFamily: '"Fraunces", serif' }}
+              >
+                {String(new Date().getDate()).padStart(2, "0")}
+              </p>
+              <p className="text-[10px] uppercase tracking-widest text-white/[0.28]">
+                {formatDate(new Date())}
+              </p>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+
+        <div className="mx-auto w-full max-w-140 shrink-0 px-4">
+          <div className="relative z-20 mb-6 -mt-7 grid grid-cols-3 gap-2.5">
+            <StatCard
+              value={totalPlaces}
+              label="Places Visited"
+              icon={MapPin}
+              iconColor="#e63922"
+              iconBgColor="#fde8e5"
+            />
+            <StatCard
+              value={totalEntries}
+              label="Total Entries"
+              icon={Clock}
+              iconColor="#2b5fc4"
+              iconBgColor="#e3eaf8"
+            />
+            <StatCard
+              value={avgRating > 0 ? avgRating.toFixed(1) : "—"}
+              label="Avg Rating"
+              icon={Star}
+              iconColor="#B8960A"
+              iconBgColor="#FEF6C7"
+            />
+          </div>
+        </div>
+
+        <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col px-4 pb-4">
+          <div className="mb-3 flex shrink-0 items-center justify-between">
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-stone-500">
+              All posts
+            </span>
+            <Link
+              to="/"
+              className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#E89951] no-underline"
+            >
+              <ArrowLeft size={13} />
+              Home
+            </Link>
+          </div>
+
+          {isLoading && (
+            <p className="py-14 text-center text-sm text-stone-500">
+              Loading your diary...
+            </p>
+          )}
+
+          {!isLoading && !entries?.length && (
+            <NoEntriesState onAddPost={() => setShowVisitModal(true)} />
+          )}
+
+          {!isLoading && entries?.length > 0 && (
+            <div className="min-h-0 flex-1 overflow-y-auto pb-24 pr-1">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {entries.map((entry) => (
+                  <EntryCard key={entry.id} entry={entry} />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
       {showVisitModal && (
-        <Modal onClose={() => setShowVisitModal(false)}>
-          <LogVisitForm
+        <Modal
+          onClose={() => setShowVisitModal(false)}
+          closeOnBackdrop={false}
+          closeOnEscape={false}
+        >
+          <PublishDiaryForm
             restaurants={restaurants ?? []}
             onClose={() => setShowVisitModal(false)}
           />

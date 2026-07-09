@@ -1,4 +1,3 @@
-using Azure.Storage.Blobs;
 using FoodDiary.Api.Data;
 using FoodDiary.Api.Interfaces;
 using FoodDiary.Api.Services;
@@ -19,10 +18,6 @@ public static class ServiceCollectionExtensions
         // Database
         services.AddDbContext<FoodDiaryContext>(options =>
             options.UseNpgsql(config.GetConnectionString("DefaultConnection")));
-
-        // Blob storage
-        services.AddSingleton(_ =>
-            new BlobServiceClient(config.GetConnectionString("BlobStorage")));
 
         // Interface → Service bindings (Dependency Injection)
         services.AddScoped<IAuthService, AuthService>();
