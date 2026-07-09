@@ -22,9 +22,9 @@ public class AuthService : IAuthService
         _config = config;
     }
 
-    public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
+    public async Task<AuthResponse> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken)
     {
-        if (await _context.Users.AnyAsync(u => u.Email == request.Email))
+        if (await _context.Users.AnyAsync(u => u.Email == request.Email, cancellationToken))
             throw new InvalidOperationException("Email already registered.");
 
         var user = new User
@@ -35,14 +35,16 @@ public class AuthService : IAuthService
         };
 
         _context.Users.Add(user);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
 
         return BuildAuthResponse(user);
     }
 
-    public async Task<AuthResponse> LoginAsync(LoginRequest request)
+    public async Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email)
+        var user = await _context.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Email == request.Email, cancellationToken)
             ?? throw new UnauthorizedAccessException("Invalid email or password.");
 
         if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))

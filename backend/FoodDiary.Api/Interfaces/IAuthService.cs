@@ -5,6 +5,6 @@ namespace FoodDiary.Api.Interfaces;
 
 public interface IAuthService
 {
-    Task<AuthResponse> RegisterAsync(RegisterRequest request);
-    Task<AuthResponse> LoginAsync(LoginRequest request);
+    Task<AuthResponse> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken);
+    Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken);
 }

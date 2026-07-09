@@ -1,6 +1,10 @@
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import { Camera, ChevronDown, Clock, MapPin, Star, X } from "lucide-react";
-import { useCreateEntry } from "../hooks/useDiaryData";
+import {
+  useCreateEntry,
+  useRestaurantLists,
+  useUpdateEntry,
+} from "../hooks/useDiaryData";
 import { uploadPhoto } from "../api/entries";
 
 function formatVisitDate(date) {
@@ -60,25 +64,49 @@ function RatingStarButton({ star, rating, onChange }) {
   );
 }
 
-export function PublishDiaryForm({ restaurants = [], onClose }) {
+export function PublishDiaryForm({ restaurants = [], entry = null, onClose }) {
+  const isEditing = Boolean(entry);
   const createEntry = useCreateEntry();
+  const updateEntry = useUpdateEntry();
+  const { data: fetchedRestaurants = [] } = useRestaurantLists();
 
-  const now = new Date();
+  const [currentVisitDate, setCurrentVisitDate] = useState(() => new Date());
   const [errorMessage, setErrorMessage] = useState(null);
   const [photoFile, setPhotoFile] = useState(null);
-  const [photoPreview, setPhotoPreview] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(entry?.photoUrl ?? null);
   const [isUploading, setIsUploading] = useState(false);
   const [showValidation, setShowValidation] = useState(false);
   const [form, setForm] = useState({
-    restaurantId: "",
-    rating: 0,
-    caption: "",
+    restaurantId: entry?.restaurant?.id ?? entry?.restaurantId ?? "",
+    rating: entry?.rating ?? 0,
+    caption: entry?.caption ?? "",
   });
 
-  const restaurantOptions = restaurants.map((restaurant) => ({
-    value: restaurant.id,
-    label: restaurant.name,
-  }));
+  const availableRestaurants = restaurants.length
+    ? restaurants
+    : fetchedRestaurants;
+  const displayedVisitDate = isEditing
+    ? new Date(entry.visitedAt)
+    : currentVisitDate;
+
+  const restaurantOptions = useMemo(() => {
+    const options = availableRestaurants.map((restaurant) => ({
+      value: restaurant.id,
+      label: restaurant.name,
+    }));
+
+    if (
+      entry?.restaurant?.id &&
+      !options.some((option) => option.value === entry.restaurant.id)
+    ) {
+      options.unshift({
+        value: entry.restaurant.id,
+        label: entry.restaurant.name,
+      });
+    }
+
+    return options;
+  }, [availableRestaurants, entry]);
 
   function handleChange(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -96,20 +124,36 @@ export function PublishDiaryForm({ restaurants = [], onClose }) {
 
   useEffect(() => {
     return () => {
-      if (photoPreview) {
+      if (photoPreview?.startsWith("blob:")) {
         URL.revokeObjectURL(photoPreview);
       }
     };
   }, [photoPreview]);
 
+  useEffect(() => {
+    if (isEditing) return undefined;
+
+    const intervalId = window.setInterval(() => {
+      setCurrentVisitDate(new Date());
+    }, 1000);
+
+    return () => window.clearInterval(intervalId);
+  }, [isEditing]);
+
   async function handleSubmit(e) {
     e.preventDefault();
     setErrorMessage(null);
 
-    if (!photoFile || !form.restaurantId || form.rating === 0) {
+    if (
+      (!photoFile && !photoPreview) ||
+      !form.restaurantId ||
+      form.rating === 0
+    ) {
       setShowValidation(true);
       setErrorMessage(
-        "Add a photo, choose a place, and rate the visit before publishing.",
+        isEditing
+          ? "Keep a photo, place, and rating before saving changes."
+          : "Add a photo, choose a place, and rate the visit before publishing.",
       );
       return;
     }
@@ -122,32 +166,52 @@ export function PublishDiaryForm({ restaurants = [], onClose }) {
         photoUrl = await uploadPhoto(photoFile);
       }
 
-      await createEntry.mutateAsync({
-        restaurantId: form.restaurantId,
-        visitedAt: new Date().toISOString(),
-        rating: form.rating,
-        caption: form.caption,
-        photoUrl,
-      });
+      const savedPhotoUrl = photoFile ? photoUrl : photoPreview;
+
+      if (isEditing) {
+        await updateEntry.mutateAsync({
+          id: entry.id,
+          payload: {
+            visitedAt: entry.visitedAt ?? new Date().toISOString(),
+            restaurantId: form.restaurantId,
+            rating: form.rating,
+            caption: form.caption,
+            photoUrl: savedPhotoUrl,
+          },
+        });
+      } else {
+        await createEntry.mutateAsync({
+          restaurantId: form.restaurantId,
+          visitedAt: new Date().toISOString(),
+          rating: form.rating,
+          caption: form.caption,
+          photoUrl: savedPhotoUrl,
+        });
+      }
 
       onClose?.();
     } catch {
-      setErrorMessage("We couldn't publish your post. Please try again.");
+      setErrorMessage(
+        isEditing
+          ? "We couldn't save your changes. Please try again."
+          : "We couldn't publish your post. Please try again.",
+      );
     } finally {
       setIsUploading(false);
     }
   }
 
-  const isSaving = createEntry.isPending || isUploading;
+  const isSaving =
+    createEntry.isPending || updateEntry.isPending || isUploading;
   const showLocationNudge = showValidation && !form.restaurantId;
   const showRatingNudge = showValidation && form.rating === 0;
-  const showPhotoNudge = showValidation && !photoFile;
+  const showPhotoNudge = showValidation && !photoFile && !photoPreview;
 
   return (
     <div className="w-full max-w-md overflow-hidden rounded-[28px] bg-[#FFFDF9] shadow-[0_20px_70px_rgba(28,17,7,0.18)]">
       <div className="flex items-center justify-between border-b border-[#EFE4D5] px-5 py-4">
         <h2 className="font-['Plus_Jakarta_Sans'] text-base font-extrabold tracking-tight text-[#1C1107]">
-          New post
+          {isEditing ? "Edit post" : "New post"}
         </h2>
         <button
           type="button"
@@ -273,7 +337,8 @@ export function PublishDiaryForm({ restaurants = [], onClose }) {
           <div className="flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-[#1F1B16]">
             <Clock size={19} className="shrink-0 text-[#8C7B6A]" />
             <span className="min-w-0 flex-1 truncate">
-              {formatVisitDate(now)} at {formatVisitTime(now)}
+              {formatVisitDate(displayedVisitDate)} at{" "}
+              {formatVisitTime(displayedVisitDate)}
             </span>
           </div>
         </div>
@@ -289,7 +354,13 @@ export function PublishDiaryForm({ restaurants = [], onClose }) {
           disabled={isSaving}
           className="mt-4 w-full rounded-2xl bg-[#E04B39] py-3.5 text-sm font-extrabold text-white shadow-[0_12px_30px_rgba(224,75,57,0.25)] transition hover:bg-[#c93c2f] disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSaving ? "Publishing..." : "Publish to Diary"}
+          {isSaving
+            ? isEditing
+              ? "Saving..."
+              : "Publishing..."
+            : isEditing
+              ? "Save Changes"
+              : "Publish to Diary"}
         </button>
       </form>
     </div>

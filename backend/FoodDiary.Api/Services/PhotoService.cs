@@ -26,7 +26,11 @@ public class PhotoService : IPhotoService
         _logger = logger;
     }
 
-    public async Task<PhotoUploadResponse> UploadAsync(Guid userId, IFormFile photo, string baseUrl)
+    public async Task<PhotoUploadResponse> UploadAsync(
+        Guid userId,
+        IFormFile photo,
+        string baseUrl,
+        CancellationToken cancellationToken)
     {
         ValidatePhoto(photo);
 
@@ -38,7 +42,7 @@ public class PhotoService : IPhotoService
         Directory.CreateDirectory(Path.GetDirectoryName(absolutePath)!);
 
         await using var stream = File.Create(absolutePath);
-        await photo.CopyToAsync(stream);
+        await photo.CopyToAsync(stream, cancellationToken);
 
         return new PhotoUploadResponse
         {
@@ -94,7 +98,7 @@ public class PhotoService : IPhotoService
         if (!AllowedExtensions.TryGetValue(extension, out var expectedContentType) ||
             !string.Equals(photo.ContentType, expectedContentType, StringComparison.OrdinalIgnoreCase))
         {
-            throw new InvalidOperationException("Only JPG, PNG, WEBP, or GIF images are allowed.");
+            throw new InvalidOperationException("Only JPG, PNG, or WEBP images are allowed.");
         }
     }
 

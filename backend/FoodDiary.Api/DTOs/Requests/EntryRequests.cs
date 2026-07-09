@@ -22,6 +22,9 @@ public class CreateEntryRequest
 public class UpdateEntryRequest
 {
     [Required]
+    public Guid RestaurantId { get; set; }
+
+    [Required]
     public DateTime VisitedAt { get; set; }
 
     [Range(typeof(decimal), "0.5", "5")]

@@ -1,10 +1,12 @@
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 
 export function Modal({
   children,
   onClose,
   closeOnBackdrop = true,
   closeOnEscape = true,
+  placement = "top",
 }) {
   useEffect(() => {
     if (!closeOnEscape) return undefined;
@@ -16,14 +18,17 @@ export function Modal({
     return () => document.removeEventListener("keydown", onKey);
   }, [closeOnEscape, onClose]);
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 px-4 py-10 pt-20 backdrop-blur-sm"
+      className={`fixed inset-0 z-50 flex justify-center bg-black/40 px-4 py-10 backdrop-blur-sm ${
+        placement === "center" ? "items-center" : "items-start pt-20"
+      }`}
       onClick={(e) => {
         if (closeOnBackdrop && e.target === e.currentTarget) onClose?.();
       }}
     >
       {children}
-    </div>
+    </div>,
+    document.body,
   );
 }

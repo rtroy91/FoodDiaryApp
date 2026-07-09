@@ -9,7 +9,7 @@ import {
   StatCard,
 } from "../components";
 import { getCurrentUser } from "../api/auth";
-import { useAllEntries, useRestaurantLists } from "../hooks/useDiaryData";
+import { useAllEntries } from "../hooks/useDiaryData";
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -56,7 +56,6 @@ function countUniqueVisitedPlaces(entries = []) {
 
 export function EntriesPage() {
   const { data: entries, isLoading } = useAllEntries();
-  const { data: restaurants } = useRestaurantLists();
   const [showVisitModal, setShowVisitModal] = useState(false);
 
   const totalPlaces = countUniqueVisitedPlaces(entries ?? []);
@@ -183,7 +182,7 @@ export function EntriesPage() {
           )}
 
           {!isLoading && entries?.length > 0 && (
-            <div className="min-h-0 flex-1 overflow-y-auto pb-24 pr-1">
+            <div className="custom-scrollbar min-h-0 flex-1 overflow-y-auto pb-24 pr-1">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
                 {entries.map((entry) => (
                   <EntryCard key={entry.id} entry={entry} />
@@ -199,10 +198,7 @@ export function EntriesPage() {
           closeOnBackdrop={false}
           closeOnEscape={false}
         >
-          <PublishDiaryForm
-            restaurants={restaurants ?? []}
-            onClose={() => setShowVisitModal(false)}
-          />
+          <PublishDiaryForm onClose={() => setShowVisitModal(false)} />
         </Modal>
       )}
     </>

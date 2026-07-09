@@ -58,3 +58,25 @@ export function useCreateEntry() {
     },
   });
 }
+
+export function useUpdateEntry() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }) => entriesApi.updateEntry(id, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["entries"] });
+      queryClient.invalidateQueries({ queryKey: ["restaurants"] });
+    },
+  });
+}
+
+export function useDeleteEntry() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: entriesApi.deleteEntry,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["entries"] });
+      queryClient.invalidateQueries({ queryKey: ["restaurants"] });
+    },
+  });
+}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   MapPin,
@@ -16,11 +16,7 @@ import {
   NoEntriesState,
 } from "../components";
 import { getCurrentUser } from "../api/auth";
-import {
-  useAllEntries,
-  useRecentEntries,
-  useRestaurantLists,
-} from "../hooks/useDiaryData";
+import { useAllEntries, useRecentEntries } from "../hooks/useDiaryData";
 
 function getGreeting() {
   const h = new Date().getHours();
@@ -65,13 +61,35 @@ function countUniqueVisitedPlaces(entries = []) {
   return ids.size;
 }
 
+function getPaginationDotClass(index, activeIndex, total) {
+  const distance = Math.min(
+    Math.abs(index - activeIndex),
+    total - Math.abs(index - activeIndex),
+  );
+
+  if (distance === 0) return "h-1.5 w-4 bg-[#E89951]";
+  if (distance === 1) return "h-1.5 w-1.5 bg-stone-400";
+
+  return "h-1 w-1 bg-stone-300/60";
+}
+
+function getCarouselMotionClass(motion) {
+  if (motion === "exit-next") return "-translate-x-5 opacity-0";
+  if (motion === "exit-previous") return "translate-x-5 opacity-0";
+  if (motion === "enter-next") return "translate-x-5 opacity-0";
+  if (motion === "enter-previous") return "-translate-x-5 opacity-0";
+
+  return "translate-x-0 opacity-100";
+}
+
 export function HomePage() {
   const { data: entries, isLoading: loadingEntries } = useRecentEntries(10);
   const { data: allEntries } = useAllEntries();
-  const { data: restaurants } = useRestaurantLists();
 
   const [showVisitModal, setShowVisitModal] = useState(false);
   const [activeEntryIndex, setActiveEntryIndex] = useState(0);
+  const [carouselMotion, setCarouselMotion] = useState("idle");
+  const carouselTimerRef = useRef(null);
 
   const totalPlaces = countUniqueVisitedPlaces(allEntries ?? []);
   const totalEntries = allEntries?.length ?? 0;
@@ -85,18 +103,41 @@ export function HomePage() {
       ? recentEntries[activeEntryIndex % recentEntries.length]
       : null;
 
+  useEffect(() => {
+    return () => {
+      if (carouselTimerRef.current) {
+        window.clearTimeout(carouselTimerRef.current);
+      }
+    };
+  }, []);
+
+  function moveEntry(direction) {
+    if (recentEntries.length <= 1 || carouselMotion !== "idle") return;
+
+    setCarouselMotion(`exit-${direction}`);
+
+    carouselTimerRef.current = window.setTimeout(() => {
+      setActiveEntryIndex((current) => {
+        if (!recentEntries.length) return 0;
+
+        return direction === "next"
+          ? (current + 1) % recentEntries.length
+          : (current - 1 + recentEntries.length) % recentEntries.length;
+      });
+
+      setCarouselMotion(`enter-${direction}`);
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => setCarouselMotion("idle"));
+      });
+    }, 120);
+  }
+
   function showPreviousEntry() {
-    setActiveEntryIndex((current) =>
-      recentEntries.length
-        ? (current - 1 + recentEntries.length) % recentEntries.length
-        : 0,
-    );
+    moveEntry("previous");
   }
 
   function showNextEntry() {
-    setActiveEntryIndex((current) =>
-      recentEntries.length ? (current + 1) % recentEntries.length : 0,
-    );
+    moveEntry("next");
   }
 
   return (
@@ -218,27 +259,33 @@ export function HomePage() {
                 <button
                   type="button"
                   onClick={showPreviousEntry}
+                  disabled={carouselMotion !== "idle"}
                   aria-label="Show previous entry"
-                  className="flex h-11 w-11 items-center justify-center rounded-full border border-[#DDE5EF] bg-white text-[#253248] shadow-[0_2px_8px_rgba(28,42,61,0.08)] transition hover:bg-[#F7FAFD]"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-[#DDE5EF] bg-white text-[#253248] shadow-[0_2px_8px_rgba(28,42,61,0.08)] transition hover:bg-[#F7FAFD] disabled:cursor-not-allowed disabled:opacity-55"
                 >
                   <ChevronLeft size={20} />
                 </button>
 
-                <div className="min-w-0">
+                <div
+                  className={`min-w-0 transform-gpu transition-[opacity,transform] duration-200 ease-out ${getCarouselMotionClass(
+                    carouselMotion,
+                  )}`}
+                >
                   <EntryCard entry={activeEntry} featured />
                 </div>
 
                 <button
                   type="button"
                   onClick={showNextEntry}
+                  disabled={carouselMotion !== "idle"}
                   aria-label="Show next entry"
-                  className="flex h-11 w-11 items-center justify-center rounded-full border border-[#DDE5EF] bg-white text-[#253248] shadow-[0_2px_8px_rgba(28,42,61,0.08)] transition hover:bg-[#F7FAFD]"
+                  className="flex h-11 w-11 items-center justify-center rounded-full border border-[#DDE5EF] bg-white text-[#253248] shadow-[0_2px_8px_rgba(28,42,61,0.08)] transition hover:bg-[#F7FAFD] disabled:cursor-not-allowed disabled:opacity-55"
                 >
                   <ChevronRight size={20} />
                 </button>
               </div>
 
-              <div className="mt-4 flex justify-center gap-2">
+              <div className="mt-4 flex items-center justify-center gap-1.5">
                 {recentEntries.map((entry, index) => {
                   const isActive =
                     index === activeEntryIndex % recentEntries.length;
@@ -250,11 +297,11 @@ export function HomePage() {
                       onClick={() => setActiveEntryIndex(index)}
                       aria-label={`Show entry ${index + 1}`}
                       aria-current={isActive ? "true" : undefined}
-                      className={`h-2.5 rounded-full transition ${
-                        isActive
-                          ? "w-6 bg-[#1C1107]"
-                          : "w-2.5 bg-[#D6C8AD] hover:bg-[#BBAA8A]"
-                      }`}
+                      className={`rounded-full transition-all duration-300 hover:bg-[#E89951] ${getPaginationDotClass(
+                        index,
+                        activeEntryIndex % recentEntries.length,
+                        recentEntries.length,
+                      )}`}
                     />
                   );
                 })}
@@ -278,10 +325,7 @@ export function HomePage() {
           closeOnBackdrop={false}
           closeOnEscape={false}
         >
-          <PublishDiaryForm
-            restaurants={restaurants ?? []}
-            onClose={() => setShowVisitModal(false)}
-          />
+          <PublishDiaryForm onClose={() => setShowVisitModal(false)} />
         </Modal>
       )}
     </>

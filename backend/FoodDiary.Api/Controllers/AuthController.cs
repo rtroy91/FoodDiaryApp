@@ -17,31 +17,17 @@ public class AuthController : ControllerBase
 
     /// <summary>Register a new account.</summary>
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+    public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
     {
-        try
-        {
-            var response = await _authService.RegisterAsync(request);
-            return Ok(response);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(new { message = ex.Message });
-        }
+        var response = await _authService.RegisterAsync(request, cancellationToken);
+        return Ok(response);
     }
 
     /// <summary>Log in and receive a JWT.</summary>
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequest request)
+    public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
     {
-        try
-        {
-            var response = await _authService.LoginAsync(request);
-            return Ok(response);
-        }
-        catch (UnauthorizedAccessException ex)
-        {
-            return Unauthorized(new { message = ex.Message });
-        }
+        var response = await _authService.LoginAsync(request, cancellationToken);
+        return Ok(response);
     }
 }

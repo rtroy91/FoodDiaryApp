@@ -1,5 +1,3 @@
-using FoodDiary.Api.DTOs.Responses;
-
 namespace FoodDiary.Api.Models;
 
 public class Entry
@@ -17,4 +15,5 @@ public class Entry
     public string? PhotoUrl { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? UpdatedAt { get; set; }
 }

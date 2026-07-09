@@ -18,10 +18,10 @@ public class EntryService : IEntryService
         _photoService = photoService;
     }
 
-    public async Task<IEnumerable<EntryResponse>> GetAllAsync(Guid userId, Guid? restaurantId)
+    public async Task<IEnumerable<EntryResponse>> GetAllAsync(Guid userId, Guid? restaurantId, CancellationToken cancellationToken)
     {
         var query = _context.Entries
-            .Include(e => e.Restaurant)
+            .AsNoTracking()
             .Where(e => e.UserId == userId);
 
         if (restaurantId.HasValue)
@@ -29,17 +29,6 @@ public class EntryService : IEntryService
 
         return await query
             .OrderByDescending(e => e.VisitedAt)
-            .Select(e => MapToResponse(e))
-            .ToListAsync();
-    }
-
-    public async Task<List<EntryResponse>> GetRecentEntries(Guid userId, int limit)
-    {
-        return await _context.Entries
-            .Include(e => e.Restaurant)
-            .Where(e => e.UserId == userId)
-            .OrderByDescending(e => e.VisitedAt)
-            .Take(limit)
             .Select(e => new EntryResponse
             {
                 Id = e.Id,
@@ -47,6 +36,8 @@ public class EntryService : IEntryService
                 Rating = e.Rating,
                 Caption = e.Caption,
                 PhotoUrl = e.PhotoUrl,
+                CreatedAt = e.CreatedAt,
+                UpdatedAt = e.UpdatedAt,
                 Restaurant = e.Restaurant == null ? null : new EntryRestaurantResponse
                 {
                     Id = e.Restaurant.Id,
@@ -58,23 +49,72 @@ public class EntryService : IEntryService
                     Category = e.Restaurant.Category
                 }
             })
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
     }
 
-    public async Task<EntryResponse?> GetByIdAsync(Guid id, Guid userId)
+    public async Task<List<EntryResponse>> GetRecentEntriesAsync(Guid userId, int limit, CancellationToken cancellationToken)
     {
-        var entry = await _context.Entries
-            .Include(e => e.Restaurant)
-            .FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId);
-
-        return entry is null ? null : MapToResponse(entry);
+        return await _context.Entries
+            .AsNoTracking()
+            .Where(e => e.UserId == userId)
+            .OrderByDescending(e => e.VisitedAt)
+            .Take(limit)
+            .Select(e => new EntryResponse
+            {
+                Id = e.Id,
+                VisitedAt = e.VisitedAt,
+                Rating = e.Rating,
+                Caption = e.Caption,
+                PhotoUrl = e.PhotoUrl,
+                CreatedAt = e.CreatedAt,
+                UpdatedAt = e.UpdatedAt,
+                Restaurant = e.Restaurant == null ? null : new EntryRestaurantResponse
+                {
+                    Id = e.Restaurant.Id,
+                    Name = e.Restaurant.Name,
+                    Address = e.Restaurant.Address,
+                    Barangay = e.Restaurant.Barangay,
+                    City = e.Restaurant.City,
+                    Province = e.Restaurant.Province,
+                    Category = e.Restaurant.Category
+                }
+            })
+            .ToListAsync(cancellationToken);
     }
 
-    public async Task<EntryResponse> CreateAsync(Guid userId, CreateEntryRequest request)
+    public async Task<EntryResponse?> GetByIdAsync(Guid id, Guid userId, CancellationToken cancellationToken)
     {
-        // Business rule: the restaurant must belong to this user
+        return await _context.Entries
+            .AsNoTracking()
+            .Where(e => e.Id == id && e.UserId == userId)
+            .Select(e => new EntryResponse
+            {
+                Id = e.Id,
+                VisitedAt = e.VisitedAt,
+                Rating = e.Rating,
+                Caption = e.Caption,
+                PhotoUrl = e.PhotoUrl,
+                CreatedAt = e.CreatedAt,
+                UpdatedAt = e.UpdatedAt,
+                Restaurant = e.Restaurant == null ? null : new EntryRestaurantResponse
+                {
+                    Id = e.Restaurant.Id,
+                    Name = e.Restaurant.Name,
+                    Address = e.Restaurant.Address,
+                    Barangay = e.Restaurant.Barangay,
+                    City = e.Restaurant.City,
+                    Province = e.Restaurant.Province,
+                    Category = e.Restaurant.Category
+                }
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<EntryResponse> CreateAsync(Guid userId, CreateEntryRequest request, CancellationToken cancellationToken)
+    {
         var restaurant = await _context.Restaurants
-            .FirstOrDefaultAsync(r => r.Id == request.RestaurantId)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(r => r.Id == request.RestaurantId, cancellationToken)
             ?? throw new KeyNotFoundException("Restaurant not found.");
 
         var entry = new Entry
@@ -88,56 +128,70 @@ public class EntryService : IEntryService
         };
 
         _context.Entries.Add(entry);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
 
         entry.Restaurant = restaurant;
         return MapToResponse(entry);
     }
 
-    public async Task<EntryResponse?> UpdateAsync(Guid id, Guid userId, UpdateEntryRequest request)
+    public async Task<EntryResponse?> UpdateAsync(Guid id, Guid userId, UpdateEntryRequest request, CancellationToken cancellationToken)
     {
         var entry = await _context.Entries
-            .Include(e => e.Restaurant)
-            .FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId);
+            .FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId, cancellationToken);
 
         if (entry is null) return null;
 
+        var restaurant = await _context.Restaurants
+            .AsNoTracking()
+            .FirstOrDefaultAsync(r => r.Id == request.RestaurantId, cancellationToken)
+            ?? throw new KeyNotFoundException("Restaurant not found.");
+
+        entry.RestaurantId = request.RestaurantId;
         entry.VisitedAt = request.VisitedAt;
         entry.Rating = request.Rating;
         entry.Caption = request.Caption;
         entry.PhotoUrl = request.PhotoUrl;
+        entry.UpdatedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
 
+        entry.Restaurant = restaurant;
         return MapToResponse(entry);
     }
 
-    public async Task<bool> DeleteAsync(Guid id, Guid userId)
+    public async Task<bool> DeleteAsync(Guid id, Guid userId, CancellationToken cancellationToken)
     {
         var entry = await _context.Entries
-            .FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId);
+            .FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId, cancellationToken);
 
         if (entry is null) return false;
 
         var photoUrl = entry.PhotoUrl;
         _context.Entries.Remove(entry);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(cancellationToken);
         await _photoService.DeleteAsync(photoUrl);
 
         return true;
     }
 
-    // ── Mapping ───────────────────────────────────────────────────────────
-
     private static EntryResponse MapToResponse(Entry e) => new()
     {
         Id = e.Id,
-        // RestaurantId = e.RestaurantId,
-        // RestaurantName = e.Restaurant?.Name ?? string.Empty,
         VisitedAt = e.VisitedAt,
         Rating = e.Rating,
         Caption = e.Caption,
         PhotoUrl = e.PhotoUrl,
-        //CreatedAt = e.CreatedAt
+        CreatedAt = e.CreatedAt,
+        UpdatedAt = e.UpdatedAt,
+        Restaurant = e.Restaurant == null ? null : new EntryRestaurantResponse
+        {
+            Id = e.Restaurant.Id,
+            Name = e.Restaurant.Name,
+            Address = e.Restaurant.Address,
+            Barangay = e.Restaurant.Barangay,
+            City = e.Restaurant.City,
+            Province = e.Restaurant.Province,
+            Category = e.Restaurant.Category,
+        }
     };
 }

@@ -7,13 +7,15 @@ public class EntryResponse
     public decimal Rating { get; set; }
     public string? Caption { get; set; }
     public string? PhotoUrl { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 
     public EntryRestaurantResponse? Restaurant { get; set; }
 }
 
 public class EntryRestaurantResponse
 {
-     public Guid Id { get; set; }
+    public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string? Address { get; set; }
     public string? Barangay { get; set; }

@@ -20,22 +20,15 @@ public class PhotosController : ControllerBase
     /// <summary>Upload a diary photo to local backend storage.</summary>
     [HttpPost("upload")]
     [RequestSizeLimit(5 * 1024 * 1024)]
-    public async Task<IActionResult> Upload([FromForm] IFormFile? photo)
+    public async Task<IActionResult> Upload([FromForm] IFormFile? photo, CancellationToken cancellationToken)
     {
         if (photo is null)
-            return BadRequest(new { message = "Photo file is required." });
+            throw new InvalidOperationException("Photo file is required.");
 
-        try
-        {
-            var userId = GetUserId();
-            var baseUrl = $"{Request.Scheme}://{Request.Host}";
-            var result = await _photoService.UploadAsync(userId, photo, baseUrl);
-            return Ok(result);
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        var userId = GetUserId();
+        var baseUrl = $"{Request.Scheme}://{Request.Host}";
+        var result = await _photoService.UploadAsync(userId, photo, baseUrl, cancellationToken);
+        return Ok(result);
     }
 
     private Guid GetUserId() =>
