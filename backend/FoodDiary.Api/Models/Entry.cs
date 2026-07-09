@@ -12,7 +12,7 @@ public class Entry
     public Restaurant? Restaurant { get; set; }
 
     public DateTime VisitedAt { get; set; }
-    public int Rating { get; set; }
+    public decimal Rating { get; set; }
     public string? Caption { get; set; }
     public string? PhotoUrl { get; set; }
 

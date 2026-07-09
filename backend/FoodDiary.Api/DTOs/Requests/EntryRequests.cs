@@ -10,8 +10,8 @@ public class CreateEntryRequest
     [Required]
     public DateTime VisitedAt { get; set; }
 
-    [Range(1, 5)]
-    public int Rating { get; set; }
+    [Range(typeof(decimal), "1", "5")]
+    public decimal Rating { get; set; }
 
     public string? Caption { get; set; }
     public string? PhotoUrl { get; set; }
@@ -22,8 +22,8 @@ public class UpdateEntryRequest
     [Required]
     public DateTime VisitedAt { get; set; }
 
-    [Range(1, 5)]
-    public int Rating { get; set; }
+    [Range(typeof(decimal), "1", "5")]
+    public decimal Rating { get; set; }
 
     public string? Caption { get; set; }
     public string? PhotoUrl { get; set; }

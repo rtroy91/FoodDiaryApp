@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Star, Upload, X } from "lucide-react";
 import { FormInput } from "./FormInput";
 import { SelectInput } from "./SelectInput";
@@ -17,6 +17,46 @@ function formatVisitTime(date) {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+function RatingStarButton({ star, rating, onChange }) {
+  const fillPercent = Math.max(0, Math.min(100, (rating - (star - 1)) * 100));
+  const gradientId = useId().replaceAll(":", "");
+  const strokeColor = fillPercent > 0 ? "#E89951" : "#C8B89A";
+
+  return (
+    <span className="relative inline-flex h-7 w-7 items-center justify-center transition hover:scale-110">
+      <Star
+        size={22}
+        className="shrink-0"
+        fill={`url(#${gradientId})`}
+        stroke={strokeColor}
+      >
+        <defs>
+          <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset={`${fillPercent}%`} stopColor="#E89951" />
+            <stop offset={`${fillPercent}%`} stopColor="transparent" />
+          </linearGradient>
+        </defs>
+      </Star>
+      <button
+        type="button"
+        role="radio"
+        aria-checked={rating === star - 0.5}
+        onClick={() => onChange(star - 0.5)}
+        className="absolute left-0 top-0 h-full w-1/2"
+        aria-label={`${star - 0.5} star rating`}
+      />
+      <button
+        type="button"
+        role="radio"
+        aria-checked={rating === star}
+        onClick={() => onChange(star)}
+        className="absolute right-0 top-0 h-full w-1/2"
+        aria-label={`${star} star rating`}
+      />
+    </span>
+  );
 }
 
 export function LogVisitForm({ restaurants = [], onClose }) {
@@ -43,6 +83,11 @@ export function LogVisitForm({ restaurants = [], onClose }) {
     e.preventDefault();
     setErrorMessage(null);
 
+    if (form.rating === 0) {
+      setErrorMessage("Pick a rating from 1 to 5 stars.");
+      return;
+    }
+
     try {
       const restaurant = await createEntry.mutateAsync({
         restaurantId: form.restaurantId,
@@ -53,7 +98,6 @@ export function LogVisitForm({ restaurants = [], onClose }) {
       });
 
       onClose?.();
-      navigate(`/place-details/${restaurant.id}`);
     } catch {
       setErrorMessage("Could not save the log. Try again.");
     }
@@ -109,22 +153,21 @@ export function LogVisitForm({ restaurants = [], onClose }) {
             style={{ fontFamily: '"Geist Mono", monospace' }}
           >
             Rating
+            <span className="ml-0.5 text-[#E04B39]">*</span>
           </span>
-          <div className="flex gap-1 rounded-2xl border border-[#D8CDBB] bg-[#F5EEE4] px-4 py-3">
+          <div
+            className="flex items-center gap-1 rounded-2xl border border-[#D8CDBB] bg-[#F5EEE4] px-4 py-3"
+            role="radiogroup"
+            aria-label="Rating"
+            aria-required="true"
+          >
             {[1, 2, 3, 4, 5].map((star) => (
-              <button
+              <RatingStarButton
                 key={star}
-                type="button"
-                onClick={() => handleChange("rating", star)}
-                className="text-[#C8B89A] transition hover:scale-110"
-                aria-label={`${star} star rating`}
-              >
-                <Star
-                  size={22}
-                  fill={star <= form.rating ? "#E89951" : "none"}
-                  stroke={star <= form.rating ? "#E89951" : "#C8B89A"}
-                />
-              </button>
+                star={star}
+                rating={form.rating}
+                onChange={(rating) => handleChange("rating", rating)}
+              />
             ))}
           </div>
         </div>
@@ -149,6 +192,10 @@ export function LogVisitForm({ restaurants = [], onClose }) {
             <input type="file" accept="image/*" className="hidden" />
           </div>
         </label>
+
+        {errorMessage && (
+          <p className="text-sm font-medium text-[#E04B39]">{errorMessage}</p>
+        )}
 
         <button
           type="submit"

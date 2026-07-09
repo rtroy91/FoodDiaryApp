@@ -31,5 +31,9 @@ public class FoodDiaryContext : DbContext
 
         modelBuilder.Entity<Entry>()
             .HasIndex(e => e.RestaurantId);
+
+        modelBuilder.Entity<Entry>()
+            .Property(e => e.Rating)
+            .HasPrecision(2, 1);
     }
 }

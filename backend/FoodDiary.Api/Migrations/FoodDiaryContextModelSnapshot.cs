@@ -37,8 +37,9 @@ namespace FoodDiary.Api.Migrations
                     b.Property<string>("PhotoUrl")
                         .HasColumnType("text");
 
-                    b.Property<int>("Rating")
-                        .HasColumnType("integer");
+                    b.Property<decimal>("Rating")
+                        .HasPrecision(2, 1)
+                        .HasColumnType("numeric(2,1)");
 
                     b.Property<Guid>("RestaurantId")
                         .HasColumnType("uuid");

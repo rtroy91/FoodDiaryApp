@@ -4,7 +4,7 @@ public class EntryResponse
 {
     public Guid Id { get; set; }
     public DateTime VisitedAt { get; set; }
-    public int Rating { get; set; }
+    public decimal Rating { get; set; }
     public string? Caption { get; set; }
     public string? PhotoUrl { get; set; }
 
