@@ -3,7 +3,8 @@ import { useNavigate, Link } from "react-router-dom";
 import { register } from "../api/auth";
 import { Check, ArrowRight, Eye, EyeOff } from "lucide-react";
 import foodHero from "../assets/food-register.svg";
-import { FormInput, AuthSidePanel } from "../components";
+import { AuthSidePanel } from "../components/AuthSidePanel";
+import { FormInput } from "../components/FormInput";
 
 export function RegisterPage() {
   const navigate = useNavigate();

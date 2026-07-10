@@ -1,14 +1,16 @@
-import { Link } from "react-router-dom";
 import Skeleton from "react-loading-skeleton";
+import { Link } from "react-router-dom";
 import {
+  Clock,
   Edit3,
   MapPin,
   MoreVertical,
   Star,
   Trash2,
   UtensilsCrossed,
+  X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Modal } from "./Modal";
 import { PublishDiaryForm } from "./PublishDiaryForm";
 import { useDeleteEntry } from "../hooks/useDiaryData";
@@ -52,7 +54,7 @@ export function EntryCardSkeleton({ featured = false, captionLines = 2 }) {
       className={`overflow-hidden rounded-[20px] border border-[#EEF2F7] bg-white shadow-none ${
         featured
           ? "flex h-[clamp(25rem,64dvh,31rem)] flex-col"
-          : "flex h-[29rem] flex-col"
+          : "flex h-116 flex-col"
       }`}
       aria-hidden="true"
     >
@@ -191,8 +193,34 @@ function DeleteEntrySheet({ entry, onCancel, onDeleted }) {
   );
 }
 
-function EntryActions({ onEdit, onDelete }) {
+function EntryActions({
+  onEdit,
+  onDelete,
+  tone = "photo",
+  placement = "photo",
+}) {
   const [isOpen, setIsOpen] = useState(false);
+  const menuRef = useRef(null);
+  const isPanelTone = tone === "panel";
+  const isInlinePlacement = placement === "inline";
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    function closeOnOutsidePointerDown(e) {
+      if (!menuRef.current?.contains(e.target)) {
+        setIsOpen(false);
+      }
+    }
+
+    document.addEventListener("pointerdown", closeOnOutsidePointerDown, true);
+    return () =>
+      document.removeEventListener(
+        "pointerdown",
+        closeOnOutsidePointerDown,
+        true,
+      );
+  }, [isOpen]);
 
   function stopCardNavigation(e) {
     e.preventDefault();
@@ -212,14 +240,26 @@ function EntryActions({ onEdit, onDelete }) {
   }
 
   return (
-    <div className="absolute right-3 top-3 z-20" onClick={stopCardNavigation}>
+    <div
+      ref={menuRef}
+      className={
+        isInlinePlacement
+          ? "relative z-20 shrink-0"
+          : "absolute right-3 top-3 z-20"
+      }
+      onClick={stopCardNavigation}
+    >
       <button
         type="button"
         onClick={(e) => {
           stopCardNavigation(e);
           setIsOpen((current) => !current);
         }}
-        className="flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-white shadow-[0_8px_24px_rgba(0,0,0,0.22)] backdrop-blur-sm transition hover:bg-black/55"
+        className={`flex h-8 w-8 items-center justify-center rounded-full shadow-[0_8px_24px_rgba(0,0,0,0.16)] transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F0E76F] ${
+          isPanelTone
+            ? "bg-stone-200 text-[#1C1107] ring-1 ring-stone-300/70 hover:bg-stone-300"
+            : "bg-black/40 text-white backdrop-blur-sm hover:bg-black/55"
+        }`}
         aria-label="Post actions"
         aria-expanded={isOpen}
       >
@@ -251,27 +291,171 @@ function EntryActions({ onEdit, onDelete }) {
   );
 }
 
+function EntryDetailModal({ entry, location, onClose, onEdit, onDelete }) {
+  const restaurant = entry.restaurant;
+  const restaurantDetailsPath = `/place-details/${
+    restaurant?.id ?? entry.restaurantId
+  }`;
+
+  return (
+    <Modal
+      onClose={onClose}
+      placement="center"
+      backdropClassName="bg-black/60 px-4 py-6 backdrop-blur-md sm:py-8"
+    >
+      <article
+        className="entry-detail-modal relative flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-[#FFFDF9] shadow-[0_30px_90px_rgba(0,0,0,0.34)] outline-none"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={`entry-detail-title-${entry.id}`}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="flex shrink-0 justify-end gap-2 px-6 pb-2 pt-4 xl:absolute xl:right-6 xl:top-6 xl:z-30 xl:p-0">
+          <EntryActions
+            onEdit={onEdit}
+            onDelete={onDelete}
+            tone="panel"
+            placement="inline"
+          />
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-stone-200 text-[#1C1107] shadow-[0_8px_24px_rgba(0,0,0,0.16)] ring-1 ring-stone-300/70 transition hover:bg-stone-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#F0E76F]"
+            aria-label="Close details"
+          >
+            <X size={17} />
+          </button>
+        </div>
+
+        <div className="grid min-h-0 flex-1 grid-cols-1 gap-5 overflow-hidden px-4 pb-4 pt-0 sm:px-6 sm:pb-6 xl:grid-cols-2 xl:items-stretch xl:gap-8 xl:p-6">
+          <div className="relative h-[min(42vh,350px)] w-full shrink-0 overflow-hidden rounded-2xl bg-[#1C1107] md:h-[min(44vh,400px)] xl:aspect-square xl:h-auto">
+            {entry.photoUrl ? (
+              <img
+                src={entry.photoUrl}
+                alt={restaurant?.name ?? "Restaurant photo"}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-[#2A1E0F] to-[#3D2E18]">
+                <UtensilsCrossed size={54} color="rgba(255,255,255,0.16)" />
+              </div>
+            )}
+          </div>
+
+          <div className="flex min-h-0 flex-col justify-between">
+            <div className="flex min-h-0 flex-1 flex-col">
+              <div className="flex shrink-0 items-start justify-between gap-4 xl:pr-20">
+                {restaurant?.id || entry.restaurantId ? (
+                  <Link
+                    id={`entry-detail-title-${entry.id}`}
+                    to={restaurantDetailsPath}
+                    className="min-w-0 flex-1 text-3xl font-normal leading-tight text-[#1C1107] underline-offset-4 transition hover:text-[#6F5130] hover:underline"
+                    style={{ fontFamily: '"Fraunces", serif' }}
+                  >
+                    {restaurant?.name ?? "Unknown restaurant"}
+                  </Link>
+                ) : (
+                  <h2
+                    id={`entry-detail-title-${entry.id}`}
+                    className="min-w-0 flex-1 text-3xl font-normal leading-tight text-[#1C1107]"
+                    style={{ fontFamily: '"Fraunces", serif' }}
+                  >
+                    {restaurant?.name ?? "Unknown restaurant"}
+                  </h2>
+                )}
+              </div>
+
+              <div className="mt-3 shrink-0 space-y-2 font-['Plus_Jakarta_Sans'] text-sm font-medium leading-5 text-[#6F7892]">
+                <div className="flex items-center gap-2 font-semibold text-[#253248]">
+                  <Star size={17} fill="#F4B21B" className="text-[#F4B21B]" />
+                  <span>
+                    {entry.rating != null
+                      ? Number(entry.rating).toFixed(1)
+                      : "-"}
+                  </span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <MapPin size={15} className="mt-0.5 shrink-0" />
+                  <span>{location || "No Location"}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock size={15} className="shrink-0" />
+                  <span>{timeAgo(entry.visitedAt)}</span>
+                </div>
+              </div>
+
+              <div className="mt-5 flex min-h-0 flex-1 flex-col border-t border-[#E6DED1] pt-5">
+                <div className="custom-scrollbar min-h-0 grow overflow-y-auto pr-2">
+                  <p className="font-['Plus_Jakarta_Sans'] text-[0.95rem] leading-7 text-[#5A4A34]">
+                    {entry.caption || "No written note for this visit yet."}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {restaurant?.category && (
+              <div className="mt-5 flex shrink-0 justify-start xl:justify-end">
+                <span className="inline-flex rounded-full border border-[#DDE5EF] bg-[#F7FAFD] px-4 py-1.5 font-['Plus_Jakarta_Sans'] text-[11px] font-semibold uppercase tracking-widest text-[#1C2A3D] shadow-[0_2px_8px_rgba(28,42,61,0.08)]">
+                  {categoryLabel(restaurant.category)}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      </article>
+    </Modal>
+  );
+}
+
 export function EntryCard({ entry, featured = false }) {
   const [isEditing, setIsEditing] = useState(false);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
-  const [isCaptionExpanded, setIsCaptionExpanded] = useState(false);
+  const [isViewingDetails, setIsViewingDetails] = useState(false);
+  const [shouldReturnToDetails, setShouldReturnToDetails] = useState(false);
   const restaurant = entry.restaurant;
   const location = getLocation(restaurant);
   const wasEdited = Boolean(entry.updatedAt);
-  const shouldCollapseCaption = (entry.caption?.length ?? 0) > 90;
 
-  function toggleCaption(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsCaptionExpanded((current) => !current);
+  function openDetails() {
+    setIsViewingDetails(true);
+  }
+
+  function handleCardKeyDown(e) {
+    if (e.target !== e.currentTarget) return;
+
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      openDetails();
+    }
+  }
+
+  function closeEditing() {
+    setIsEditing(false);
+    if (shouldReturnToDetails) {
+      setShouldReturnToDetails(false);
+      setIsViewingDetails(true);
+    }
+  }
+
+  function cancelDelete() {
+    setIsConfirmingDelete(false);
+    if (shouldReturnToDetails) {
+      setShouldReturnToDetails(false);
+      setIsViewingDetails(true);
+    }
+  }
+
+  function finishDelete() {
+    setShouldReturnToDetails(false);
+    setIsConfirmingDelete(false);
   }
 
   const card = (
     <div
-      className={`overflow-hidden rounded-[20px] border border-[#EEF2F7] bg-white shadow-none ${
+      className={`overflow-hidden rounded-[20px] border border-[#EEF2F7] bg-white shadow-none transition ${
         featured
           ? "flex h-[clamp(25rem,64dvh,31rem)] flex-col"
-          : "flex h-[29rem] flex-col transition hover:-translate-y-0.5"
+          : "flex h-116 flex-col hover:-translate-y-0.5"
       }`}
     >
       <div
@@ -323,31 +507,12 @@ export function EntryCard({ entry, featured = false }) {
           </span>
         </div>
 
-        <div
-          className={`mt-3 ${
-            isCaptionExpanded
-              ? "custom-scrollbar max-h-24 overflow-y-auto pr-1"
-              : "h-[3.2rem] overflow-hidden"
-          }`}
-        >
+        <div className="mt-3 h-[3.2rem] overflow-hidden">
           {entry.caption && (
             <div className="border-l-2 border-[#DDE5EF] pl-2.5">
-              <p
-                className={`font-['Plus_Jakarta_Sans'] text-sm leading-[1.6rem] text-[#5A4A34] ${
-                  isCaptionExpanded ? "" : "line-clamp-2"
-                }`}
-              >
+              <p className="line-clamp-2 font-['Plus_Jakarta_Sans'] text-sm leading-[1.6rem] text-[#5A4A34]">
                 {entry.caption}
               </p>
-              {shouldCollapseCaption && (
-                <button
-                  type="button"
-                  onClick={toggleCaption}
-                  className="mt-0.5 font-['Plus_Jakarta_Sans'] text-xs font-extrabold text-[#E89951] transition hover:text-[#c93c2f]"
-                >
-                  {isCaptionExpanded ? "See Less" : "See More"}
-                </button>
-              )}
             </div>
           )}
         </div>
@@ -386,28 +551,56 @@ export function EntryCard({ entry, featured = false }) {
     <>
       {isEditing && (
         <Modal
-          onClose={() => setIsEditing(false)}
+          onClose={closeEditing}
           closeOnBackdrop={false}
           closeOnEscape={false}
         >
-          <PublishDiaryForm entry={entry} onClose={() => setIsEditing(false)} />
+          <PublishDiaryForm entry={entry} onClose={closeEditing} />
         </Modal>
       )}
       {isConfirmingDelete && (
-        <Modal onClose={() => setIsConfirmingDelete(false)} placement="center">
+        <Modal
+          onClose={cancelDelete}
+          placement="center"
+          closeOnBackdrop={false}
+        >
           <DeleteEntrySheet
             entry={entry}
-            onCancel={() => setIsConfirmingDelete(false)}
-            onDeleted={() => setIsConfirmingDelete(false)}
+            onCancel={cancelDelete}
+            onDeleted={finishDelete}
           />
         </Modal>
+      )}
+      {isViewingDetails && (
+        <EntryDetailModal
+          entry={entry}
+          location={location}
+          onClose={() => setIsViewingDetails(false)}
+          onEdit={() => {
+            setShouldReturnToDetails(true);
+            setIsViewingDetails(false);
+            setIsEditing(true);
+          }}
+          onDelete={() => {
+            setShouldReturnToDetails(true);
+            setIsViewingDetails(false);
+            setIsConfirmingDelete(true);
+          }}
+        />
       )}
     </>
   );
 
   if (featured) {
     return (
-      <div className="relative block h-full cursor-default no-underline">
+      <div
+        className="relative block h-full cursor-pointer no-underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#F0E76F]"
+        role="button"
+        tabIndex={0}
+        onClick={openDetails}
+        onKeyDown={handleCardKeyDown}
+        aria-label={`Open details for ${restaurant?.name ?? "entry"}`}
+      >
         {card}
         {actions}
         {modals}
@@ -416,10 +609,15 @@ export function EntryCard({ entry, featured = false }) {
   }
 
   return (
-    <div className="relative block h-full">
-      <Link to={`/entries/${entry.id}`} className="block h-full no-underline">
-        {card}
-      </Link>
+    <div
+      className="relative block h-full cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#F0E76F]"
+      role="button"
+      tabIndex={0}
+      onClick={openDetails}
+      onKeyDown={handleCardKeyDown}
+      aria-label={`Open details for ${restaurant?.name ?? "entry"}`}
+    >
+      {card}
       {actions}
       {modals}
     </div>

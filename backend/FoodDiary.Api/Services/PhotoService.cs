@@ -9,12 +9,13 @@ public class PhotoService : IPhotoService
     private const long MaxFileSize = 5 * 1024 * 1024;
     private const string UploadsPath = "uploads/entry-photos";
 
-    private static readonly Dictionary<string, string> AllowedExtensions = new(StringComparer.OrdinalIgnoreCase)
+    private static readonly Dictionary<string, string[]> AllowedExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
-        [".jpg"] = "image/jpeg",
-        [".jpeg"] = "image/jpeg",
-        [".png"] = "image/png",
-        [".webp"] = "image/webp"
+        [".jpg"] = ["image/jpeg"],
+        [".jpeg"] = ["image/jpeg"],
+        [".png"] = ["image/png"],
+        [".webp"] = ["image/webp"],
+        [".jfif"] = ["image/jpeg", "image/jfif"]
     };
 
     private readonly IWebHostEnvironment _environment;
@@ -95,10 +96,10 @@ public class PhotoService : IPhotoService
             throw new InvalidOperationException("Photo must be 5 MB or smaller.");
 
         var extension = Path.GetExtension(photo.FileName);
-        if (!AllowedExtensions.TryGetValue(extension, out var expectedContentType) ||
-            !string.Equals(photo.ContentType, expectedContentType, StringComparison.OrdinalIgnoreCase))
+        if (!AllowedExtensions.TryGetValue(extension, out var expectedContentTypes) ||
+            !expectedContentTypes.Contains(photo.ContentType, StringComparer.OrdinalIgnoreCase))
         {
-            throw new InvalidOperationException("Only JPG, PNG, or WEBP images are allowed.");
+            throw new InvalidOperationException("Only JPG, PNG, JFIF, or WEBP images are allowed.");
         }
     }
 

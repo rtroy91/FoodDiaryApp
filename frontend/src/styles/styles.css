@@ -61,3 +61,19 @@ body {
   background: rgba(140, 123, 106, 0.55);
 }
 
+.entry-detail-modal {
+  animation: entry-detail-in 180ms ease-out both;
+}
+
+@keyframes entry-detail-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+

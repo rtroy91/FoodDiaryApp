@@ -7,6 +7,7 @@ export function Modal({
   closeOnBackdrop = true,
   closeOnEscape = true,
   placement = "top",
+  backdropClassName = "",
 }) {
   useEffect(() => {
     if (!closeOnEscape) return undefined;
@@ -22,8 +23,9 @@ export function Modal({
     <div
       className={`fixed inset-0 z-50 flex justify-center bg-black/40 px-4 py-10 backdrop-blur-sm ${
         placement === "center" ? "items-center" : "items-start pt-20"
-      }`}
+      } ${backdropClassName}`}
       onClick={(e) => {
+        e.stopPropagation();
         if (closeOnBackdrop && e.target === e.currentTarget) onClose?.();
       }}
     >
