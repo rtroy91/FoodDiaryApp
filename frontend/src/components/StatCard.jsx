@@ -1,3 +1,5 @@
+import Skeleton from "react-loading-skeleton";
+
 export function StatCard({ value, label, icon: Icon, iconColor, iconBgColor }) {
   return (
     <div className="border rounded-2xl border-[#E8DFC8] bg-stone-50 px-5 py-4">
@@ -21,6 +23,36 @@ export function StatCard({ value, label, icon: Icon, iconColor, iconBgColor }) {
       >
         {label}
       </p>
+    </div>
+  );
+}
+
+export function StatCardSkeleton({ icon: Icon, iconColor, iconBgColor }) {
+  return (
+    <div className="border rounded-2xl border-[#E8DFC8] bg-stone-50 px-5 py-4">
+      {Icon && (
+        <div
+          className="mb-2 flex h-8 w-8 items-center justify-center rounded-xl"
+          style={{ backgroundColor: iconBgColor }}
+        >
+          <Icon size={16} color={iconColor} />
+        </div>
+      )}
+      <Skeleton
+        width={24}
+        height={32}
+        borderRadius={6}
+        baseColor="#e7dfd2"
+        highlightColor="#f8f4ec"
+      />
+      <Skeleton
+        className="mt-2 block"
+        width={80}
+        height={12}
+        borderRadius={6}
+        baseColor="#f0ebe2"
+        highlightColor="#fbf8f2"
+      />
     </div>
   );
 }

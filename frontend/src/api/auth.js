@@ -1,15 +1,23 @@
 import { apiClient } from "./client";
+import {
+  clearAuthStorage,
+  getAuthToken,
+  getStoredUser,
+  setAuthToken,
+  setStoredUser,
+} from "./authStorage";
+
+function storeAuthSession(data) {
+  setAuthToken(data.token);
+  setStoredUser({
+    email: data.email,
+    displayName: data.displayName,
+  });
+}
 
 export async function login(email, password) {
   const { data } = await apiClient.post("/auth/login", { email, password });
-  localStorage.setItem("food_diary_token", data.token);
-  localStorage.setItem(
-    "food_diary_user",
-    JSON.stringify({
-      email: data.email,
-      displayName: data.displayName,
-    }),
-  );
+  storeAuthSession(data);
   return data;
 }
 
@@ -19,35 +27,18 @@ export async function register(email, password, displayName) {
     password,
     displayName,
   });
-  localStorage.setItem("food_diary_token", data.token);
-  localStorage.setItem(
-    "food_diary_user",
-    JSON.stringify({
-      email: data.email,
-      displayName: data.displayName,
-    }),
-  );
+  storeAuthSession(data);
   return data;
 }
 
 export function logout() {
-  localStorage.removeItem("food_diary_token");
-  localStorage.removeItem("food_diary_user");
+  clearAuthStorage();
 }
 
 export function isAuthenticated() {
-  return Boolean(localStorage.getItem("food_diary_token"));
+  return Boolean(getAuthToken());
 }
 
 export function getCurrentUser() {
-  const storedUser = localStorage.getItem("food_diary_user");
-
-  if (!storedUser) return null;
-
-  try {
-    return JSON.parse(storedUser);
-  } catch {
-    localStorage.removeItem("food_diary_user");
-    return null;
-  }
+  return getStoredUser();
 }

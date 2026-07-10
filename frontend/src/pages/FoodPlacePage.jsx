@@ -1,14 +1,17 @@
-import { useMemo, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import { Plus, Search, Star, Trophy, UtensilsCrossed } from "lucide-react";
-import {
-  AddRestaurantForm,
-  FoodPlaceCard,
-  Modal,
-  PageHeader,
-  SelectInput,
-} from "../components";
+import { FoodPlaceCard } from "../components/FoodPlaceCard";
+import { Modal } from "../components/Modal";
+import { PageHeader } from "../components/PageHeader";
+import { SelectInput } from "../components/SelectInput";
 import { useAllEntries, useRestaurantLists } from "../hooks/useDiaryData";
 import { buildPlaceStats, categoryLabel } from "../utils/restaurants";
+
+const AddRestaurantForm = lazy(() =>
+  import("../components/AddRestaurantForm").then((module) => ({
+    default: module.AddRestaurantForm,
+  })),
+);
 
 function SectionHeader({ eyebrow, title }) {
   return (
@@ -52,35 +55,47 @@ export function FoodPlacePage() {
     return [...unique].sort((a, b) => a.localeCompare(b));
   }, [places]);
 
-  const popularPlaces = [...places]
-    .filter((place) => place.visitCount > 0)
-    .sort((a, b) => b.visitCount - a.visitCount)
-    .slice(0, 3);
+  const popularPlaces = useMemo(
+    () =>
+      [...places]
+        .filter((place) => place.visitCount > 0)
+        .sort((a, b) => b.visitCount - a.visitCount)
+        .slice(0, 3),
+    [places],
+  );
 
-  const favoritePlaces = [...places]
-    .filter((place) => place.averageRating != null)
-    .sort((a, b) => {
-      const ratingDiff = b.averageRating - a.averageRating;
-      return ratingDiff || b.visitCount - a.visitCount;
-    })
-    .slice(0, 3);
+  const favoritePlaces = useMemo(
+    () =>
+      [...places]
+        .filter((place) => place.averageRating != null)
+        .sort((a, b) => {
+          const ratingDiff = b.averageRating - a.averageRating;
+          return ratingDiff || b.visitCount - a.visitCount;
+        })
+        .slice(0, 3),
+    [places],
+  );
 
-  const filteredPlaces = places.filter((place) => {
-    const matchesCategory = category === "all" || place.category === category;
-    const text = [
-      place.name,
-      place.address,
-      place.barangay,
-      place.city,
-      place.province,
-      place.category,
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
+  const filteredPlaces = useMemo(() => {
+    const normalizedSearchTerm = searchTerm.trim().toLowerCase();
 
-    return matchesCategory && text.includes(searchTerm.trim().toLowerCase());
-  });
+    return places.filter((place) => {
+      const matchesCategory = category === "all" || place.category === category;
+      const text = [
+        place.name,
+        place.address,
+        place.barangay,
+        place.city,
+        place.province,
+        place.category,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return matchesCategory && text.includes(normalizedSearchTerm);
+    });
+  }, [category, places, searchTerm]);
 
   const isLoading = loadingRestaurants || loadingEntries;
 
@@ -226,7 +241,9 @@ export function FoodPlacePage() {
 
       {showAddModal && (
         <Modal onClose={() => setShowAddModal(false)}>
-          <AddRestaurantForm onClose={() => setShowAddModal(false)} />
+          <Suspense fallback={null}>
+            <AddRestaurantForm onClose={() => setShowAddModal(false)} />
+          </Suspense>
         </Modal>
       )}
     </>

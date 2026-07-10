@@ -2,7 +2,8 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { login } from "../api/auth";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
-import { AuthSidePanel, FormInput } from "../components/";
+import { AuthSidePanel } from "../components/AuthSidePanel";
+import { FormInput } from "../components/FormInput";
 
 export function LoginPage() {
   const navigate = useNavigate();

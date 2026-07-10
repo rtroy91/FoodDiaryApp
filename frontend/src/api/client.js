@@ -1,4 +1,5 @@
 import axios from "axios";
+import { clearAuthStorage, getAuthToken } from "./authStorage";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "https://localhost:5001/api";
@@ -9,7 +10,7 @@ export const apiClient = axios.create({
 
 // Attach the JWT (stored after login) to every outgoing request.
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem("food_diary_token");
+  const token = getAuthToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -25,8 +26,7 @@ apiClient.interceptors.response.use(
       window.location.pathname === "/register";
 
     if (error.response?.status === 401 && !isAuthRoute) {
-      localStorage.removeItem("food_diary_token");
-      localStorage.removeItem("food_diary_user");
+      clearAuthStorage();
       window.location.href = "/login";
     }
     return Promise.reject(error);

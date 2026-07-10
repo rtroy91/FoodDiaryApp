@@ -1,22 +1,63 @@
+import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { NavBar } from "./components/NavBar";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { HomePage } from "./pages/HomePage";
-import { DiscoverPage } from "./pages/DiscoverPage";
 import { EntriesPage } from "./pages/EntriesPage";
-import { EntryDetailPage } from "./pages/EntryDetailPage";
-import { FoodPlacePage } from "./pages/FoodPlacePage";
-import { FoodPlaceDetailPage } from "./pages/FoodPlaceDetailPage";
-import { AddRestaurantForm } from "./components/AddRestaurantForm";
-import { LoginPage } from "./pages/LoginPage";
-import { RegisterPage } from "./pages/RegisterPage";
+
+const DiscoverPage = lazy(() =>
+  import("./pages/DiscoverPage").then((module) => ({
+    default: module.DiscoverPage,
+  })),
+);
+const EntryDetailPage = lazy(() =>
+  import("./pages/EntryDetailPage").then((module) => ({
+    default: module.EntryDetailPage,
+  })),
+);
+const FoodPlacePage = lazy(() =>
+  import("./pages/FoodPlacePage").then((module) => ({
+    default: module.FoodPlacePage,
+  })),
+);
+const FoodPlaceDetailPage = lazy(() =>
+  import("./pages/FoodPlaceDetailPage").then((module) => ({
+    default: module.FoodPlaceDetailPage,
+  })),
+);
+const AddRestaurantForm = lazy(() =>
+  import("./components/AddRestaurantForm").then((module) => ({
+    default: module.AddRestaurantForm,
+  })),
+);
+const LoginPage = lazy(() =>
+  import("./pages/LoginPage").then((module) => ({ default: module.LoginPage })),
+);
+const RegisterPage = lazy(() =>
+  import("./pages/RegisterPage").then((module) => ({
+    default: module.RegisterPage,
+  })),
+);
+
+function RouteLoadingShell() {
+  return (
+    <div
+      className="min-h-dvh bg-[#F5F0E8]"
+      style={{ fontFamily: '"Geist Mono", monospace' }}
+    />
+  );
+}
+
+function withRouteSuspense(element) {
+  return <Suspense fallback={<RouteLoadingShell />}>{element}</Suspense>;
+}
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/login" element={withRouteSuspense(<LoginPage />)} />
+        <Route path="/register" element={withRouteSuspense(<RegisterPage />)} />
 
         <Route
           path="/"

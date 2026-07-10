@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Home, MapPin, Trophy, LogOut } from "lucide-react";
 import { logout } from "../api/auth";
@@ -7,6 +8,10 @@ const NAV_ITEMS = [
   { to: "/discover", label: "Discover", icon: MapPin, end: false },
   { to: "/food-places", label: "Food Places", icon: Trophy, end: false },
 ];
+
+function OutletLoadingShell() {
+  return <div className="h-full bg-[#F5F0E8]" />;
+}
 
 export function NavBar() {
   const navigate = useNavigate();
@@ -57,7 +62,9 @@ export function NavBar() {
         </div>
       </div>
       <main className="h-full">
-        <Outlet />
+        <Suspense fallback={<OutletLoadingShell />}>
+          <Outlet />
+        </Suspense>
       </main>
     </div>
   );

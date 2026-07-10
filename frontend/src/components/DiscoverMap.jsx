@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from "react";
 import L from "leaflet";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 import { categoryLabel } from "../utils/restaurants";
 
 const BATAAN_CENTER = [14.676, 120.536];
@@ -55,9 +56,13 @@ function MapViewport({ restaurants, selectedRestaurant }) {
 
   useEffect(() => {
     if (selectedRestaurant?.latitude && selectedRestaurant?.longitude) {
-      map.flyTo([selectedRestaurant.latitude, selectedRestaurant.longitude], 15, {
-        duration: 0.6,
-      });
+      map.flyTo(
+        [selectedRestaurant.latitude, selectedRestaurant.longitude],
+        15,
+        {
+          duration: 0.6,
+        },
+      );
       return;
     }
 

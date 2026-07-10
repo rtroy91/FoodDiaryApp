@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   MapPin,
@@ -8,13 +8,11 @@ import {
   Star,
   Plus,
 } from "lucide-react";
-import {
-  Modal,
-  PublishDiaryForm,
-  StatCard,
-  EntryCard,
-  NoEntriesState,
-} from "../components";
+import { EntryCard, EntryCardSkeleton } from "../components/EntryCard";
+import { Modal } from "../components/Modal";
+import { NoEntriesState } from "../components/NoEntriesState";
+import { PublishDiaryForm } from "../components/PublishDiaryForm";
+import { StatCard, StatCardSkeleton } from "../components/StatCard";
 import { getCurrentUser } from "../api/auth";
 import { useAllEntries, useRecentEntries } from "../hooks/useDiaryData";
 
@@ -84,16 +82,22 @@ function getCarouselMotionClass(motion) {
 
 export function HomePage() {
   const { data: entries, isLoading: loadingEntries } = useRecentEntries(10);
-  const { data: allEntries } = useAllEntries();
+  const { data: allEntries, isLoading: loadingAllEntries } = useAllEntries();
 
   const [showVisitModal, setShowVisitModal] = useState(false);
   const [activeEntryIndex, setActiveEntryIndex] = useState(0);
   const [carouselMotion, setCarouselMotion] = useState("idle");
   const carouselTimerRef = useRef(null);
 
-  const totalPlaces = countUniqueVisitedPlaces(allEntries ?? []);
-  const totalEntries = allEntries?.length ?? 0;
-  const avgRating = avg(allEntries?.map((e) => e.rating) ?? []);
+  const stats = useMemo(() => {
+    const sourceEntries = allEntries ?? [];
+
+    return {
+      totalPlaces: countUniqueVisitedPlaces(sourceEntries),
+      totalEntries: sourceEntries.length,
+      avgRating: avg(sourceEntries.map((entry) => entry.rating)),
+    };
+  }, [allEntries]);
   const currentUser = getCurrentUser();
   const userName =
     currentUser?.displayName || currentUser?.email?.split("@")[0] || "there";
@@ -208,27 +212,49 @@ export function HomePage() {
 
         <div className="mx-auto max-w-140 px-4">
           <div className="relative z-20 mb-4 -mt-7 grid grid-cols-3 gap-2.5">
-            <StatCard
-              value={totalPlaces}
-              label="Places Visited"
-              icon={MapPin}
-              iconColor="#e63922"
-              iconBgColor="#fde8e5"
-            />
-            <StatCard
-              value={totalEntries}
-              label="Total Entries"
-              icon={Clock}
-              iconColor="#2b5fc4"
-              iconBgColor="#e3eaf8"
-            />
-            <StatCard
-              value={avgRating > 0 ? avgRating.toFixed(1) : "—"}
-              label="Avg Rating"
-              icon={Star}
-              iconColor="#B8960A"
-              iconBgColor="#FEF6C7"
-            />
+            {loadingAllEntries ? (
+              <>
+                <StatCardSkeleton
+                  icon={MapPin}
+                  iconColor="#e63922"
+                  iconBgColor="#fde8e5"
+                />
+                <StatCardSkeleton
+                  icon={Clock}
+                  iconColor="#2b5fc4"
+                  iconBgColor="#e3eaf8"
+                />
+                <StatCardSkeleton
+                  icon={Star}
+                  iconColor="#B8960A"
+                  iconBgColor="#FEF6C7"
+                />
+              </>
+            ) : (
+              <>
+                <StatCard
+                  value={stats.totalPlaces}
+                  label="Places Visited"
+                  icon={MapPin}
+                  iconColor="#e63922"
+                  iconBgColor="#fde8e5"
+                />
+                <StatCard
+                  value={stats.totalEntries}
+                  label="Total Entries"
+                  icon={Clock}
+                  iconColor="#2b5fc4"
+                  iconBgColor="#e3eaf8"
+                />
+                <StatCard
+                  value={stats.avgRating > 0 ? stats.avgRating.toFixed(1) : "—"}
+                  label="Avg Rating"
+                  icon={Star}
+                  iconColor="#B8960A"
+                  iconBgColor="#FEF6C7"
+                />
+              </>
+            )}
           </div>
 
           <div className="mb-2.5 flex items-center justify-between">
@@ -244,9 +270,51 @@ export function HomePage() {
           </div>
 
           {loadingEntries && (
-            <p className="py-10 text-center text-sm text-stone-500">
-              Loading your diary…
-            </p>
+            <div className="relative left-1/2 w-[min(calc(100vw-2rem),34rem)] -translate-x-1/2 pb-2">
+              <div className="grid grid-cols-[44px_minmax(0,1fr)_44px] items-center gap-3">
+                <button
+                  type="button"
+                  disabled
+                  aria-label="Show previous entry"
+                  className="pointer-events-none flex h-11 w-11 items-center justify-center rounded-full border border-[#DDE5EF] bg-white text-[#253248] opacity-55 shadow-[0_2px_8px_rgba(28,42,61,0.08)]"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+
+                <EntryCardSkeleton featured />
+
+                <button
+                  type="button"
+                  disabled
+                  aria-label="Show next entry"
+                  className="pointer-events-none flex h-11 w-11 items-center justify-center rounded-full border border-[#DDE5EF] bg-white text-[#253248] opacity-55 shadow-[0_2px_8px_rgba(28,42,61,0.08)]"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </div>
+
+              <div className="mt-4 flex items-center justify-center gap-1.5">
+                {[0, 1, 2, 3, 4].map((dot) => (
+                  <span
+                    key={dot}
+                    className={`rounded-full ${
+                      dot === 2
+                        ? "h-1.5 w-4 bg-[#E89951]"
+                        : "h-1.5 w-1.5 bg-stone-300"
+                    }`}
+                  />
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowVisitModal(true)}
+                className="mx-auto mt-3 flex h-11 w-full max-w-xs items-center justify-center gap-2 rounded-xl bg-[#E04B39] py-3.5 text-sm font-semibold text-white transition hover:bg-[#c93c2f]"
+              >
+                <Plus size={16} />
+                Add Post
+              </button>
+            </div>
           )}
 
           {!loadingEntries && !entries?.length && (

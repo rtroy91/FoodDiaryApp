@@ -1,6 +1,9 @@
 import { useMemo, useState } from "react";
 import { MapPin, Search, UtensilsCrossed } from "lucide-react";
-import { FoodPlaceCard, PageHeader, SelectInput, DiscoverMap } from "../components";
+import { DiscoverMap } from "../components/DiscoverMap";
+import { FoodPlaceCard } from "../components/FoodPlaceCard";
+import { PageHeader } from "../components/PageHeader";
+import { SelectInput } from "../components/SelectInput";
 import { useAllEntries, useRestaurantLists } from "../hooks/useDiaryData";
 import { useBataanCities } from "../hooks/usePsgc";
 import { buildPlaceStats, categoryLabel } from "../utils/restaurants";
@@ -35,7 +38,8 @@ export function DiscoverPage() {
   } = useRestaurantLists();
 
   const { data: entries = [], isLoading: isLoadingEntries } = useAllEntries();
-  const { data: bataanCities = [], isLoading: isLoadingCities } = useBataanCities();
+  const { data: bataanCities = [], isLoading: isLoadingCities } =
+    useBataanCities();
   const [selectedCity, setSelectedCity] = useState("all");
   const [selectedRestaurantId, setSelectedRestaurantId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -181,7 +185,11 @@ export function DiscoverPage() {
 
                 {!isLoading && filteredRestaurants.length === 0 && (
                   <div className="rounded-2xl border border-[#E8DFC8] bg-[#FFFBF4] px-5 py-12 text-center">
-                    <MapPin size={34} color="#C8B89A" className="mx-auto mb-3" />
+                    <MapPin
+                      size={34}
+                      color="#C8B89A"
+                      className="mx-auto mb-3"
+                    />
                     <p
                       className="mb-1.5 text-xl text-[#1C1107]"
                       style={{ fontFamily: '"Fraunces", serif' }}
@@ -189,8 +197,8 @@ export function DiscoverPage() {
                       No results found
                     </p>
                     <p className="text-xs text-stone-500">
-                      Try adjusting your filters or searching for a different area
-                      in Bataan.
+                      Try adjusting your filters or searching for a different
+                      area in Bataan.
                     </p>
                   </div>
                 )}

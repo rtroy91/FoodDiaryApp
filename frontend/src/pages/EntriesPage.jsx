@@ -1,13 +1,11 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft, Clock, MapPin, Star } from "lucide-react";
-import {
-  EntryCard,
-  PublishDiaryForm,
-  Modal,
-  NoEntriesState,
-  StatCard,
-} from "../components";
+import { EntryCard, EntryCardSkeleton } from "../components/EntryCard";
+import { Modal } from "../components/Modal";
+import { NoEntriesState } from "../components/NoEntriesState";
+import { PublishDiaryForm } from "../components/PublishDiaryForm";
+import { StatCard, StatCardSkeleton } from "../components/StatCard";
 import { getCurrentUser } from "../api/auth";
 import { useAllEntries } from "../hooks/useDiaryData";
 
@@ -58,9 +56,15 @@ export function EntriesPage() {
   const { data: entries, isLoading } = useAllEntries();
   const [showVisitModal, setShowVisitModal] = useState(false);
 
-  const totalPlaces = countUniqueVisitedPlaces(entries ?? []);
-  const totalEntries = entries?.length ?? 0;
-  const avgRating = avg(entries?.map((e) => e.rating) ?? []);
+  const stats = useMemo(() => {
+    const sourceEntries = entries ?? [];
+
+    return {
+      totalPlaces: countUniqueVisitedPlaces(sourceEntries),
+      totalEntries: sourceEntries.length,
+      avgRating: avg(sourceEntries.map((entry) => entry.rating)),
+    };
+  }, [entries]);
   const currentUser = getCurrentUser();
   const userName =
     currentUser?.displayName || currentUser?.email?.split("@")[0] || "there";
@@ -133,27 +137,49 @@ export function EntriesPage() {
 
         <div className="mx-auto w-full max-w-140 shrink-0 px-4">
           <div className="relative z-20 mb-6 -mt-7 grid grid-cols-3 gap-2.5">
-            <StatCard
-              value={totalPlaces}
-              label="Places Visited"
-              icon={MapPin}
-              iconColor="#e63922"
-              iconBgColor="#fde8e5"
-            />
-            <StatCard
-              value={totalEntries}
-              label="Total Entries"
-              icon={Clock}
-              iconColor="#2b5fc4"
-              iconBgColor="#e3eaf8"
-            />
-            <StatCard
-              value={avgRating > 0 ? avgRating.toFixed(1) : "—"}
-              label="Avg Rating"
-              icon={Star}
-              iconColor="#B8960A"
-              iconBgColor="#FEF6C7"
-            />
+            {isLoading ? (
+              <>
+                <StatCardSkeleton
+                  icon={MapPin}
+                  iconColor="#e63922"
+                  iconBgColor="#fde8e5"
+                />
+                <StatCardSkeleton
+                  icon={Clock}
+                  iconColor="#2b5fc4"
+                  iconBgColor="#e3eaf8"
+                />
+                <StatCardSkeleton
+                  icon={Star}
+                  iconColor="#B8960A"
+                  iconBgColor="#FEF6C7"
+                />
+              </>
+            ) : (
+              <>
+                <StatCard
+                  value={stats.totalPlaces}
+                  label="Places Visited"
+                  icon={MapPin}
+                  iconColor="#e63922"
+                  iconBgColor="#fde8e5"
+                />
+                <StatCard
+                  value={stats.totalEntries}
+                  label="Total Entries"
+                  icon={Clock}
+                  iconColor="#2b5fc4"
+                  iconBgColor="#e3eaf8"
+                />
+                <StatCard
+                  value={stats.avgRating > 0 ? stats.avgRating.toFixed(1) : "—"}
+                  label="Avg Rating"
+                  icon={Star}
+                  iconColor="#B8960A"
+                  iconBgColor="#FEF6C7"
+                />
+              </>
+            )}
           </div>
         </div>
 
@@ -172,9 +198,16 @@ export function EntriesPage() {
           </div>
 
           {isLoading && (
-            <p className="py-14 text-center text-sm text-stone-500">
-              Loading your diary...
-            </p>
+            <div className="custom-scrollbar min-h-0 flex-1 overflow-y-auto pb-24 pr-1">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {[3, 1, 2, 3, 1, 2].map((captionLines, index) => (
+                  <EntryCardSkeleton
+                    key={`${captionLines}-${index}`}
+                    captionLines={captionLines}
+                  />
+                ))}
+              </div>
+            </div>
           )}
 
           {!isLoading && !entries?.length && (

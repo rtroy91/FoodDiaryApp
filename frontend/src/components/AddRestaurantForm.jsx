@@ -8,11 +8,13 @@ import {
   useMap,
   useMapEvents,
 } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 import { LocateFixed, MapPin, Search, X } from "lucide-react";
 import { useCreateRestaurant } from "../hooks/useDiaryData";
 import { useBataanCities, useBarangaysByCity } from "../hooks/usePsgc";
 import { BATAAN_PROVINCE_NAME } from "../api/psgc";
-import { FormInput, SelectInput } from "../components";
+import { FormInput } from "./FormInput";
+import { SelectInput } from "./SelectInput";
 
 const BATAAN_CENTER = { lat: 14.676, lon: 120.536 };
 const BATAAN_ZOOM = 10;

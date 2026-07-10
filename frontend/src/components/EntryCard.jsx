@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import Skeleton from "react-loading-skeleton";
 import {
   Edit3,
   MapPin,
@@ -35,6 +36,112 @@ function timeAgo(dateStr) {
   if (mins >= 1) return `${mins}m ago`;
 
   return "Just Now";
+}
+
+export function EntryCardSkeleton({ featured = false, captionLines = 2 }) {
+  const captionWidths = featured
+    ? ["62%", "44%"]
+    : [
+        "84%",
+        captionLines > 1 ? "66%" : null,
+        captionLines > 2 ? "46%" : null,
+      ].filter(Boolean);
+
+  return (
+    <div
+      className={`overflow-hidden rounded-[20px] border border-[#EEF2F7] bg-white shadow-none ${
+        featured
+          ? "flex h-[clamp(25rem,64dvh,31rem)] flex-col"
+          : "flex h-[29rem] flex-col"
+      }`}
+      aria-hidden="true"
+    >
+      <div
+        className={`shrink-0 overflow-hidden ${
+          featured ? "h-[clamp(13rem,34dvh,18rem)]" : "h-56"
+        }`}
+      >
+        <Skeleton
+          containerClassName="block h-full w-full"
+          className="block h-full w-full"
+          height="100%"
+          borderRadius={0}
+          baseColor="#e7dfd2"
+          highlightColor="#f8f4ec"
+        />
+      </div>
+
+      <div
+        className={`${
+          featured
+            ? "flex min-h-0 flex-1 flex-col overflow-hidden px-5 py-4"
+            : "flex min-h-0 flex-1 flex-col px-4 py-3.5"
+        }`}
+      >
+        <div className="mb-1 flex items-start justify-between gap-3">
+          <Skeleton
+            width={featured ? 160 : 128}
+            height={featured ? 24 : 20}
+            borderRadius={6}
+            baseColor="#e7dfd2"
+            highlightColor="#f8f4ec"
+          />
+          <div className="flex shrink-0 items-center gap-1.5">
+            <Star size={15} fill="#F4B21B" className="text-[#F4B21B]" />
+            <Skeleton
+              width={28}
+              height={16}
+              borderRadius={6}
+              baseColor="#e7dfd2"
+              highlightColor="#f8f4ec"
+            />
+          </div>
+        </div>
+
+        <div className="flex min-h-5 items-center gap-2">
+          <MapPin size={12} className="shrink-0 text-[#6F7892]" />
+          <Skeleton
+            width={featured ? 96 : 120}
+            height={14}
+            borderRadius={6}
+            baseColor="#f0ebe2"
+            highlightColor="#fbf8f2"
+          />
+        </div>
+
+        <div className="mt-3 h-[3.2rem] overflow-hidden border-l-2 border-[#DDE5EF] pl-2.5">
+          {captionWidths.map((width, index) => (
+            <Skeleton
+              key={width}
+              className={index === 0 ? "block" : "mt-2 block"}
+              width={width}
+              height={14}
+              borderRadius={6}
+              baseColor="#f0ebe2"
+              highlightColor="#fbf8f2"
+            />
+          ))}
+        </div>
+
+        <div className="mt-auto flex shrink-0 items-center justify-between gap-3 pt-3">
+          <Skeleton
+            width={48}
+            height={12}
+            borderRadius={6}
+            baseColor="#f0ebe2"
+            highlightColor="#fbf8f2"
+          />
+          <Skeleton
+            width={48}
+            height={24}
+            borderRadius={999}
+            baseColor="#e7dfd2"
+            highlightColor="#f8f4ec"
+          />
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function DeleteEntrySheet({ entry, onCancel, onDeleted }) {
@@ -220,7 +327,7 @@ export function EntryCard({ entry, featured = false }) {
           className={`mt-3 ${
             isCaptionExpanded
               ? "custom-scrollbar max-h-24 overflow-y-auto pr-1"
-              : "min-h-[3.2rem] overflow-hidden"
+              : "h-[3.2rem] overflow-hidden"
           }`}
         >
           {entry.caption && (
