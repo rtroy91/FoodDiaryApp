@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { MapPin, Search, UtensilsCrossed } from "lucide-react";
-import { DiscoverMap } from "../components/DiscoverMap";
-import { FoodPlaceCard } from "../components/FoodPlaceCard";
+import { FoodMap } from "../components/FoodMap";
+import { FoodCatalogCard } from "../components/FoodCatalogCard";
 import { PageHeader } from "../components/PageHeader";
 import { SelectInput } from "../components/SelectInput";
 import { useAllEntries, useRestaurantLists } from "../hooks/useDiaryData";
@@ -30,7 +30,7 @@ function normalizeSearchText(value) {
     .trim();
 }
 
-export function DiscoverPage() {
+export function FoodMapPage() {
   const {
     data: restaurants = [],
     isLoading: isLoadingRestaurants,
@@ -100,19 +100,19 @@ export function DiscoverPage() {
 
   return (
     <div
-      className="min-h-screen bg-[#F5F0E8] lg:h-screen lg:overflow-hidden"
+      className="min-h-full bg-[#F5F0E8]"
       style={{ fontFamily: '"Geist Mono", monospace' }}
     >
       <PageHeader
-        title="Discover Bataan's Best"
-        subtitle="View all food places pinned across Bataan in one easy map."
+        title="Food Map"
+        subtitle="View all top places pinned across Bataan in one easy map."
       />
 
       <div
-        className="mx-auto px-4 pb-24 lg:flex lg:h-[calc(100vh-10rem)] lg:flex-col lg:pb-4"
+        className="mx-auto px-4 pb-24 lg:flex lg:h-[calc(100dvh-12rem)] lg:max-h-[calc(100dvh-12rem)] lg:flex-col lg:pb-4"
         style={pageShellStyle}
       >
-        <div className="relative z-20 -mt-8 mb-5 grid gap-3 rounded-3xl border border-[#E8DFC8] bg-[#FFFBF4] p-3 shadow-[0_10px_28px_rgba(28,17,7,0.08)] md:grid-cols-[1fr_260px]">
+        <div className="relative z-20 -mt-8 mb-5 grid gap-3 rounded-3xl border border-[#E8DFC8] bg-stone-50 p-3 shadow-[0_10px_28px_rgba(28,17,7,0.08)] md:grid-cols-[1fr_260px]">
           <div className="flex items-center gap-3 rounded-2xl border border-[#D8CDBB] bg-[#F5EEE4] px-4 py-3 text-sm text-[#5A4A34] transition focus-within:border-[#E04B39]/20 focus-within:ring-2 focus-within:ring-[#E04B39]/20">
             <Search size={16} className="shrink-0 text-stone-400" />
             <input
@@ -134,7 +134,7 @@ export function DiscoverPage() {
 
         {isError && (
           <div className="rounded-2xl border border-[#E04B39]/20 bg-[#FFF5F1] px-5 py-4 font-['Plus_Jakarta_Sans'] text-sm text-[#8A2A1C]">
-            Could not load food places right now. Try again in a moment.
+            Could not load top places right now. Try again in a moment.
           </div>
         )}
 
@@ -149,23 +149,23 @@ export function DiscoverPage() {
               className="mb-1.5 text-xl text-[#1C1107]"
               style={{ fontFamily: '"Fraunces", serif' }}
             >
-              No food places yet
+              No top places yet
             </p>
           </div>
         )}
 
         {!isError && restaurants.length > 0 && (
-          <div className="grid gap-5 lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,1.1fr)_390px]">
+          <div className="grid gap-5 lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,1.1fr)_390px] lg:overflow-hidden">
             <section className="h-105 overflow-hidden rounded-2xl border border-[#E8DFC8] bg-[#FFFBF4] shadow-[0_10px_28px_rgba(28,17,7,0.06)] lg:h-full">
-              <DiscoverMap
+              <FoodMap
                 restaurants={filteredRestaurants}
                 selectedRestaurantId={selectedRestaurantId}
                 onSelectRestaurant={setSelectedRestaurantId}
               />
             </section>
 
-            <section className="min-w-0 lg:flex lg:min-h-0 lg:flex-col lg:pr-1">
-              <div className="mb-3 flex items-end justify-between gap-3">
+            <section className="min-w-0 overflow-hidden lg:flex lg:h-full lg:min-h-0 lg:flex-col lg:pr-1">
+              <div className="mb-3 flex shrink-0 items-end justify-between gap-3">
                 <div>
                   <h2
                     className="mt-1 text-2xl font-light text-[#1C1107]"
@@ -176,13 +176,12 @@ export function DiscoverPage() {
                 </div>
               </div>
 
-              <div className="grid gap-3 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-1">
+              <div className="custom-scrollbar grid min-w-0 auto-rows-max content-start gap-3 overflow-x-hidden overflow-y-auto lg:min-h-0 lg:flex-1 lg:pr-1">
                 {isLoading && (
                   <p className="rounded-2xl border border-[#E8DFC8] bg-[#FFFBF4] px-5 py-12 text-center text-sm text-stone-500">
-                    Loading food places...
+                    Loading top places...
                   </p>
                 )}
-
                 {!isLoading && filteredRestaurants.length === 0 && (
                   <div className="rounded-2xl border border-[#E8DFC8] bg-[#FFFBF4] px-5 py-12 text-center">
                     <MapPin
@@ -202,9 +201,8 @@ export function DiscoverPage() {
                     </p>
                   </div>
                 )}
-
                 {filteredRestaurants.map((restaurant) => (
-                  <FoodPlaceCard
+                  <FoodCatalogCard
                     key={restaurant.id}
                     restaurant={restaurant}
                     isSelected={restaurant.id === selectedRestaurantId}

@@ -1,6 +1,6 @@
 import { lazy, Suspense, useMemo, useState } from "react";
 import { Plus, Search, Star, Trophy, UtensilsCrossed } from "lucide-react";
-import { FoodPlaceCard } from "../components/FoodPlaceCard";
+import { FoodCatalogCard } from "../components/FoodCatalogCard";
 import { Modal } from "../components/Modal";
 import { PageHeader } from "../components/PageHeader";
 import { SelectInput } from "../components/SelectInput";
@@ -35,7 +35,7 @@ const pageShellStyle = {
   width: "100%",
 };
 
-export function FoodPlacePage() {
+export function TopPlacePage() {
   const { data: restaurants, isLoading: loadingRestaurants } =
     useRestaurantLists();
   const { data: entries, isLoading: loadingEntries } = useAllEntries();
@@ -106,13 +106,13 @@ export function FoodPlacePage() {
         style={{ fontFamily: '"Geist Mono", monospace' }}
       >
         <PageHeader
-          title="Food places"
+          title="Top Places"
           subtitle="Browse the spots you keep coming back to."
           maxWidth="1180px"
         />
 
         <div className="mx-auto px-4 pb-24" style={pageShellStyle}>
-          <div className="relative z-20 -mt-8 mb-8 grid gap-3 rounded-3xl border border-[#E8DFC8] bg-[#FFFBF4] p-3 shadow-[0_10px_28px_rgba(28,17,7,0.08)] md:grid-cols-[1fr_260px]">
+          <div className="relative z-20 -mt-8 mb-8 grid gap-3 rounded-3xl border border-[#E8DFC8] bg-stone-50 p-3 shadow-[0_10px_28px_rgba(28,17,7,0.08)] md:grid-cols-[1fr_260px]">
             <label className="flex items-center gap-3 rounded-2xl border border-[#D8CDBB] bg-[#F5EEE4] px-4 py-3 text-sm text-[#5A4A34] transition focus-within:border-[#E04B39]/20 focus-within:ring-2 focus-within:ring-[#E04B39]/20">
               <Search size={16} className="shrink-0 text-stone-400" />
               <input
@@ -139,7 +139,7 @@ export function FoodPlacePage() {
 
           {isLoading && (
             <p className="py-14 text-center text-sm text-stone-500">
-              Loading food places...
+              Loading top places...
             </p>
           )}
 
@@ -151,7 +151,7 @@ export function FoodPlacePage() {
                   {popularPlaces.length > 0 ? (
                     <div className="grid gap-3">
                       {popularPlaces.map((place) => (
-                        <FoodPlaceCard
+                        <FoodCatalogCard
                           key={place.id}
                           restaurant={place}
                           compact
@@ -179,7 +179,7 @@ export function FoodPlacePage() {
                   {favoritePlaces.length > 0 ? (
                     <div className="grid gap-3">
                       {favoritePlaces.map((place) => (
-                        <FoodPlaceCard key={place.id} restaurant={place} />
+                        <FoodCatalogCard key={place.id} restaurant={place} />
                       ))}
                     </div>
                   ) : (
@@ -212,7 +212,7 @@ export function FoodPlacePage() {
                 {filteredPlaces.length > 0 ? (
                   <div className="grid gap-4 md:grid-cols-2">
                     {filteredPlaces.map((place) => (
-                      <FoodPlaceCard key={place.id} restaurant={place} />
+                      <FoodCatalogCard key={place.id} restaurant={place} />
                     ))}
                   </div>
                 ) : (

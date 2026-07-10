@@ -1,13 +1,13 @@
 import { lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 import { NavBar } from "./components/NavBar";
 import { ProtectedRoute } from "./components/ProtectedRoute";
-import { HomePage } from "./pages/HomePage";
 import { EntriesPage } from "./pages/EntriesPage";
+import { FeaturedPage } from "./pages/FeaturedPage";
 
-const DiscoverPage = lazy(() =>
-  import("./pages/DiscoverPage").then((module) => ({
-    default: module.DiscoverPage,
+const FoodMapPage = lazy(() =>
+  import("./pages/FoodMapPage").then((module) => ({
+    default: module.FoodMapPage,
   })),
 );
 const EntryDetailPage = lazy(() =>
@@ -15,9 +15,9 @@ const EntryDetailPage = lazy(() =>
     default: module.EntryDetailPage,
   })),
 );
-const FoodPlacePage = lazy(() =>
-  import("./pages/FoodPlacePage").then((module) => ({
-    default: module.FoodPlacePage,
+const TopPlacePage = lazy(() =>
+  import("./pages/TopPlacePage").then((module) => ({
+    default: module.TopPlacePage,
   })),
 );
 const FoodPlaceDetailPage = lazy(() =>
@@ -67,11 +67,11 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<HomePage />} />
+          <Route index element={<FeaturedPage />} />
           <Route path="entries" element={<EntriesPage />} />
           <Route path="entries/:id" element={<EntryDetailPage />} />
-          <Route path="discover" element={<DiscoverPage />} />
-          <Route path="food-places" element={<FoodPlacePage />} />
+          <Route path="food-map" element={<FoodMapPage />} />
+          <Route path="top-places" element={<TopPlacePage />} />
           <Route path="add-restaurant" element={<AddRestaurantForm />} />
           <Route path="place-details/:id" element={<FoodPlaceDetailPage />} />
         </Route>

@@ -293,9 +293,12 @@ function EntryActions({
 
 function EntryDetailModal({ entry, location, onClose, onEdit, onDelete }) {
   const restaurant = entry.restaurant;
-  const restaurantDetailsPath = `/place-details/${
-    restaurant?.id ?? entry.restaurantId
-  }`;
+  const entryDetailsPath = `/entries/${entry.id}`;
+
+  function handleRestaurantLinkClick(event) {
+    event.stopPropagation();
+    onClose();
+  }
 
   return (
     <Modal
@@ -348,9 +351,13 @@ function EntryDetailModal({ entry, location, onClose, onEdit, onDelete }) {
                 {restaurant?.id || entry.restaurantId ? (
                   <Link
                     id={`entry-detail-title-${entry.id}`}
-                    to={restaurantDetailsPath}
+                    to={entryDetailsPath}
+                    onClick={handleRestaurantLinkClick}
                     className="min-w-0 flex-1 text-3xl font-normal leading-tight text-[#1C1107] underline-offset-4 transition hover:text-[#6F5130] hover:underline"
                     style={{ fontFamily: '"Fraunces", serif' }}
+                    aria-label={`Open entry details for ${
+                      restaurant?.name ?? "this restaurant"
+                    }`}
                   >
                     {restaurant?.name ?? "Unknown restaurant"}
                   </Link>

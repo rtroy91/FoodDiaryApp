@@ -80,7 +80,7 @@ function getCarouselMotionClass(motion) {
   return "translate-x-0 opacity-100";
 }
 
-export function HomePage() {
+export function FeaturedPage() {
   const { data: entries, isLoading: loadingEntries } = useRecentEntries(10);
   const { data: allEntries, isLoading: loadingAllEntries } = useAllEntries();
 

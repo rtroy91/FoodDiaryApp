@@ -126,7 +126,7 @@ function RestaurantMarker({ restaurant, isSelected, onSelect }) {
   );
 }
 
-export function DiscoverMap({
+export function FoodMap({
   restaurants,
   selectedRestaurantId,
   onSelectRestaurant,

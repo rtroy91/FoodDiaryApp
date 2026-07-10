@@ -508,7 +508,7 @@ export function FoodPlaceDetailPage() {
       return;
     }
 
-    navigate("/food-places", { replace: true });
+    navigate("/top-places", { replace: true });
   }
 
   if (loadingRestaurant) {
@@ -529,10 +529,10 @@ export function FoodPlaceDetailPage() {
           Food place not found
         </p>
         <Link
-          to="/food-places"
+          to="/top-places"
           className="font-['Plus_Jakarta_Sans'] text-sm font-semibold text-[#E89951] no-underline"
         >
-          Back to food places
+          Back to Top Places
         </Link>
       </div>
     );

@@ -26,11 +26,13 @@ export function buildPlaceStats(restaurants = [], entries = []) {
       visitCount: 0,
       ratingTotal: 0,
       averageRating: null,
+      thumbnailUrl: null,
     };
 
     current.visitCount += 1;
     current.ratingTotal += entry.rating ?? 0;
     current.averageRating = current.ratingTotal / current.visitCount;
+    current.thumbnailUrl ??= entry.photoUrl ?? null;
     byId.set(id, current);
   });
 
