@@ -8,6 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint . --cache --cache-location node_modules/.cache/eslint",
     "lint:staged": "lint-staged",
     "prepare": "husky"
   },
