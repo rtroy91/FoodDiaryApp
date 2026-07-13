@@ -175,6 +175,48 @@ function createOpeningHours() {
   return WEEK_DAYS.map(({ day }) => ({ day, open: null, close: null }));
 }
 
+function normalizeLocationText(value) {
+  return (value ?? "")
+    .toLowerCase()
+    .replace(/\bcity\b|\bmunicipality\b|\bof\b|\bbrgy\b|\bbarangay\b/g, "")
+    .replace(/[^a-z0-9]/g, "");
+}
+
+function findBestLocationMatch(value, options) {
+  const normalizedValue = normalizeLocationText(value);
+  if (!normalizedValue) return "";
+
+  return (
+    options.find((option) => {
+      const normalizedOption = normalizeLocationText(option);
+      return (
+        normalizedValue === normalizedOption ||
+        normalizedValue.includes(normalizedOption) ||
+        normalizedOption.includes(normalizedValue)
+      );
+    }) ?? ""
+  );
+}
+
+function getAddressParts(result) {
+  const address = result?.address ?? {};
+  return {
+    city:
+      address.city ??
+      address.town ??
+      address.municipality ??
+      address.county ??
+      "",
+    barangay:
+      address.suburb ??
+      address.neighbourhood ??
+      address.quarter ??
+      address.village ??
+      address.hamlet ??
+      "",
+  };
+}
+
 export function RestaurantForm({ restaurant, onClose }) {
   const navigate = useNavigate();
   const createRestaurant = useCreateRestaurant();
@@ -222,8 +264,28 @@ export function RestaurantForm({ restaurant, onClose }) {
   const [pinLocation, setPinLocation] = useState(BATAAN_CENTER);
   const [pendingBarangay, setPendingBarangay] = useState("");
 
+  const matchedCity = useMemo(() => {
+    if (form.cityCode) {
+      return cities.find((item) => item.code === form.cityCode) ?? null;
+    }
+
+    if (!isEditing || !form.cityName || !cities.length) {
+      return null;
+    }
+
+    return (
+      cities.find(
+        (item) =>
+          normalizeLocationText(item.name) ===
+          normalizeLocationText(form.cityName),
+      ) ?? null
+    );
+  }, [cities, form.cityCode, form.cityName, isEditing]);
+
+  const resolvedCityCode = form.cityCode || matchedCity?.code || "";
+
   const { data: barangays = [], isLoading: loadingBarangays } =
-    useBarangaysByCity(form.cityCode);
+    useBarangaysByCity(resolvedCityCode);
 
   const cityOptions = useMemo(
     () =>
@@ -243,36 +305,19 @@ export function RestaurantForm({ restaurant, onClose }) {
         .map((brgy) => ({
           value: brgy.name,
           label: brgy.name,
-        })),
+      })),
     [barangays],
   );
 
-  useEffect(() => {
-    if (!pendingBarangay || !barangays.length) return;
+  const resolvedBarangay = useMemo(() => {
+    if (form.barangay) return form.barangay;
+    if (!pendingBarangay || !barangays.length) return "";
 
-    const match = findBestLocationMatch(
+    return findBestLocationMatch(
       pendingBarangay,
       barangays.map((item) => item.name),
     );
-
-    if (match) {
-      handleChange("barangay", match);
-      setPendingBarangay("");
-    }
-  }, [barangays, pendingBarangay]);
-
-  useEffect(() => {
-    if (!isEditing || form.cityCode || !form.cityName || !cities.length) return;
-
-    const city = cities.find(
-      (item) =>
-        normalizeLocationText(item.name) === normalizeLocationText(form.cityName),
-    );
-
-    if (city) {
-      setForm((prev) => ({ ...prev, cityCode: city.code }));
-    }
-  }, [cities, form.cityCode, form.cityName, isEditing]);
+  }, [barangays, form.barangay, pendingBarangay]);
 
   useEffect(() => {
     return () => {
@@ -296,7 +341,7 @@ export function RestaurantForm({ restaurant, onClose }) {
   }
 
   function handleNextStep() {
-    if (!form.name.trim() || !form.cityCode || !form.barangay) {
+    if (!form.name.trim() || !resolvedCityCode || !resolvedBarangay) {
       setErrorMessage("Add the place name, city, and barangay to continue.");
       return;
     }
@@ -354,48 +399,12 @@ export function RestaurantForm({ restaurant, onClose }) {
       cityName: city?.name ?? "",
       barangay: "",
     }));
+    setPendingBarangay("");
   }
 
-  function normalizeLocationText(value) {
-    return (value ?? "")
-      .toLowerCase()
-      .replace(/\bcity\b|\bmunicipality\b|\bof\b|\bbrgy\b|\bbarangay\b/g, "")
-      .replace(/[^a-z0-9]/g, "");
-  }
-
-  function findBestLocationMatch(value, options) {
-    const normalizedValue = normalizeLocationText(value);
-    if (!normalizedValue) return "";
-
-    return (
-      options.find((option) => {
-        const normalizedOption = normalizeLocationText(option);
-        return (
-          normalizedValue === normalizedOption ||
-          normalizedValue.includes(normalizedOption) ||
-          normalizedOption.includes(normalizedValue)
-        );
-      }) ?? ""
-    );
-  }
-
-  function getAddressParts(result) {
-    const address = result?.address ?? {};
-    return {
-      city:
-        address.city ??
-        address.town ??
-        address.municipality ??
-        address.county ??
-        "",
-      barangay:
-        address.suburb ??
-        address.neighbourhood ??
-        address.quarter ??
-        address.village ??
-        address.hamlet ??
-        "",
-    };
+  function handleBarangayChange(value) {
+    setPendingBarangay("");
+    handleChange("barangay", value);
   }
 
   function applyPinnedLocation(result) {
@@ -540,8 +549,8 @@ export function RestaurantForm({ restaurant, onClose }) {
       const payload = {
         name: form.name,
         address: form.address,
-        barangay: form.barangay,
-        city: form.cityName,
+        barangay: resolvedBarangay,
+        city: form.cityName || matchedCity?.name || "",
         province: BATAAN_PROVINCE_NAME,
         category: form.category,
         menuPhotoUrl: menuPhotoUrl ?? restaurant?.menuPhotoUrl ?? null,
@@ -660,7 +669,7 @@ export function RestaurantForm({ restaurant, onClose }) {
               <div>
                 <SelectInput
                   label="City / Municipality"
-                  value={form.cityCode}
+                  value={resolvedCityCode}
                   onChange={handleCityChange}
                   required
                   disabled={loadingCities || citiesError}
@@ -676,10 +685,10 @@ export function RestaurantForm({ restaurant, onClose }) {
 
               <SelectInput
                 label="Barangay"
-                value={form.barangay}
-                onChange={(value) => handleChange("barangay", value)}
+                value={resolvedBarangay}
+                onChange={handleBarangayChange}
                 required
-                disabled={!form.cityCode || loadingBarangays}
+                disabled={!resolvedCityCode || loadingBarangays}
                 placeholder={
                   loadingBarangays ? "Loading..." : "Select barangay"
                 }

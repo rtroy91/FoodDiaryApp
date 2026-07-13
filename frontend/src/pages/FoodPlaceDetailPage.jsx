@@ -17,11 +17,7 @@ import {
   UtensilsCrossed,
   Wallet,
 } from "lucide-react";
-import {
-  useDeleteRestaurant,
-  useEntries,
-  useRestaurant,
-} from "../hooks/useDiaryData";
+import { useDeleteRestaurant, useEntries, useRestaurant } from "../hooks/useDiaryData";
 import { categoryLabel } from "../utils/restaurants";
 import { Modal } from "../components/Modal";
 import { RestaurantForm } from "../components/RestaurantForm";
@@ -33,11 +29,7 @@ const pageShellStyle = {
 };
 
 function getLocation(restaurant) {
-  return [
-    restaurant?.barangay ? `Brgy. ${restaurant.barangay}` : null,
-    restaurant?.city,
-    restaurant?.province,
-  ]
+  return [restaurant?.barangay ? `Brgy. ${restaurant.barangay}` : null, restaurant?.city, restaurant?.province]
     .filter(Boolean)
     .join(", ");
 }
@@ -56,9 +48,7 @@ function formatDate(value) {
 }
 
 function averageRating(entries = [], fallback) {
-  const ratings = entries
-    .map((entry) => entry.rating)
-    .filter((rating) => typeof rating === "number");
+  const ratings = entries.map((entry) => entry.rating).filter((rating) => typeof rating === "number");
 
   if (ratings.length) {
     return ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length;
@@ -78,10 +68,7 @@ function getPhotoEntries(entries = [], restaurant) {
       ]
     : [];
 
-  return [
-    ...storePhoto,
-    ...entries.filter((entry) => entry.photoUrl),
-  ].slice(0, 6);
+  return [...storePhoto, ...entries.filter((entry) => entry.photoUrl)].slice(0, 6);
 }
 
 function BentoCard({ children, className = "" }) {
@@ -97,9 +84,7 @@ function BentoCard({ children, className = "" }) {
 function SectionLabel({ eyebrow, title }) {
   return (
     <div className="mb-5">
-      <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#8C7B6A]">
-        {eyebrow}
-      </p>
+      <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#8C7B6A]">{eyebrow}</p>
       <h2
         className="mt-1 text-2xl font-normal leading-tight text-[#1C1107]"
         style={{ fontFamily: '"Fraunces", serif' }}
@@ -114,11 +99,7 @@ function RatingStars({ rating, size = 18 }) {
   return (
     <div className="flex items-center gap-1 text-[#F4B21B]">
       {[1, 2, 3, 4, 5].map((star) => (
-        <Star
-          key={star}
-          size={size}
-          fill={star <= Math.round(rating ?? 0) ? "currentColor" : "none"}
-        />
+        <Star key={star} size={size} fill={star <= Math.round(rating ?? 0) ? "currentColor" : "none"} />
       ))}
     </div>
   );
@@ -136,11 +117,7 @@ function ImageFallback({ label, dark = false, className = "" }) {
           dark ? "border-white/15" : "border-[#C8B89A]/50"
         }`}
       />
-      <div
-        className={`absolute h-10 w-28 -rotate-12 rounded-full ${
-          dark ? "bg-white/8" : "bg-white/40"
-        }`}
-      />
+      <div className={`absolute h-10 w-28 -rotate-12 rounded-full ${dark ? "bg-white/8" : "bg-white/40"}`} />
       <UtensilsCrossed
         size={34}
         className={dark ? "relative text-[#F0E76F]" : "relative text-[#9B8B72]"}
@@ -211,7 +188,7 @@ function MenuPreview({ menuItems, expanded, onToggle }) {
       <button
         type="button"
         onClick={onToggle}
-        className="group w-full rounded-[24px] bg-[#F5EEE4] p-3 text-left transition hover:bg-[#EFE5D8] focus:outline-none focus:ring-2 focus:ring-[#E89951]/45"
+        className="group w-full rounded-3xl bg-[#F5EEE4] p-3 text-left transition hover:bg-[#EFE5D8] focus:outline-none focus:ring-2 focus:ring-[#E89951]/45"
       >
         <div className="grid gap-3 sm:grid-cols-[96px_1fr_auto] sm:items-center">
           <div className="h-24 overflow-hidden rounded-[20px] bg-[#E8DFC8]">
@@ -226,9 +203,7 @@ function MenuPreview({ menuItems, expanded, onToggle }) {
             )}
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#8C7B6A]">
-              Menu preview
-            </p>
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#8C7B6A]">Menu preview</p>
             <p className="mt-1 line-clamp-2 text-sm font-bold leading-5 text-[#1C1107]">
               {primaryItem?.name || "Featured dishes"}
             </p>
@@ -237,44 +212,27 @@ function MenuPreview({ menuItems, expanded, onToggle }) {
             </p>
           </div>
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#1C1107] text-white transition group-hover:bg-[#2F3A4D]">
-            <ChevronDown
-              size={18}
-              className={`transition ${expanded ? "rotate-180" : ""}`}
-            />
+            <ChevronDown size={18} className={`transition ${expanded ? "rotate-180" : ""}`} />
           </span>
         </div>
       </button>
 
       <div className="mt-4 grid gap-3">
         {visibleItems.map((item) => (
-          <div
-            key={item.id}
-            className="rounded-[20px] border border-[#E8DFC8] bg-white p-3"
-          >
+          <div key={item.id} className="rounded-[20px] border border-[#E8DFC8] bg-white p-3">
             <div className="flex items-start gap-3">
               <div className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-[#E8DFC8]">
                 {item.imageUrl ? (
-                  <img
-                    src={item.imageUrl}
-                    alt={item.name}
-                    className="h-full w-full object-cover"
-                  />
+                  <img src={item.imageUrl} alt={item.name} className="h-full w-full object-cover" />
                 ) : (
                   <ImageFallback label={item.name} />
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="line-clamp-1 text-sm font-bold text-[#1C1107]">
-                  {item.name}
-                </p>
-                <p className="mt-1 line-clamp-1 text-xs text-stone-500">
-                  {item.description}
-                </p>
+                <p className="line-clamp-1 text-sm font-bold text-[#1C1107]">{item.name}</p>
+                <p className="mt-1 line-clamp-1 text-xs text-stone-500">{item.description}</p>
                 <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-[#F5EEE4]">
-                  <div
-                    className="h-full rounded-full bg-[#E89951]"
-                    style={{ width: `${item.score}%` }}
-                  />
+                  <div className="h-full rounded-full bg-[#E89951]" style={{ width: `${item.score}%` }} />
                 </div>
               </div>
             </div>
@@ -299,12 +257,7 @@ function PlaceActions({ onEdit, onDelete }) {
     }
 
     document.addEventListener("pointerdown", closeOnOutsidePointerDown, true);
-    return () =>
-      document.removeEventListener(
-        "pointerdown",
-        closeOnOutsidePointerDown,
-        true,
-      );
+    return () => document.removeEventListener("pointerdown", closeOnOutsidePointerDown, true);
   }, [isOpen]);
 
   function handleEdit() {
@@ -368,17 +321,12 @@ function DeletePlaceSheet({ restaurant, onCancel, onDeleted }) {
 
   return (
     <div className="w-full max-w-md rounded-[28px] bg-[#FFFDF9] p-5 shadow-[0_20px_70px_rgba(28,17,7,0.18)]">
-      <h2 className="text-lg font-extrabold tracking-tight text-[#1C1107]">
-        Delete Place?
-      </h2>
+      <h2 className="text-lg font-extrabold tracking-tight text-[#1C1107]">Delete Place?</h2>
       <p className="mt-3 text-sm leading-6 text-[#756450]">
-        Are you sure you want to delete {restaurant.name}? This will also remove
-        diary entries linked to this place.
+        Are you sure you want to delete {restaurant.name}? This will also remove diary entries linked to this place.
       </p>
       {deleteRestaurant.isError && (
-        <p className="mt-3 text-sm font-semibold text-[#E04B39]">
-          We couldn't delete this place. Please try again.
-        </p>
+        <p className="mt-3 text-sm font-semibold text-[#E04B39]">We couldn't delete this place. Please try again.</p>
       )}
       <button
         type="button"
@@ -403,11 +351,9 @@ function DeletePlaceSheet({ restaurant, onCancel, onDeleted }) {
 function FoodHighlights({ photos = [] }) {
   if (!photos.length) {
     return (
-      <div className="flex min-h-72 flex-col items-center justify-center rounded-[24px] bg-[#F5EEE4] text-center">
+      <div className="flex min-h-72 flex-col items-center justify-center rounded-3xl bg-[#F5EEE4] text-center">
         <Camera size={34} className="mb-3 text-[#C8B89A]" />
-        <p className="text-sm text-stone-500">
-          Food highlights will appear here.
-        </p>
+        <p className="text-sm text-stone-500">Food highlights will appear here.</p>
       </div>
     );
   }
@@ -417,10 +363,8 @@ function FoodHighlights({ photos = [] }) {
       {photos.slice(0, 5).map((entry, index) => (
         <div
           key={entry.id}
-          className={`group relative overflow-hidden rounded-[24px] bg-[#E8DFC8] ${
-            index === 0
-              ? "col-span-2 h-72 md:row-span-2 md:h-full"
-              : "h-[8.5rem] md:h-40"
+          className={`group relative overflow-hidden rounded-3xl bg-[#E8DFC8] ${
+            index === 0 ? "col-span-2 h-72 md:row-span-2 md:h-full" : "h-34 md:h-40"
           }`}
         >
           <img
@@ -430,9 +374,7 @@ function FoodHighlights({ photos = [] }) {
           />
           {entry.caption && (
             <div className="pointer-events-none absolute inset-x-0 bottom-0 flex min-h-16 items-end bg-linear-to-t from-black/65 to-transparent p-3">
-              <p className="line-clamp-2 text-xs font-semibold leading-5 text-white">
-                {entry.caption}
-              </p>
+              <p className="line-clamp-2 text-xs font-semibold leading-5 text-white">{entry.caption}</p>
             </div>
           )}
         </div>
@@ -441,26 +383,16 @@ function FoodHighlights({ photos = [] }) {
   );
 }
 
-function DetailTile({
-  icon: Icon,
-  label,
-  value,
-  compact = false,
-  className = "",
-}) {
+function DetailTile({ icon: Icon, label, value, compact = false, className = "" }) {
   if (compact) {
     return (
-      <div
-        className={`flex items-start gap-3 rounded-2xl bg-[#F5EEE4] px-3 py-2.5 ${className}`}
-      >
+      <div className={`flex items-start gap-3 rounded-2xl bg-[#F5EEE4] px-3 py-2.5 ${className}`}>
         <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/75 text-[#6F5130]">
           <Icon size={15} />
         </div>
         <div className="min-w-0">
           <p className="text-[11px] font-semibold text-stone-500">{label}</p>
-          <p className="mt-0.5 text-sm font-bold leading-5 text-[#1C1107]">
-            {value || "Not added"}
-          </p>
+          <p className="mt-0.5 text-sm font-bold leading-5 text-[#1C1107]">{value || "Not added"}</p>
         </div>
       </div>
     );
@@ -472,9 +404,7 @@ function DetailTile({
         <Icon size={18} />
       </div>
       <p className="text-xs font-semibold text-stone-500">{label}</p>
-      <p className="mt-1 text-sm font-bold leading-5 text-[#1C1107]">
-        {value || "Not added"}
-      </p>
+      <p className="mt-1 text-sm font-bold leading-5 text-[#1C1107]">{value || "Not added"}</p>
     </div>
   );
 }
@@ -497,76 +427,36 @@ function formatOpeningHours(value) {
     .sort((a, b) => a.day - b.day)
     .map((item) => {
       const day = OPENING_DAY_LABELS[item.day] ?? `Day ${item.day}`;
-      return item.open && item.close
-        ? `${day} ${item.open}-${item.close}`
-        : `${day} Closed`;
+      return item.open && item.close ? `${day} ${item.open}-${item.close}` : `${day} Closed`;
     })
     .join(", ");
 }
 
 function PlaceProfile({ restaurant, category, fullAddress, location }) {
   const openingHours =
-    formatOpeningHours(restaurant.openingHours) ??
-    restaurant.hours ??
-    restaurant.businessHours ??
-    "N/A";
+    formatOpeningHours(restaurant.openingHours) ?? restaurant.hours ?? restaurant.businessHours ?? "N/A";
 
   return (
     <div className="grid gap-2 sm:grid-cols-2">
-      <DetailTile
-        icon={MapPin}
-        label="Address"
-        value={fullAddress || "N/A"}
-        compact
-        className="sm:col-span-2"
-      />
-      <DetailTile
-        icon={Navigation}
-        label="Area"
-        value={location || restaurant.city || "N/A"}
-        compact
-      />
-      <DetailTile
-        icon={UtensilsCrossed}
-        label="Category"
-        value={category}
-        compact
-      />
-      <DetailTile
-        icon={Clock3}
-        label="Opening hours"
-        value={openingHours}
-        compact
-      />
-      <DetailTile
-        icon={Wallet}
-        label="Budget"
-        value={restaurant.priceRange || restaurant.budget || "N/A"}
-        compact
-      />
+      <DetailTile icon={MapPin} label="Address" value={fullAddress || "N/A"} compact className="sm:col-span-2" />
+      <DetailTile icon={Navigation} label="Area" value={location || restaurant.city || "N/A"} compact />
+      <DetailTile icon={UtensilsCrossed} label="Category" value={category} compact />
+      <DetailTile icon={Clock3} label="Opening hours" value={openingHours} compact />
+      <DetailTile icon={Wallet} label="Budget" value={restaurant.priceRange || restaurant.budget || "N/A"} compact />
     </div>
   );
 }
 
 function VisitorSignal({ entries = [], restaurantPromo }) {
   const captions = entries.map((entry) => entry.caption || "");
-  const promo =
-    restaurantPromo ||
-    captions.find((caption) =>
-      /promo|discount|sale|deal|free|voucher/i.test(caption),
-    );
-  const newFood = captions.find((caption) =>
-    /new|special|seasonal|limited|fresh/i.test(caption),
-  );
+  const promo = restaurantPromo || captions.find((caption) => /promo|discount|sale|deal|free|voucher/i.test(caption));
+  const newFood = captions.find((caption) => /new|special|seasonal|limited|fresh/i.test(caption));
 
   return (
     <div className="grid gap-3">
       <div className="rounded-[22px] bg-[#FFF7D2] p-4">
         <Flame size={18} className="mb-3 text-[#9B6A12]" />
-        <p
-          className="text-2xl font-normal text-[#1C1107]"
-          style={{ fontFamily: '"Fraunces", serif' }}
-        >
+        <p className="text-2xl font-normal text-[#1C1107]" style={{ fontFamily: '"Fraunces", serif' }}>
           {promo ? "Promo spotted" : "No promo posted"}
         </p>
         <p className="mt-1 text-xs leading-5 text-stone-600">
@@ -575,10 +465,7 @@ function VisitorSignal({ entries = [], restaurantPromo }) {
       </div>
       <div className="rounded-[22px] bg-[#F1F7EA] p-4">
         <TrendingUp size={18} className="mb-3 text-[#294B20]" />
-        <p
-          className="text-2xl font-normal text-[#1C1107]"
-          style={{ fontFamily: '"Fraunces", serif' }}
-        >
+        <p className="text-2xl font-normal text-[#1C1107]" style={{ fontFamily: '"Fraunces", serif' }}>
           {newFood ? "New food noted" : "No new food yet"}
         </p>
         <p className="mt-1 text-xs leading-5 text-stone-600">
@@ -592,25 +479,18 @@ function VisitorSignal({ entries = [], restaurantPromo }) {
 function EntryPreviewList({ entries = [], loading }) {
   if (loading) {
     return (
-      <p className="rounded-[24px] bg-[#F5EEE4] py-10 text-center text-sm text-stone-500">
-        Loading food diary entries...
-      </p>
+      <p className="rounded-3xl bg-[#F5EEE4] py-10 text-center text-sm text-stone-500">Loading food diary entries...</p>
     );
   }
 
   if (!entries.length) {
     return (
-      <div className="rounded-[24px] bg-[#F5EEE4] px-5 py-10 text-center">
+      <div className="rounded-3xl bg-[#F5EEE4] px-5 py-10 text-center">
         <UtensilsCrossed size={34} className="mx-auto mb-3 text-[#C8B89A]" />
-        <p
-          className="text-xl font-normal text-[#1C1107]"
-          style={{ fontFamily: '"Fraunces", serif' }}
-        >
+        <p className="text-xl font-normal text-[#1C1107]" style={{ fontFamily: '"Fraunces", serif' }}>
           No diary entries yet
         </p>
-        <p className="mt-1 text-sm text-stone-500">
-          Entries from visitors will appear here once they log this place.
-        </p>
+        <p className="mt-1 text-sm text-stone-500">Entries from visitors will appear here once they log this place.</p>
       </div>
     );
   }
@@ -621,9 +501,9 @@ function EntryPreviewList({ entries = [], loading }) {
         <Link
           key={entry.id}
           to={`/entries/${entry.id}`}
-          className="grid gap-3 rounded-[24px] bg-[#F5EEE4] p-3 no-underline transition hover:bg-[#EFE5D8] sm:grid-cols-[104px_1fr]"
+          className="grid gap-3 rounded-3xl bg-[#F5EEE4] p-3 no-underline transition hover:bg-[#EFE5D8] sm:grid-cols-[104px_1fr]"
         >
-          <div className="h-[7.5rem] overflow-hidden rounded-[18px] bg-[#E8DFC8] sm:h-full">
+          <div className="h-30 overflow-hidden rounded-[18px] bg-[#E8DFC8] sm:h-full">
             {entry.photoUrl ? (
               <img
                 src={entry.photoUrl}
@@ -636,9 +516,7 @@ function EntryPreviewList({ entries = [], loading }) {
           </div>
           <div className="min-w-0 py-1">
             <div className="mb-2 flex items-center justify-between gap-3">
-              <p className="text-xs font-semibold text-stone-500">
-                {formatDate(entry.visitedAt)}
-              </p>
+              <p className="text-xs font-semibold text-stone-500">{formatDate(entry.visitedAt)}</p>
               <span className="inline-flex items-center gap-1 text-sm font-bold text-[#B8960A]">
                 <Star size={14} fill="currentColor" />
                 {entry.rating ?? "-"}
@@ -650,9 +528,7 @@ function EntryPreviewList({ entries = [], loading }) {
             >
               {entry.caption || "No written note for this visit."}
             </p>
-            <p className="mt-3 text-xs font-bold uppercase tracking-[0.12em] text-[#E89951]">
-              View entry
-            </p>
+            <p className="mt-3 text-xs font-bold uppercase tracking-[0.12em] text-[#E89951]">View entry</p>
           </div>
         </Link>
       ))}
@@ -670,25 +546,16 @@ export function FoodPlaceDetailPage() {
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
 
   const sortedEntries = useMemo(
-    () =>
-      [...(entries ?? [])].sort(
-        (a, b) =>
-          new Date(b.visitedAt).getTime() - new Date(a.visitedAt).getTime(),
-      ),
-    [entries],
+    () => [...(entries ?? [])].sort((a, b) => new Date(b.visitedAt).getTime() - new Date(a.visitedAt).getTime()),
+    [entries]
   );
 
   const location = getLocation(restaurant);
-  const fullAddress = [restaurant?.address, location]
-    .filter(Boolean)
-    .join(", ");
+  const fullAddress = [restaurant?.address, location].filter(Boolean).join(", ");
   const photos = getPhotoEntries(sortedEntries, restaurant);
   const avg = averageRating(sortedEntries, restaurant?.averageRating);
   const category = categoryLabel(restaurant?.category);
-  const menuItems = useMemo(
-    () => buildMenuItems(restaurant, sortedEntries),
-    [restaurant, sortedEntries],
-  );
+  const menuItems = useMemo(() => buildMenuItems(restaurant, sortedEntries), [restaurant, sortedEntries]);
 
   function handleBack() {
     if (window.history.state?.idx > 0) {
@@ -710,16 +577,10 @@ export function FoodPlaceDetailPage() {
   if (!restaurant) {
     return (
       <div className="min-h-screen bg-[#FDFBF7] px-4 py-16 text-center font-['Plus_Jakarta_Sans']">
-        <p
-          className="mb-3 text-2xl text-[#1C1107]"
-          style={{ fontFamily: '"Fraunces", serif' }}
-        >
+        <p className="mb-3 text-2xl text-[#1C1107]" style={{ fontFamily: '"Fraunces", serif' }}>
           Food place not found
         </p>
-        <Link
-          to="/top-places"
-          className="text-sm font-semibold text-[#E89951] no-underline"
-        >
+        <Link to="/top-places" className="text-sm font-semibold text-[#E89951] no-underline">
           Back to Top Places
         </Link>
       </div>
@@ -729,145 +590,104 @@ export function FoodPlaceDetailPage() {
   return (
     <>
       <div className="min-h-screen bg-[#FDFBF7] font-['Plus_Jakarta_Sans'] text-[#1C1107] antialiased">
-      <header className="relative overflow-hidden border-b border-[#E8DFC8] bg-[#1C1107] text-white">
-        <div
-          className="food-place-hero-shell mx-auto px-5 py-10 lg:px-6 lg:py-16"
-          style={pageShellStyle}
-        >
-          <div className="food-place-hero-copy lg:col-span-2">
-            <div className="mb-8 flex items-center justify-between gap-4">
-              <button
-                type="button"
-                onClick={handleBack}
-                className="group inline-flex max-w-full items-center gap-2 whitespace-nowrap rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-white/80 transition hover:bg-white/15"
-              >
-                <ArrowLeft
-                  className="shrink-0 transition-transform group-hover:-translate-x-0.5"
-                  size={14}
-                />
-                Return to Places
-              </button>
-
-              <PlaceActions
-                onEdit={() => setIsEditingPlace(true)}
-                onDelete={() => setIsConfirmingDelete(true)}
-              />
-            </div>
-
-            <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
-              <div className="flex min-w-0 items-start gap-4">
-                <span className="mt-2 flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-[18px] border border-white/10 bg-white/8 text-[#F0E76F]">
-                  {restaurant.storePhotoUrl ? (
-                    <img
-                      src={restaurant.storePhotoUrl}
-                      alt={`${restaurant.name} store icon`}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <ImageIcon size={28} />
-                  )}
-                </span>
-                <h1
-                  className="min-w-0 max-w-4xl text-5xl font-normal leading-none text-white sm:text-6xl lg:text-7xl"
-                  style={{ fontFamily: '"Fraunces", serif' }}
+        <header className="relative overflow-hidden border-b border-[#E8DFC8] bg-[#1C1107] text-white">
+          <div className="food-place-hero-shell mx-auto px-5 py-10 lg:px-6 lg:py-16" style={pageShellStyle}>
+            <div className="food-place-hero-copy lg:col-span-2">
+              <div className="mb-8 flex items-center justify-between gap-4">
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  className="group inline-flex max-w-full items-center gap-2 whitespace-nowrap rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-white/80 transition hover:bg-white/15"
                 >
-                  {restaurant.name}
-                </h1>
+                  <ArrowLeft className="shrink-0 transition-transform group-hover:-translate-x-0.5" size={14} />
+                  Return to Places
+                </button>
+
+                <PlaceActions onEdit={() => setIsEditingPlace(true)} onDelete={() => setIsConfirmingDelete(true)} />
               </div>
 
-              <div className="w-full rounded-[28px] border border-white/10 bg-white/5 p-5 shadow-2xl backdrop-blur lg:justify-self-end">
-                <p className="text-xs font-bold uppercase tracking-[0.14em] text-stone-400">
-                  Community rating
-                </p>
-                <div className="mt-2 flex items-baseline gap-4">
-                  <span
-                    className="text-7xl font-normal leading-none"
+              <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
+                <div className="flex min-w-0 items-start gap-4">
+                  <span className="mt-2 flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-[18px] border border-white/10 bg-white/8 text-[#F0E76F]">
+                    {restaurant.storePhotoUrl ? (
+                      <img
+                        src={restaurant.storePhotoUrl}
+                        alt={`${restaurant.name} store icon`}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <ImageIcon size={28} />
+                    )}
+                  </span>
+                  <h1
+                    className="min-w-0 max-w-4xl text-5xl font-normal leading-none text-white sm:text-6xl lg:text-7xl"
                     style={{ fontFamily: '"Fraunces", serif' }}
                   >
-                    {avg != null ? avg.toFixed(1) : "-"}
-                  </span>
-                  <div>
-                    <RatingStars rating={avg} />
-                    <p className="mt-1 text-xs text-stone-400">
-                      Based on authentic diary entries
-                    </p>
+                    {restaurant.name}
+                  </h1>
+                </div>
+
+                <div className="w-full rounded-[28px] border border-white/10 bg-white/5 p-5 shadow-2xl backdrop-blur lg:justify-self-end">
+                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-stone-400">Community rating</p>
+                  <div className="mt-2 flex items-baseline gap-4">
+                    <span className="text-7xl font-normal leading-none" style={{ fontFamily: '"Fraunces", serif' }}>
+                      {avg != null ? avg.toFixed(1) : "-"}
+                    </span>
+                    <div>
+                      <RatingStars rating={avg} />
+                      <p className="mt-1 text-xs text-stone-400">Based on authentic diary entries</p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <main
-        className="mx-auto px-5 py-10 lg:px-6 lg:py-12"
-        style={pageShellStyle}
-      >
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-12">
-          <BentoCard className="bg-white p-4 md:col-span-2 lg:col-span-5">
-            <SectionLabel title="Directory Information" />
-            <PlaceProfile
-              restaurant={restaurant}
-              category={category}
-              fullAddress={fullAddress}
-              location={location}
-            />
-          </BentoCard>
+        <main className="mx-auto px-5 py-10 lg:px-6 lg:py-12" style={pageShellStyle}>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-12">
+            <BentoCard className="bg-white p-4 md:col-span-2 lg:col-span-5">
+              <SectionLabel title="Directory Information" />
+              <PlaceProfile restaurant={restaurant} category={category} fullAddress={fullAddress} location={location} />
+            </BentoCard>
 
-          <BentoCard className="bg-white md:col-span-2 lg:col-span-7">
-            <SectionLabel title="Photo Highlights" />
-            <FoodHighlights photos={photos} />
-          </BentoCard>
+            <BentoCard className="bg-white md:col-span-2 lg:col-span-7">
+              <SectionLabel title="Photo Highlights" />
+              <FoodHighlights photos={photos} />
+            </BentoCard>
 
-          <BentoCard className="bg-white md:col-span-1 lg:col-span-6">
-            <SectionLabel title="Menu" />
-            <MenuPreview
-              menuItems={menuItems}
-              expanded={menuExpanded}
-              onToggle={() => setMenuExpanded((value) => !value)}
-            />
-          </BentoCard>
+            <BentoCard className="bg-white md:col-span-1 lg:col-span-6">
+              <SectionLabel title="Menu" />
+              <MenuPreview
+                menuItems={menuItems}
+                expanded={menuExpanded}
+                onToggle={() => setMenuExpanded((value) => !value)}
+              />
+            </BentoCard>
 
-          <BentoCard className="bg-[#FAF8F5] md:col-span-1 lg:col-span-6">
-            <SectionLabel title="Promos & Offers" />
-            <VisitorSignal
-              entries={sortedEntries}
-              restaurantPromo={restaurant.promo}
-            />
-          </BentoCard>
+            <BentoCard className="bg-[#FAF8F5] md:col-span-1 lg:col-span-6">
+              <SectionLabel title="Promos & Offers" />
+              <VisitorSignal entries={sortedEntries} restaurantPromo={restaurant.promo} />
+            </BentoCard>
 
-          <BentoCard className="bg-white md:col-span-2 lg:col-span-12">
-            <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <SectionLabel title="Visitor Logbook" />
-            </div>
-            <EntryPreviewList
-              entries={sortedEntries}
-              loading={loadingEntries}
-            />
-          </BentoCard>
-        </div>
-      </main>
+            <BentoCard className="bg-white md:col-span-2 lg:col-span-12">
+              <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <SectionLabel title="Visitor Logbook" />
+              </div>
+              <EntryPreviewList entries={sortedEntries} loading={loadingEntries} />
+            </BentoCard>
+          </div>
+        </main>
       </div>
 
       {isEditingPlace && (
-        <Modal
-          onClose={() => setIsEditingPlace(false)}
-          closeOnBackdrop={false}
-          closeOnEscape={false}
-        >
-          <RestaurantForm
-            restaurant={restaurant}
-            onClose={() => setIsEditingPlace(false)}
-          />
+        <Modal onClose={() => setIsEditingPlace(false)} closeOnBackdrop={false} closeOnEscape={false}>
+          <RestaurantForm restaurant={restaurant} onClose={() => setIsEditingPlace(false)} />
         </Modal>
       )}
 
       {isConfirmingDelete && (
-        <Modal
-          onClose={() => setIsConfirmingDelete(false)}
-          placement="center"
-          closeOnBackdrop={false}
-        >
+        <Modal onClose={() => setIsConfirmingDelete(false)} placement="center" closeOnBackdrop={false}>
           <DeletePlaceSheet
             restaurant={restaurant}
             onCancel={() => setIsConfirmingDelete(false)}
