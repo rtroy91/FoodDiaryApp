@@ -18,6 +18,7 @@ frontend/.env.*
 # .NET build output
 **/bin/
 **/obj/
+backend/FoodDiary.Api/wwwroot/uploads/
 
 # IDE and editor files
 .vs/

@@ -1,13 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  MapPin,
-  Clock,
-  ChevronLeft,
-  ChevronRight,
-  Star,
-  Plus,
-} from "lucide-react";
+import { MapPin, Clock, ChevronLeft, ChevronRight, Star, Plus } from "lucide-react";
 import { EntryCard, EntryCardSkeleton } from "../components/EntryCard";
 import { Modal } from "../components/Modal";
 import { NoEntriesState } from "../components/NoEntriesState";
@@ -44,14 +37,7 @@ function countUniqueVisitedPlaces(entries = []) {
     const key =
       restaurant?.id ??
       entry.restaurantId ??
-      [
-        restaurant?.name,
-        restaurant?.barangay,
-        restaurant?.city,
-        restaurant?.province,
-      ]
-        .filter(Boolean)
-        .join("|");
+      [restaurant?.name, restaurant?.barangay, restaurant?.city, restaurant?.province].filter(Boolean).join("|");
 
     if (key) ids.add(key);
   });
@@ -60,10 +46,7 @@ function countUniqueVisitedPlaces(entries = []) {
 }
 
 function getPaginationDotClass(index, activeIndex, total) {
-  const distance = Math.min(
-    Math.abs(index - activeIndex),
-    total - Math.abs(index - activeIndex),
-  );
+  const distance = Math.min(Math.abs(index - activeIndex), total - Math.abs(index - activeIndex));
 
   if (distance === 0) return "h-1.5 w-4 bg-[#E89951]";
   if (distance === 1) return "h-1.5 w-1.5 bg-stone-400";
@@ -99,13 +82,9 @@ export function FeaturedPage() {
     };
   }, [allEntries]);
   const currentUser = getCurrentUser();
-  const userName =
-    currentUser?.displayName || currentUser?.email?.split("@")[0] || "there";
+  const userName = currentUser?.displayName || currentUser?.email?.split("@")[0] || "there";
   const recentEntries = entries ?? [];
-  const activeEntry =
-    recentEntries.length > 0
-      ? recentEntries[activeEntryIndex % recentEntries.length]
-      : null;
+  const activeEntry = recentEntries.length > 0 ? recentEntries[activeEntryIndex % recentEntries.length] : null;
 
   useEffect(() => {
     return () => {
@@ -146,10 +125,7 @@ export function FeaturedPage() {
 
   return (
     <>
-      <div
-        className="relative h-full overflow-hidden bg-[#F5F0E8]"
-        style={{ fontFamily: '"Geist Mono", monospace' }}
-      >
+      <div className="relative h-full overflow-hidden bg-[#F5F0E8]" style={{ fontFamily: '"Geist Mono", monospace' }}>
         <div className="relative h-48 overflow-hidden bg-[#1C1107]">
           <svg
             className="absolute inset-0 h-full w-full"
@@ -160,36 +136,16 @@ export function FeaturedPage() {
           >
             <circle cx="480" cy="30" r="60" fill="#A5CF83" opacity="0.08" />
             <circle cx="500" cy="90" r="30" fill="#F0E76F" opacity="0.08" />
-            <rect
-              x="20"
-              y="100"
-              width="40"
-              height="40"
-              fill="#ECB65F"
-              opacity="0.08"
-              transform="rotate(15 40 120)"
-            />
+            <rect x="20" y="100" width="40" height="40" fill="#ECB65F" opacity="0.08" transform="rotate(15 40 120)" />
             <circle cx="60" cy="40" r="18" fill="#E89951" opacity="0.08" />
-            <rect
-              x="380"
-              y="120"
-              width="20"
-              height="20"
-              fill="#A5CF83"
-              opacity="0.08"
-              transform="rotate(30 390 130)"
-            />
+            <rect x="380" y="120" width="20" height="20" fill="#A5CF83" opacity="0.08" transform="rotate(30 390 130)" />
             <circle cx="200" cy="140" r="10" fill="#F0E76F" opacity="0.08" />
           </svg>
 
           <div className="relative z-10 mx-auto flex max-w-140 items-end justify-between px-5 pt-20 pb-7">
             <div>
-              <p
-                className="text-3xl font-light leading-tight text-white"
-                style={{ fontFamily: '"Fraunces", serif' }}
-              >
-                {getGreeting()},{" "}
-                <span className="italic text-[#F0E76F]">{userName}</span>
+              <p className="text-3xl font-light leading-tight text-white" style={{ fontFamily: '"Fraunces", serif' }}>
+                {getGreeting()}, <span className="italic text-[#F0E76F]">{userName}</span>
               </p>
               <p className="mt-1 font-['Plus_Jakarta_Sans'] text-sm text-white/55">
                 Here's your food history at a glance.
@@ -203,9 +159,7 @@ export function FeaturedPage() {
               >
                 {String(new Date().getDate()).padStart(2, "0")}
               </p>
-              <p className="text-[10px] uppercase tracking-widest text-white/[0.28]">
-                {formatDate(new Date())}
-              </p>
+              <p className="text-[10px] uppercase tracking-widest text-white/[0.28]">{formatDate(new Date())}</p>
             </div>
           </div>
         </div>
@@ -214,21 +168,9 @@ export function FeaturedPage() {
           <div className="relative z-20 mb-4 -mt-7 grid grid-cols-3 gap-2.5">
             {loadingAllEntries ? (
               <>
-                <StatCardSkeleton
-                  icon={MapPin}
-                  iconColor="#e63922"
-                  iconBgColor="#fde8e5"
-                />
-                <StatCardSkeleton
-                  icon={Clock}
-                  iconColor="#2b5fc4"
-                  iconBgColor="#e3eaf8"
-                />
-                <StatCardSkeleton
-                  icon={Star}
-                  iconColor="#B8960A"
-                  iconBgColor="#FEF6C7"
-                />
+                <StatCardSkeleton icon={MapPin} iconColor="#e63922" iconBgColor="#fde8e5" />
+                <StatCardSkeleton icon={Clock} iconColor="#2b5fc4" iconBgColor="#e3eaf8" />
+                <StatCardSkeleton icon={Star} iconColor="#B8960A" iconBgColor="#FEF6C7" />
               </>
             ) : (
               <>
@@ -258,13 +200,8 @@ export function FeaturedPage() {
           </div>
 
           <div className="mb-2.5 flex items-center justify-between">
-            <span className="text-[10px] font-semibold uppercase tracking-widest text-stone-500">
-              Recent post
-            </span>
-            <Link
-              to="/entries"
-              className="text-[11px] font-semibold text-[#E89951] no-underline"
-            >
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-stone-500">Recent post</span>
+            <Link to="/entries" className="text-[11px] font-semibold text-[#E89951] no-underline">
               See all →
             </Link>
           </div>
@@ -297,11 +234,7 @@ export function FeaturedPage() {
                 {[0, 1, 2, 3, 4].map((dot) => (
                   <span
                     key={dot}
-                    className={`rounded-full ${
-                      dot === 2
-                        ? "h-1.5 w-4 bg-[#E89951]"
-                        : "h-1.5 w-1.5 bg-stone-300"
-                    }`}
+                    className={`rounded-full ${dot === 2 ? "h-1.5 w-4 bg-[#E89951]" : "h-1.5 w-1.5 bg-stone-300"}`}
                   />
                 ))}
               </div>
@@ -317,9 +250,7 @@ export function FeaturedPage() {
             </div>
           )}
 
-          {!loadingEntries && !entries?.length && (
-            <NoEntriesState onAddPost={() => setShowVisitModal(true)} />
-          )}
+          {!loadingEntries && !entries?.length && <NoEntriesState onAddPost={() => setShowVisitModal(true)} />}
 
           {!loadingEntries && activeEntry && (
             <div className="relative left-1/2 w-[min(calc(100vw-2rem),34rem)] -translate-x-1/2 pb-2">
@@ -336,7 +267,7 @@ export function FeaturedPage() {
 
                 <div
                   className={`min-w-0 transform-gpu transition-[opacity,transform] duration-200 ease-out ${getCarouselMotionClass(
-                    carouselMotion,
+                    carouselMotion
                   )}`}
                 >
                   <EntryCard entry={activeEntry} featured />
@@ -355,8 +286,7 @@ export function FeaturedPage() {
 
               <div className="mt-4 flex items-center justify-center gap-1.5">
                 {recentEntries.map((entry, index) => {
-                  const isActive =
-                    index === activeEntryIndex % recentEntries.length;
+                  const isActive = index === activeEntryIndex % recentEntries.length;
 
                   return (
                     <button
@@ -368,7 +298,7 @@ export function FeaturedPage() {
                       className={`rounded-full transition-all duration-300 hover:bg-[#E89951] ${getPaginationDotClass(
                         index,
                         activeEntryIndex % recentEntries.length,
-                        recentEntries.length,
+                        recentEntries.length
                       )}`}
                     />
                   );
@@ -388,11 +318,7 @@ export function FeaturedPage() {
         </div>
       </div>
       {showVisitModal && (
-        <Modal
-          onClose={() => setShowVisitModal(false)}
-          closeOnBackdrop={false}
-          closeOnEscape={false}
-        >
+        <Modal onClose={() => setShowVisitModal(false)} closeOnBackdrop={false} closeOnEscape={false}>
           <PublishDiaryForm onClose={() => setShowVisitModal(false)} />
         </Modal>
       )}

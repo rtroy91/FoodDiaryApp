@@ -6,54 +6,47 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 const FeaturedPage = lazy(() =>
   import("./pages/FeaturedPage").then((module) => ({
     default: module.FeaturedPage,
-  })),
+  }))
 );
 const EntriesPage = lazy(() =>
   import("./pages/EntriesPage").then((module) => ({
     default: module.EntriesPage,
-  })),
+  }))
 );
 const FoodMapPage = lazy(() =>
   import("./pages/FoodMapPage").then((module) => ({
     default: module.FoodMapPage,
-  })),
+  }))
 );
 const EntryDetailPage = lazy(() =>
   import("./pages/EntryDetailPage").then((module) => ({
     default: module.EntryDetailPage,
-  })),
+  }))
 );
 const TopPlacePage = lazy(() =>
   import("./pages/TopPlacePage").then((module) => ({
     default: module.TopPlacePage,
-  })),
+  }))
 );
 const FoodPlaceDetailPage = lazy(() =>
   import("./pages/FoodPlaceDetailPage").then((module) => ({
     default: module.FoodPlaceDetailPage,
-  })),
+  }))
 );
 const RestaurantForm = lazy(() =>
   import("./components/RestaurantForm").then((module) => ({
     default: module.RestaurantForm,
-  })),
+  }))
 );
-const LoginPage = lazy(() =>
-  import("./pages/LoginPage").then((module) => ({ default: module.LoginPage })),
-);
+const LoginPage = lazy(() => import("./pages/LoginPage").then((module) => ({ default: module.LoginPage })));
 const RegisterPage = lazy(() =>
   import("./pages/RegisterPage").then((module) => ({
     default: module.RegisterPage,
-  })),
+  }))
 );
 
 function RouteLoadingShell() {
-  return (
-    <div
-      className="min-h-dvh bg-[#F5F0E8]"
-      style={{ fontFamily: '"Geist Mono", monospace' }}
-    />
-  );
+  return <div className="min-h-dvh bg-[#F5F0E8]" style={{ fontFamily: '"Geist Mono", monospace' }} />;
 }
 
 function withRouteSuspense(element) {

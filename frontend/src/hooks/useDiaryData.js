@@ -44,8 +44,7 @@ export function useCreateRestaurant() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: restaurantsApi.createRestaurant,
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ["restaurants"] }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["restaurants"] }),
   });
 }
 

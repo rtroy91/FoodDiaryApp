@@ -1,11 +1,11 @@
-@import './fonts.css';
+@import "./fonts.css";
 @import "tailwindcss";
 
 html,
 body,
 #root {
   min-height: 100%;
-  background: #F5F0E8;
+  background: #f5f0e8;
 }
 
 body {
@@ -19,7 +19,9 @@ body {
   height: 22px !important;
   background: transparent !important;
   color: #1c1107 !important;
-  font: 700 18px/20px "Plus Jakarta Sans", sans-serif !important;
+  font:
+    700 18px/20px "Plus Jakarta Sans",
+    sans-serif !important;
 }
 
 .leaflet-popup-close-button:focus-visible {
@@ -119,4 +121,3 @@ body {
     transform: scale(1) translateY(0);
   }
 }
-

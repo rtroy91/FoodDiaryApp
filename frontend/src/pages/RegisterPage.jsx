@@ -56,9 +56,7 @@ export function RegisterPage() {
       await register(form.email, form.password, form.displayName);
       navigate("/");
     } catch {
-      setErrorMessage(
-        "Could not create your account. That email may already be taken.",
-      );
+      setErrorMessage("Could not create your account. That email may already be taken.");
     } finally {
       setSubmitting(false);
     }
@@ -83,10 +81,7 @@ export function RegisterPage() {
         <section className="flex items-center justify-center bg-[#FFFBF4] px-6 py-10 sm:px-10">
           <div className="w-full max-w-md">
             <div className="mb-8">
-              <h2
-                className="mt-2 text-3xl font-semibold text-[#1F1B16]"
-                style={{ fontFamily: '"Fraunces", serif' }}
-              >
+              <h2 className="mt-2 text-3xl font-semibold text-[#1F1B16]" style={{ fontFamily: '"Fraunces", serif' }}>
                 Create your account
               </h2>
 
@@ -147,29 +142,19 @@ export function RegisterPage() {
                   type="button"
                   onClick={() => setShowConfirmPassword((prev) => !prev)}
                   className="text-[#8C7B6A] transition hover:text-[#1F1B16]"
-                  aria-label={
-                    showConfirmPassword ? "Hide password" : "Show password"
-                  }
+                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
                 >
-                  {showConfirmPassword ? (
-                    <EyeOff size={18} />
-                  ) : (
-                    <Eye size={18} />
-                  )}
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </FormInput>
 
               {form.confirmPassword && (
                 <p
                   className={`text-xs font-medium ${
-                    form.password === form.confirmPassword
-                      ? "text-green-600"
-                      : "text-[#E04B39]"
+                    form.password === form.confirmPassword ? "text-green-600" : "text-[#E04B39]"
                   }`}
                 >
-                  {form.password === form.confirmPassword
-                    ? "✓ Passwords match"
-                    : "✗ Passwords do not match"}
+                  {form.password === form.confirmPassword ? "✓ Passwords match" : "✗ Passwords do not match"}
                 </p>
               )}
 

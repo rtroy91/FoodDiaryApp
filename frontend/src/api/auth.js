@@ -1,11 +1,5 @@
 import { apiClient } from "./client";
-import {
-  clearAuthStorage,
-  getAuthToken,
-  getStoredUser,
-  setAuthToken,
-  setStoredUser,
-} from "./authStorage";
+import { clearAuthStorage, getAuthToken, getStoredUser, setAuthToken, setStoredUser } from "./authStorage";
 
 function storeAuthSession(data) {
   setAuthToken(data.token);

@@ -32,11 +32,7 @@ export function FormInput({
           step={step}
           className="w-full rounded-2xl border border-[#D8CDBB] bg-[#F5EEE4] px-4 py-3 pr-12 text-sm text-[#1F1B16] outline-none transition focus:border-[#E04B39]/20 focus:ring-2 focus:ring-[#E04B39]/20 disabled:opacity-50"
         />
-        {children && (
-          <div className="absolute inset-y-0 right-3 flex items-center">
-            {children}
-          </div>
-        )}
+        {children && <div className="absolute inset-y-0 right-3 flex items-center">{children}</div>}
       </div>
     </label>
   );

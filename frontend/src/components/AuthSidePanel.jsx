@@ -36,11 +36,7 @@ export function AuthSidePanel({ appFeatures, title }) {
         </div>
 
         <div>
-          <img
-            src={foodHero}
-            alt="Food illustration"
-            className="mx-auto h-96 w-auto object-contain"
-          />
+          <img src={foodHero} alt="Food illustration" className="mx-auto h-96 w-auto object-contain" />
         </div>
 
         <ul className="space-y-3">

@@ -1,15 +1,6 @@
 import Skeleton from "react-loading-skeleton";
 import { Link } from "react-router-dom";
-import {
-  Clock,
-  Edit3,
-  MapPin,
-  MoreVertical,
-  Star,
-  Trash2,
-  UtensilsCrossed,
-  X,
-} from "lucide-react";
+import { Clock, Edit3, MapPin, MoreVertical, Star, Trash2, UtensilsCrossed, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Modal } from "./Modal";
 import { PublishDiaryForm } from "./PublishDiaryForm";
@@ -17,11 +8,7 @@ import { useDeleteEntry } from "../hooks/useDiaryData";
 import { categoryLabel } from "../utils/restaurants";
 
 function getLocation(restaurant) {
-  return [
-    restaurant?.barangay ? "Brgy. " + restaurant.barangay : null,
-    restaurant?.city,
-    restaurant?.province,
-  ]
+  return [restaurant?.barangay ? "Brgy. " + restaurant.barangay : null, restaurant?.city, restaurant?.province]
     .filter(Boolean)
     .join(", ");
 }
@@ -43,26 +30,16 @@ function timeAgo(dateStr) {
 export function EntryCardSkeleton({ featured = false, captionLines = 2 }) {
   const captionWidths = featured
     ? ["62%", "44%"]
-    : [
-        "84%",
-        captionLines > 1 ? "66%" : null,
-        captionLines > 2 ? "46%" : null,
-      ].filter(Boolean);
+    : ["84%", captionLines > 1 ? "66%" : null, captionLines > 2 ? "46%" : null].filter(Boolean);
 
   return (
     <div
       className={`overflow-hidden rounded-[20px] border border-[#EEF2F7] bg-white shadow-none ${
-        featured
-          ? "flex h-[clamp(25rem,64dvh,31rem)] flex-col"
-          : "flex h-116 flex-col"
+        featured ? "flex h-[clamp(25rem,64dvh,31rem)] flex-col" : "flex h-116 flex-col"
       }`}
       aria-hidden="true"
     >
-      <div
-        className={`shrink-0 overflow-hidden ${
-          featured ? "h-[clamp(13rem,34dvh,18rem)]" : "h-56"
-        }`}
-      >
+      <div className={`shrink-0 overflow-hidden ${featured ? "h-[clamp(13rem,34dvh,18rem)]" : "h-56"}`}>
         <Skeleton
           containerClassName="block h-full w-full"
           className="block h-full w-full"
@@ -90,13 +67,7 @@ export function EntryCardSkeleton({ featured = false, captionLines = 2 }) {
           />
           <div className="flex shrink-0 items-center gap-1.5">
             <Star size={15} fill="#F4B21B" className="text-[#F4B21B]" />
-            <Skeleton
-              width={28}
-              height={16}
-              borderRadius={6}
-              baseColor="#e7dfd2"
-              highlightColor="#f8f4ec"
-            />
+            <Skeleton width={28} height={16} borderRadius={6} baseColor="#e7dfd2" highlightColor="#f8f4ec" />
           </div>
         </div>
 
@@ -126,20 +97,8 @@ export function EntryCardSkeleton({ featured = false, captionLines = 2 }) {
         </div>
 
         <div className="mt-auto flex shrink-0 items-center justify-between gap-3 pt-3">
-          <Skeleton
-            width={48}
-            height={12}
-            borderRadius={6}
-            baseColor="#f0ebe2"
-            highlightColor="#fbf8f2"
-          />
-          <Skeleton
-            width={48}
-            height={24}
-            borderRadius={999}
-            baseColor="#e7dfd2"
-            highlightColor="#f8f4ec"
-          />
+          <Skeleton width={48} height={12} borderRadius={6} baseColor="#f0ebe2" highlightColor="#fbf8f2" />
+          <Skeleton width={48} height={24} borderRadius={999} baseColor="#e7dfd2" highlightColor="#f8f4ec" />
         </div>
       </div>
     </div>
@@ -161,17 +120,12 @@ function DeleteEntrySheet({ entry, onCancel, onDeleted }) {
 
   return (
     <div className="w-full max-w-md rounded-[28px] bg-[#FFFDF9] p-5 shadow-[0_20px_70px_rgba(28,17,7,0.18)]">
-      <h2 className="font-['Plus_Jakarta_Sans'] text-lg font-extrabold tracking-tight text-[#1C1107]">
-        Delete Post?
-      </h2>
+      <h2 className="font-['Plus_Jakarta_Sans'] text-lg font-extrabold tracking-tight text-[#1C1107]">Delete Post?</h2>
       <p className="mt-3 font-['Plus_Jakarta_Sans'] text-sm leading-6 text-[#756450]">
-        Are you sure you want to delete your visit to {restaurantName}? This
-        action cannot be undone.
+        Are you sure you want to delete your visit to {restaurantName}? This action cannot be undone.
       </p>
       {deleteEntry.isError && (
-        <p className="mt-3 text-sm font-semibold text-[#E04B39]">
-          We couldn't delete this post. Please try again.
-        </p>
+        <p className="mt-3 text-sm font-semibold text-[#E04B39]">We couldn't delete this post. Please try again.</p>
       )}
       <button
         type="button"
@@ -193,12 +147,7 @@ function DeleteEntrySheet({ entry, onCancel, onDeleted }) {
   );
 }
 
-function EntryActions({
-  onEdit,
-  onDelete,
-  tone = "photo",
-  placement = "photo",
-}) {
+function EntryActions({ onEdit, onDelete, tone = "photo", placement = "photo" }) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef(null);
   const isPanelTone = tone === "panel";
@@ -214,12 +163,7 @@ function EntryActions({
     }
 
     document.addEventListener("pointerdown", closeOnOutsidePointerDown, true);
-    return () =>
-      document.removeEventListener(
-        "pointerdown",
-        closeOnOutsidePointerDown,
-        true,
-      );
+    return () => document.removeEventListener("pointerdown", closeOnOutsidePointerDown, true);
   }, [isOpen]);
 
   function stopCardNavigation(e) {
@@ -242,11 +186,7 @@ function EntryActions({
   return (
     <div
       ref={menuRef}
-      className={
-        isInlinePlacement
-          ? "relative z-20 shrink-0"
-          : "absolute right-3 top-3 z-20"
-      }
+      className={isInlinePlacement ? "relative z-20 shrink-0" : "absolute right-3 top-3 z-20"}
       onClick={stopCardNavigation}
     >
       <button
@@ -301,11 +241,7 @@ function EntryDetailModal({ entry, location, onClose, onEdit, onDelete }) {
   }
 
   return (
-    <Modal
-      onClose={onClose}
-      placement="center"
-      backdropClassName="bg-black/60 px-4 py-6 backdrop-blur-md sm:py-8"
-    >
+    <Modal onClose={onClose} placement="center" backdropClassName="bg-black/60 px-4 py-6 backdrop-blur-md sm:py-8">
       <article
         className="entry-detail-modal relative flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-[#FFFDF9] shadow-[0_30px_90px_rgba(0,0,0,0.34)] outline-none"
         role="dialog"
@@ -314,12 +250,7 @@ function EntryDetailModal({ entry, location, onClose, onEdit, onDelete }) {
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex shrink-0 justify-end gap-2 px-6 pb-2 pt-4 xl:absolute xl:right-6 xl:top-6 xl:z-30 xl:p-0">
-          <EntryActions
-            onEdit={onEdit}
-            onDelete={onDelete}
-            tone="panel"
-            placement="inline"
-          />
+          <EntryActions onEdit={onEdit} onDelete={onDelete} tone="panel" placement="inline" />
           <button
             type="button"
             onClick={onClose}
@@ -355,9 +286,7 @@ function EntryDetailModal({ entry, location, onClose, onEdit, onDelete }) {
                     onClick={handleRestaurantLinkClick}
                     className="min-w-0 flex-1 text-3xl font-normal leading-tight text-[#1C1107] underline-offset-4 transition hover:text-[#6F5130] hover:underline"
                     style={{ fontFamily: '"Fraunces", serif' }}
-                    aria-label={`Open entry details for ${
-                      restaurant?.name ?? "this restaurant"
-                    }`}
+                    aria-label={`Open entry details for ${restaurant?.name ?? "this restaurant"}`}
                   >
                     {restaurant?.name ?? "Unknown restaurant"}
                   </Link>
@@ -375,11 +304,7 @@ function EntryDetailModal({ entry, location, onClose, onEdit, onDelete }) {
               <div className="mt-3 shrink-0 space-y-2 font-['Plus_Jakarta_Sans'] text-sm font-medium leading-5 text-[#6F7892]">
                 <div className="flex items-center gap-2 font-semibold text-[#253248]">
                   <Star size={17} fill="#F4B21B" className="text-[#F4B21B]" />
-                  <span>
-                    {entry.rating != null
-                      ? Number(entry.rating).toFixed(1)
-                      : "-"}
-                  </span>
+                  <span>{entry.rating != null ? Number(entry.rating).toFixed(1) : "-"}</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <MapPin size={15} className="mt-0.5 shrink-0" />
@@ -460,16 +385,10 @@ export function EntryCard({ entry, featured = false }) {
   const card = (
     <div
       className={`overflow-hidden rounded-[20px] border border-[#EEF2F7] bg-white shadow-none transition ${
-        featured
-          ? "flex h-[clamp(25rem,64dvh,31rem)] flex-col"
-          : "flex h-116 flex-col hover:-translate-y-0.5"
+        featured ? "flex h-[clamp(25rem,64dvh,31rem)] flex-col" : "flex h-116 flex-col hover:-translate-y-0.5"
       }`}
     >
-      <div
-        className={`relative shrink-0 overflow-hidden ${
-          featured ? "h-[clamp(13rem,34dvh,18rem)]" : "h-56"
-        }`}
-      >
+      <div className={`relative shrink-0 overflow-hidden ${featured ? "h-[clamp(13rem,34dvh,18rem)]" : "h-56"}`}>
         {entry.photoUrl ? (
           <img
             src={entry.photoUrl}
@@ -501,17 +420,13 @@ export function EntryCard({ entry, featured = false }) {
           </p>
           <div className="flex shrink-0 items-center gap-1.5 text-sm font-semibold text-[#253248]">
             <Star size={15} fill="#F4B21B" className="text-[#F4B21B]" />
-            <p>
-              {entry.rating != null ? Number(entry.rating).toFixed(1) : "-"}
-            </p>
+            <p>{entry.rating != null ? Number(entry.rating).toFixed(1) : "-"}</p>
           </div>
         </div>
 
         <div className="flex min-h-5 items-center gap-2 font-['Plus_Jakarta_Sans'] text-xs font-medium leading-5 text-[#6F7892]">
           <MapPin size={12} className="shrink-0" />
-          <span className="min-w-0 flex-1 truncate py-px">
-            {location || "No Location"}
-          </span>
+          <span className="min-w-0 flex-1 truncate py-px">{location || "No Location"}</span>
         </div>
 
         <div className="mt-3 h-[3.2rem] overflow-hidden">
@@ -529,10 +444,7 @@ export function EntryCard({ entry, featured = false }) {
             <span>{timeAgo(entry.visitedAt)}</span>
             {wasEdited && (
               <>
-                <span
-                  className="h-1 w-1 rounded-full bg-stone-400"
-                  aria-hidden="true"
-                />
+                <span className="h-1 w-1 rounded-full bg-stone-400" aria-hidden="true" />
                 <span>Edited</span>
               </>
             )}
@@ -547,35 +459,18 @@ export function EntryCard({ entry, featured = false }) {
     </div>
   );
 
-  const actions = (
-    <EntryActions
-      onEdit={() => setIsEditing(true)}
-      onDelete={() => setIsConfirmingDelete(true)}
-    />
-  );
+  const actions = <EntryActions onEdit={() => setIsEditing(true)} onDelete={() => setIsConfirmingDelete(true)} />;
 
   const modals = (
     <>
       {isEditing && (
-        <Modal
-          onClose={closeEditing}
-          closeOnBackdrop={false}
-          closeOnEscape={false}
-        >
+        <Modal onClose={closeEditing} closeOnBackdrop={false} closeOnEscape={false}>
           <PublishDiaryForm entry={entry} onClose={closeEditing} />
         </Modal>
       )}
       {isConfirmingDelete && (
-        <Modal
-          onClose={cancelDelete}
-          placement="center"
-          closeOnBackdrop={false}
-        >
-          <DeleteEntrySheet
-            entry={entry}
-            onCancel={cancelDelete}
-            onDeleted={finishDelete}
-          />
+        <Modal onClose={cancelDelete} placement="center" closeOnBackdrop={false}>
+          <DeleteEntrySheet entry={entry} onCancel={cancelDelete} onDeleted={finishDelete} />
         </Modal>
       )}
       {isViewingDetails && (

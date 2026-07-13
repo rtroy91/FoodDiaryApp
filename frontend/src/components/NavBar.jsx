@@ -23,10 +23,8 @@ export function NavBar() {
   const isEntriesRoute = pathname.startsWith("/entries");
   const isFoodMapRoute = pathname === "/food-map";
   const isTopPlacesRoute = pathname === "/top-places";
-  const hasDarkHeaderBg =
-    isHomeRoute || isEntriesRoute || isFoodMapRoute || isTopPlacesRoute;
-  const usesContainedPageScroll =
-    isHomeRoute || isEntriesRoute || isFoodMapRoute || isTopPlacesRoute;
+  const hasDarkHeaderBg = isHomeRoute || isEntriesRoute || isFoodMapRoute || isTopPlacesRoute;
+  const usesContainedPageScroll = isHomeRoute || isEntriesRoute || isFoodMapRoute || isTopPlacesRoute;
 
   const shellClassName = [
     "relative flex h-dvh flex-col overflow-hidden",
@@ -47,9 +45,7 @@ export function NavBar() {
 
   function handleShellScroll(event) {
     const nextIsScrolled = event.currentTarget.scrollTop > 25;
-    setIsScrolled((currentIsScrolled) =>
-      currentIsScrolled === nextIsScrolled ? currentIsScrolled : nextIsScrolled,
-    );
+    setIsScrolled((currentIsScrolled) => (currentIsScrolled === nextIsScrolled ? currentIsScrolled : nextIsScrolled));
   }
 
   return (
@@ -69,12 +65,7 @@ export function NavBar() {
               className="flex shrink-0 items-center gap-2 font-['Fraunces'] text-xl font-light text-white no-underline"
               aria-label="DiarEat home"
             >
-              <img
-                src="/favicon.svg"
-                alt=""
-                className="h-8 w-8 shrink-0"
-                aria-hidden="true"
-              />
+              <img src="/favicon.svg" alt="" className="h-8 w-8 shrink-0" aria-hidden="true" />
               <span className="hidden min-[420px]:inline">DiarEat</span>
             </NavLink>
 
@@ -89,9 +80,7 @@ export function NavBar() {
 
                     return [
                       "whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium no-underline transition-colors duration-200 sm:px-4 sm:text-sm",
-                      isActive || isHomeActive
-                        ? "bg-[#A3E635] text-stone-900"
-                        : "text-stone-300 hover:text-white",
+                      isActive || isHomeActive ? "bg-[#A3E635] text-stone-900" : "text-stone-300 hover:text-white",
                     ].join(" ");
                   }}
                 >

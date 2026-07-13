@@ -1,26 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import L from "leaflet";
-import {
-  MapContainer,
-  Marker,
-  TileLayer,
-  useMap,
-  useMapEvents,
-} from "react-leaflet";
+import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import {
-  Image as ImageIcon,
-  LocateFixed,
-  MapPin,
-  Search,
-  Store,
-  X,
-} from "lucide-react";
-import {
-  useCreateRestaurant,
-  useUpdateRestaurant,
-} from "../hooks/useDiaryData";
+import { Image as ImageIcon, LocateFixed, MapPin, Search, Store, X } from "lucide-react";
+import { useCreateRestaurant, useUpdateRestaurant } from "../hooks/useDiaryData";
 import { uploadPhoto } from "../api/entries";
 import { useBataanCities, useBarangaysByCity } from "../hooks/usePsgc";
 import { BATAAN_PROVINCE_NAME } from "../api/psgc";
@@ -144,9 +128,7 @@ function LocationPinMap({ pinLocation, onMovePin }) {
 function PhotoIconUpload({ label, preview, inputRef, icon: Icon, onChange }) {
   return (
     <div>
-      <p className="mb-2 text-xs font-medium uppercase text-[#8C7B6A]">
-        {label}
-      </p>
+      <p className="mb-2 text-xs font-medium uppercase text-[#8C7B6A]">{label}</p>
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
@@ -154,11 +136,7 @@ function PhotoIconUpload({ label, preview, inputRef, icon: Icon, onChange }) {
         aria-label={`Upload ${label.toLowerCase()}`}
         title={`Upload ${label.toLowerCase()}`}
       >
-        {preview ? (
-          <img src={preview} alt="" className="h-full w-full object-cover" />
-        ) : (
-          <Icon size={28} />
-        )}
+        {preview ? <img src={preview} alt="" className="h-full w-full object-cover" /> : <Icon size={28} />}
       </button>
       <input
         ref={inputRef}
@@ -201,19 +179,8 @@ function findBestLocationMatch(value, options) {
 function getAddressParts(result) {
   const address = result?.address ?? {};
   return {
-    city:
-      address.city ??
-      address.town ??
-      address.municipality ??
-      address.county ??
-      "",
-    barangay:
-      address.suburb ??
-      address.neighbourhood ??
-      address.quarter ??
-      address.village ??
-      address.hamlet ??
-      "",
+    city: address.city ?? address.town ?? address.municipality ?? address.county ?? "",
+    barangay: address.suburb ?? address.neighbourhood ?? address.quarter ?? address.village ?? address.hamlet ?? "",
   };
 }
 
@@ -225,11 +192,7 @@ export function RestaurantForm({ restaurant, onClose }) {
   const storePhotoInputRef = useRef(null);
   const isEditing = Boolean(restaurant?.id);
 
-  const {
-    data: cities = [],
-    isLoading: loadingCities,
-    isError: citiesError,
-  } = useBataanCities();
+  const { data: cities = [], isLoading: loadingCities, isError: citiesError } = useBataanCities();
 
   const [form, setForm] = useState({
     name: restaurant?.name ?? "",
@@ -239,21 +202,15 @@ export function RestaurantForm({ restaurant, onClose }) {
     barangay: restaurant?.barangay ?? "",
     category: restaurant?.category ?? "",
     promo: restaurant?.promo ?? "",
-    openingHours: restaurant?.openingHours?.length
-      ? restaurant.openingHours
-      : createOpeningHours(),
+    openingHours: restaurant?.openingHours?.length ? restaurant.openingHours : createOpeningHours(),
     budget: restaurant?.budget ?? "",
     latitude: restaurant?.latitude ?? null,
     longitude: restaurant?.longitude ?? null,
   });
   const [menuPhotoFile, setMenuPhotoFile] = useState(null);
-  const [menuPhotoPreview, setMenuPhotoPreview] = useState(
-    restaurant?.menuPhotoUrl ?? null,
-  );
+  const [menuPhotoPreview, setMenuPhotoPreview] = useState(restaurant?.menuPhotoUrl ?? null);
   const [storePhotoFile, setStorePhotoFile] = useState(null);
-  const [storePhotoPreview, setStorePhotoPreview] = useState(
-    restaurant?.storePhotoUrl ?? null,
-  );
+  const [storePhotoPreview, setStorePhotoPreview] = useState(restaurant?.storePhotoUrl ?? null);
   const [errorMessage, setErrorMessage] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -273,19 +230,12 @@ export function RestaurantForm({ restaurant, onClose }) {
       return null;
     }
 
-    return (
-      cities.find(
-        (item) =>
-          normalizeLocationText(item.name) ===
-          normalizeLocationText(form.cityName),
-      ) ?? null
-    );
+    return cities.find((item) => normalizeLocationText(item.name) === normalizeLocationText(form.cityName)) ?? null;
   }, [cities, form.cityCode, form.cityName, isEditing]);
 
   const resolvedCityCode = form.cityCode || matchedCity?.code || "";
 
-  const { data: barangays = [], isLoading: loadingBarangays } =
-    useBarangaysByCity(resolvedCityCode);
+  const { data: barangays = [], isLoading: loadingBarangays } = useBarangaysByCity(resolvedCityCode);
 
   const cityOptions = useMemo(
     () =>
@@ -295,7 +245,7 @@ export function RestaurantForm({ restaurant, onClose }) {
           value: city.code,
           label: city.name,
         })),
-    [cities],
+    [cities]
   );
 
   const barangayOptions = useMemo(
@@ -305,8 +255,8 @@ export function RestaurantForm({ restaurant, onClose }) {
         .map((brgy) => ({
           value: brgy.name,
           label: brgy.name,
-      })),
-    [barangays],
+        })),
+    [barangays]
   );
 
   const resolvedBarangay = useMemo(() => {
@@ -315,7 +265,7 @@ export function RestaurantForm({ restaurant, onClose }) {
 
     return findBestLocationMatch(
       pendingBarangay,
-      barangays.map((item) => item.name),
+      barangays.map((item) => item.name)
     );
   }, [barangays, form.barangay, pendingBarangay]);
 
@@ -359,7 +309,7 @@ export function RestaurantForm({ restaurant, onClose }) {
               open: isOpen ? (item.open ?? "09:00") : null,
               close: isOpen ? (item.close ?? "18:00") : null,
             }
-          : item,
+          : item
       );
 
       return { ...prev, openingHours };
@@ -369,9 +319,7 @@ export function RestaurantForm({ restaurant, onClose }) {
   function handleOpeningTimeChange(day, field, value) {
     setForm((prev) => ({
       ...prev,
-      openingHours: prev.openingHours.map((item) =>
-        item.day === day ? { ...item, [field]: value || null } : item,
-      ),
+      openingHours: prev.openingHours.map((item) => (item.day === day ? { ...item, [field]: value || null } : item)),
     }));
   }
 
@@ -411,16 +359,13 @@ export function RestaurantForm({ restaurant, onClose }) {
     const { city, barangay } = getAddressParts(result);
     const cityMatch = findBestLocationMatch(
       city,
-      cities.map((item) => item.name),
+      cities.map((item) => item.name)
     );
 
     setForm((prev) => ({
       ...prev,
       address: result.display_name ?? prev.address,
-      cityCode: cityMatch
-        ? (cities.find((item) => item.name === cityMatch)?.code ??
-          prev.cityCode)
-        : prev.cityCode,
+      cityCode: cityMatch ? (cities.find((item) => item.name === cityMatch)?.code ?? prev.cityCode) : prev.cityCode,
       cityName: cityMatch || prev.cityName,
       barangay: "",
       latitude: result.lat ? Number(result.lat) : prev.latitude,
@@ -439,9 +384,7 @@ export function RestaurantForm({ restaurant, onClose }) {
       addressdetails: "1",
     });
 
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?${params.toString()}`,
-    );
+    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?${params.toString()}`);
 
     return response.json();
   }
@@ -484,9 +427,7 @@ export function RestaurantForm({ restaurant, onClose }) {
         countrycodes: "ph",
       });
 
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?${params.toString()}`,
-      );
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?${params.toString()}`);
       const data = await response.json();
       setLocationResults(Array.isArray(data) ? data : []);
       setLocationStatus(data?.length ? "" : "No matching location found.");
@@ -512,9 +453,7 @@ export function RestaurantForm({ restaurant, onClose }) {
             addressdetails: "1",
           });
 
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?${params.toString()}`,
-          );
+          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?${params.toString()}`);
           const data = await response.json();
           if (data?.display_name) {
             setPinLocation({
@@ -531,7 +470,7 @@ export function RestaurantForm({ restaurant, onClose }) {
         }
       },
       () => setLocationStatus("Allow location access to pin your spot."),
-      { enableHighAccuracy: true, timeout: 10000 },
+      { enableHighAccuracy: true, timeout: 10000 }
     );
   }
 
@@ -583,10 +522,7 @@ export function RestaurantForm({ restaurant, onClose }) {
   return (
     <div className="w-full max-w-2xl rounded-3xl bg-white shadow-[0_8px_40px_rgba(28,17,7,0.12)]">
       <div className="flex items-center justify-between border-b border-[#F0EAE0] px-6 py-5">
-        <h2
-          className="text-xl font-semibold text-[#1C1107]"
-          style={{ fontFamily: '"Fraunces", serif' }}
-        >
+        <h2 className="text-xl font-semibold text-[#1C1107]" style={{ fontFamily: '"Fraunces", serif' }}>
           {isEditing ? "Edit place" : "Add a new place"}
         </h2>
         <button
@@ -604,17 +540,14 @@ export function RestaurantForm({ restaurant, onClose }) {
           {["Place Details", "Directory Extras"].map((step, index) => (
             <div
               key={step}
-              className={`h-1.5 flex-1 rounded-full ${
-                index <= currentStep ? "bg-[#E04B39]" : "bg-[#E8DFC8]"
-              }`}
+              className={`h-1.5 flex-1 rounded-full ${index <= currentStep ? "bg-[#E04B39]" : "bg-[#E8DFC8]"}`}
               aria-label={step}
             />
           ))}
         </div>
 
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8C7B6A]">
-          Step {currentStep + 1} of 2 -{" "}
-          {currentStep === 0 ? "Place Details" : "Directory Extras"}
+          Step {currentStep + 1} of 2 - {currentStep === 0 ? "Place Details" : "Directory Extras"}
         </p>
 
         {currentStep === 0 ? (
@@ -629,9 +562,7 @@ export function RestaurantForm({ restaurant, onClose }) {
 
             <div>
               <div className="mb-1.5 flex items-center justify-between gap-3">
-                <label className="text-[11px] font-semibold uppercase tracking-widest text-[#7A6A54]">
-                  Address
-                </label>
+                <label className="text-[11px] font-semibold uppercase tracking-widest text-[#7A6A54]">Address</label>
               </div>
               <div className="flex rounded-2xl border border-[#E8DFC8] bg-[#FFFBF4] transition focus-within:border-[#E89951]">
                 <input
@@ -652,18 +583,12 @@ export function RestaurantForm({ restaurant, onClose }) {
               </div>
               {form.latitude && form.longitude && (
                 <p className="mt-1 text-[10px] text-stone-500">
-                  Pinned at {form.latitude.toFixed(5)},{" "}
-                  {form.longitude.toFixed(5)}
+                  Pinned at {form.latitude.toFixed(5)}, {form.longitude.toFixed(5)}
                 </p>
               )}
             </div>
 
-            <FormInput
-              label="Province"
-              value={BATAAN_PROVINCE_NAME}
-              onChange={() => {}}
-              disabled
-            />
+            <FormInput label="Province" value={BATAAN_PROVINCE_NAME} onChange={() => {}} disabled />
 
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -676,11 +601,7 @@ export function RestaurantForm({ restaurant, onClose }) {
                   placeholder={loadingCities ? "Loading..." : "Select city"}
                   options={cityOptions}
                 />
-                {citiesError && (
-                  <p className="mt-1 text-[10px] text-[#E04B39]">
-                    Couldn't load cities.
-                  </p>
-                )}
+                {citiesError && <p className="mt-1 text-[10px] text-[#E04B39]">Couldn't load cities.</p>}
               </div>
 
               <SelectInput
@@ -689,9 +610,7 @@ export function RestaurantForm({ restaurant, onClose }) {
                 onChange={handleBarangayChange}
                 required
                 disabled={!resolvedCityCode || loadingBarangays}
-                placeholder={
-                  loadingBarangays ? "Loading..." : "Select barangay"
-                }
+                placeholder={loadingBarangays ? "Loading..." : "Select barangay"}
                 options={barangayOptions}
               />
             </div>
@@ -730,14 +649,10 @@ export function RestaurantForm({ restaurant, onClose }) {
             />
 
             <div className="rounded-2xl border border-[#E8DFC8] bg-[#FFFBF4] p-4">
-              <p className="mb-3 text-xs font-medium uppercase text-[#8C7B6A]">
-                Opening Hours
-              </p>
+              <p className="mb-3 text-xs font-medium uppercase text-[#8C7B6A]">Opening Hours</p>
               <div className="max-h-52 space-y-2 overflow-y-auto pr-1">
                 {WEEK_DAYS.map(({ day, label, short }) => {
-                  const hours = form.openingHours.find(
-                    (item) => item.day === day,
-                  );
+                  const hours = form.openingHours.find((item) => item.day === day);
                   const isOpen = Boolean(hours?.open || hours?.close);
 
                   return (
@@ -749,9 +664,7 @@ export function RestaurantForm({ restaurant, onClose }) {
                         <input
                           type="checkbox"
                           checked={isOpen}
-                          onChange={(e) =>
-                            handleOpeningDayToggle(day, e.target.checked)
-                          }
+                          onChange={(e) => handleOpeningDayToggle(day, e.target.checked)}
                           className="h-4 w-4 rounded border-[#D8CDBB] accent-[#E04B39]"
                         />
                         <span title={label}>{short}</span>
@@ -759,9 +672,7 @@ export function RestaurantForm({ restaurant, onClose }) {
                       <input
                         type="time"
                         value={hours?.open ?? ""}
-                        onChange={(e) =>
-                          handleOpeningTimeChange(day, "open", e.target.value)
-                        }
+                        onChange={(e) => handleOpeningTimeChange(day, "open", e.target.value)}
                         disabled={!isOpen}
                         className="min-w-0 rounded-xl border border-[#D8CDBB] bg-[#F5EEE4] px-3 py-2 text-sm text-[#1F1B16] outline-none transition focus:border-[#E04B39]/20 focus:ring-2 focus:ring-[#E04B39]/20 disabled:opacity-45"
                         aria-label={`${label} opening time`}
@@ -769,9 +680,7 @@ export function RestaurantForm({ restaurant, onClose }) {
                       <input
                         type="time"
                         value={hours?.close ?? ""}
-                        onChange={(e) =>
-                          handleOpeningTimeChange(day, "close", e.target.value)
-                        }
+                        onChange={(e) => handleOpeningTimeChange(day, "close", e.target.value)}
                         disabled={!isOpen}
                         className="min-w-0 rounded-xl border border-[#D8CDBB] bg-[#F5EEE4] px-3 py-2 text-sm text-[#1F1B16] outline-none transition focus:border-[#E04B39]/20 focus:ring-2 focus:ring-[#E04B39]/20 disabled:opacity-45"
                         aria-label={`${label} closing time`}
@@ -812,11 +721,7 @@ export function RestaurantForm({ restaurant, onClose }) {
             <button
               type="button"
               onClick={() => setCurrentStep(0)}
-              disabled={
-                isSaving ||
-                createRestaurant.isPending ||
-                updateRestaurant.isPending
-              }
+              disabled={isSaving || createRestaurant.isPending || updateRestaurant.isPending}
               className="rounded-2xl border border-[#E8DFC8] bg-[#FFFBF4] py-3.5 text-sm font-semibold text-[#5A4A34] transition hover:bg-[#F5F0E8] disabled:cursor-not-allowed disabled:opacity-70"
             >
               Back
@@ -847,15 +752,10 @@ export function RestaurantForm({ restaurant, onClose }) {
           <div className="w-full max-w-lg rounded-3xl bg-white shadow-[0_8px_40px_rgba(28,17,7,0.18)]">
             <div className="flex items-center justify-between border-b border-[#F0EAE0] px-5 py-4">
               <div>
-                <h3
-                  className="text-lg font-semibold text-[#1C1107]"
-                  style={{ fontFamily: '"Fraunces", serif' }}
-                >
+                <h3 className="text-lg font-semibold text-[#1C1107]" style={{ fontFamily: '"Fraunces", serif' }}>
                   Pin location
                 </h3>
-                <p className="mt-0.5 text-xs text-stone-500">
-                  Move the pin, then use it to fill the location details.
-                </p>
+                <p className="mt-0.5 text-xs text-stone-500">Move the pin, then use it to fill the location details.</p>
               </div>
               <button
                 type="button"
@@ -897,10 +797,7 @@ export function RestaurantForm({ restaurant, onClose }) {
               </button>
 
               <div className="relative overflow-hidden rounded-2xl border border-[#E8DFC8] bg-[#F5F0E8]">
-                <LocationPinMap
-                  pinLocation={pinLocation}
-                  onMovePin={setPinLocation}
-                />
+                <LocationPinMap pinLocation={pinLocation} onMovePin={setPinLocation} />
                 <div className="absolute bottom-3 left-3 rounded-full bg-white/90 px-3 py-1.5 text-[10px] font-semibold text-stone-600 shadow">
                   Click the map or drag the pin
                 </div>
@@ -919,11 +816,7 @@ export function RestaurantForm({ restaurant, onClose }) {
                 </button>
               </div>
 
-              {locationStatus && (
-                <p className="text-center text-xs text-stone-500">
-                  {locationStatus}
-                </p>
-              )}
+              {locationStatus && <p className="text-center text-xs text-stone-500">{locationStatus}</p>}
 
               <div className="max-h-64 space-y-2 overflow-auto">
                 {locationResults.map((result) => (
@@ -942,9 +835,7 @@ export function RestaurantForm({ restaurant, onClose }) {
                     <p className="text-sm font-semibold text-[#1C1107]">
                       {result.name || result.display_name?.split(",")[0]}
                     </p>
-                    <p className="mt-1 text-xs leading-snug text-stone-500">
-                      {result.display_name}
-                    </p>
+                    <p className="mt-1 text-xs leading-snug text-stone-500">{result.display_name}</p>
                   </button>
                 ))}
               </div>

@@ -8,9 +8,7 @@ const psgcClient = axios.create({
 export const BATAAN_PROVINCE_NAME = "Bataan";
 
 export async function getCitiesOfBataan() {
-  const { data } = await psgcClient.get(
-    `/provinces/${BATAAN_PROVINCE_NAME}/cities-municipalities`,
-  );
+  const { data } = await psgcClient.get(`/provinces/${BATAAN_PROVINCE_NAME}/cities-municipalities`);
 
   return Array.isArray(data) ? data : data.data || [];
 }
@@ -18,9 +16,7 @@ export async function getCitiesOfBataan() {
 export async function getBarangaysByCity(cityOrMunicipalityCode) {
   if (!cityOrMunicipalityCode) return [];
 
-  const { data } = await psgcClient.get(
-    `/cities-municipalities/${cityOrMunicipalityCode}/barangays`,
-  );
+  const { data } = await psgcClient.get(`/cities-municipalities/${cityOrMunicipalityCode}/barangays`);
 
   return Array.isArray(data) ? data : data.data || [];
 }

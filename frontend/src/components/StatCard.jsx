@@ -11,10 +11,7 @@ export function StatCard({ value, label, icon: Icon, iconColor, iconBgColor }) {
           <Icon size={16} color={iconColor} />
         </div>
       )}
-      <p
-        className="text-2xl font-semibold leading-none text-[#1C1107]"
-        style={{ fontFamily: '"Fraunces", serif' }}
-      >
+      <p className="text-2xl font-semibold leading-none text-[#1C1107]" style={{ fontFamily: '"Fraunces", serif' }}>
         {value}
       </p>
       <p
@@ -38,13 +35,7 @@ export function StatCardSkeleton({ icon: Icon, iconColor, iconBgColor }) {
           <Icon size={16} color={iconColor} />
         </div>
       )}
-      <Skeleton
-        width={24}
-        height={32}
-        borderRadius={6}
-        baseColor="#e7dfd2"
-        highlightColor="#f8f4ec"
-      />
+      <Skeleton width={24} height={32} borderRadius={6} baseColor="#e7dfd2" highlightColor="#f8f4ec" />
       <Skeleton
         className="mt-2 block"
         width={80}

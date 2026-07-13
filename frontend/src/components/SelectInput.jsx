@@ -40,9 +40,7 @@ export function SelectInput({
           {children}
         </select>
 
-        <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xl text-[#8C7B6A]">
-          ▾
-        </span>
+        <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xl text-[#8C7B6A]">▾</span>
       </div>
     </label>
   );

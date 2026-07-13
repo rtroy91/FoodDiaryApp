@@ -33,11 +33,7 @@ function formatDate(value) {
 }
 
 function getLocation(restaurant) {
-  return [
-    restaurant?.barangay ? `Brgy. ${restaurant.barangay}` : null,
-    restaurant?.city,
-    restaurant?.province,
-  ]
+  return [restaurant?.barangay ? `Brgy. ${restaurant.barangay}` : null, restaurant?.city, restaurant?.province]
     .filter(Boolean)
     .join(", ");
 }
@@ -46,11 +42,7 @@ function EntryStars({ rating }) {
   return (
     <div className="flex items-center gap-1 text-[#F4B21B]">
       {[1, 2, 3, 4, 5].map((star) => (
-        <Star
-          key={star}
-          size={20}
-          fill={star <= (rating ?? 0) ? "currentColor" : "none"}
-        />
+        <Star key={star} size={20} fill={star <= (rating ?? 0) ? "currentColor" : "none"} />
       ))}
     </div>
   );
@@ -62,12 +54,8 @@ function DetailTile({ icon: Icon, label, value }) {
       <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-white/70 text-[#6F5130]">
         <Icon size={17} />
       </div>
-      <p className="font-['Plus_Jakarta_Sans'] text-xs text-stone-500">
-        {label}
-      </p>
-      <p className="mt-1 font-['Plus_Jakarta_Sans'] text-sm font-bold text-[#1C1107]">
-        {value || "Not added"}
-      </p>
+      <p className="font-['Plus_Jakarta_Sans'] text-xs text-stone-500">{label}</p>
+      <p className="mt-1 font-['Plus_Jakarta_Sans'] text-sm font-bold text-[#1C1107]">{value || "Not added"}</p>
     </div>
   );
 }
@@ -76,10 +64,7 @@ export function EntryDetailPage() {
   const { id } = useParams();
   const { data: entries, isLoading } = useAllEntries();
 
-  const entry = useMemo(
-    () => entries?.find((item) => String(item.id) === String(id)),
-    [entries, id],
-  );
+  const entry = useMemo(() => entries?.find((item) => String(item.id) === String(id)), [entries, id]);
 
   const restaurant = entry?.restaurant;
   const location = getLocation(restaurant);
@@ -95,16 +80,10 @@ export function EntryDetailPage() {
   if (!entry) {
     return (
       <div className="min-h-screen bg-[#F5F0E8] px-4 py-16 text-center">
-        <p
-          className="mb-3 text-2xl text-[#1C1107]"
-          style={{ fontFamily: '"Fraunces", serif' }}
-        >
+        <p className="mb-3 text-2xl text-[#1C1107]" style={{ fontFamily: '"Fraunces", serif' }}>
           Diary entry not found
         </p>
-        <Link
-          to="/entries"
-          className="font-['Plus_Jakarta_Sans'] text-sm font-semibold text-[#E89951] no-underline"
-        >
+        <Link to="/entries" className="font-['Plus_Jakarta_Sans'] text-sm font-semibold text-[#E89951] no-underline">
           Back to entries
         </Link>
       </div>
@@ -112,10 +91,7 @@ export function EntryDetailPage() {
   }
 
   return (
-    <div
-      className="min-h-screen bg-[#F5F0E8]"
-      style={{ fontFamily: '"Geist Mono", monospace' }}
-    >
+    <div className="min-h-screen bg-[#F5F0E8]" style={{ fontFamily: '"Geist Mono", monospace' }}>
       <header className="relative overflow-hidden bg-[#1C1107]">
         <div className="absolute inset-0" aria-hidden="true">
           <div className="absolute left-8 top-10 h-24 w-24 rounded-full border border-[#F0E76F]/15" />
@@ -123,10 +99,7 @@ export function EntryDetailPage() {
           <div className="absolute bottom-0 left-1/3 h-24 w-56 rounded-t-full border border-[#A5CF83]/10" />
         </div>
 
-        <div
-          className="relative z-10 mx-auto px-4 pb-14 pt-8"
-          style={pageShellStyle}
-        >
+        <div className="relative z-10 mx-auto px-4 pb-14 pt-8" style={pageShellStyle}>
           <Link
             to="/entries"
             className="mb-9 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 font-['Plus_Jakarta_Sans'] text-xs font-semibold text-white/70 no-underline transition hover:bg-white/10"
@@ -147,27 +120,19 @@ export function EntryDetailPage() {
                 {restaurant?.name ?? "Food memory"}
               </h1>
               <p className="mt-4 max-w-2xl font-['Plus_Jakarta_Sans'] text-base leading-7 text-white/62">
-                A single visit record with the photo, rating, place, date, and
-                notes from that food memory.
+                A single visit record with the photo, rating, place, date, and notes from that food memory.
               </p>
             </div>
 
             <div className="rounded-3xl border border-white/10 bg-white/6 p-4 text-white shadow-[0_18px_46px_rgba(0,0,0,0.22)] backdrop-blur">
-              <p className="font-['Plus_Jakarta_Sans'] text-xs text-white/50">
-                Visit rating
-              </p>
+              <p className="font-['Plus_Jakarta_Sans'] text-xs text-white/50">Visit rating</p>
               <div className="mt-2 flex items-end gap-3">
-                <p
-                  className="text-6xl font-light leading-none"
-                  style={{ fontFamily: '"Fraunces", serif' }}
-                >
+                <p className="text-6xl font-light leading-none" style={{ fontFamily: '"Fraunces", serif' }}>
                   {entry.rating ?? "-"}
                 </p>
                 <div className="pb-1">
                   <EntryStars rating={entry.rating} />
-                  <p className="mt-1 font-['Plus_Jakarta_Sans'] text-xs text-white/50">
-                    {formatDate(entry.visitedAt)}
-                  </p>
+                  <p className="mt-1 font-['Plus_Jakarta_Sans'] text-xs text-white/50">{formatDate(entry.visitedAt)}</p>
                 </div>
               </div>
             </div>
@@ -203,21 +168,9 @@ export function EntryDetailPage() {
             </p>
 
             <div className="mt-6 grid gap-3">
-              <DetailTile
-                icon={CalendarDays}
-                label="Visited"
-                value={formatDate(entry.visitedAt)}
-              />
-              <DetailTile
-                icon={MapPin}
-                label="Place"
-                value={restaurant?.name}
-              />
-              <DetailTile
-                icon={ReceiptText}
-                label="Entry type"
-                value="Food memory"
-              />
+              <DetailTile icon={CalendarDays} label="Visited" value={formatDate(entry.visitedAt)} />
+              <DetailTile icon={MapPin} label="Place" value={restaurant?.name} />
+              <DetailTile icon={ReceiptText} label="Entry type" value="Food memory" />
             </div>
           </div>
         </section>
@@ -225,24 +178,17 @@ export function EntryDetailPage() {
         <section className="mt-6 grid gap-5 md:grid-cols-3">
           <div className="rounded-3xl border border-[#E8DFC8] bg-[#FFFBF4] p-5">
             <MessageSquareText size={19} className="mb-3 text-[#6F5130]" />
-            <p
-              className="text-2xl font-light text-[#1C1107]"
-              style={{ fontFamily: '"Fraunces", serif' }}
-            >
+            <p className="text-2xl font-light text-[#1C1107]" style={{ fontFamily: '"Fraunces", serif' }}>
               What to remember
             </p>
             <p className="mt-2 font-['Plus_Jakarta_Sans'] text-sm leading-6 text-stone-500">
-              This is the personal note for one visit, separate from the public
-              food place profile.
+              This is the personal note for one visit, separate from the public food place profile.
             </p>
           </div>
 
           <div className="rounded-3xl border border-[#E8DFC8] bg-[#FFFBF4] p-5">
             <UtensilsCrossed size={19} className="mb-3 text-[#6F5130]" />
-            <p
-              className="text-2xl font-light text-[#1C1107]"
-              style={{ fontFamily: '"Fraunces", serif' }}
-            >
+            <p className="text-2xl font-light text-[#1C1107]" style={{ fontFamily: '"Fraunces", serif' }}>
               Place details
             </p>
             <p className="mt-2 font-['Plus_Jakarta_Sans'] text-sm leading-6 text-stone-500">
@@ -255,15 +201,11 @@ export function EntryDetailPage() {
             className="rounded-3xl border border-[#E8DFC8] bg-[#1C1107] p-5 text-white no-underline transition hover:bg-[#2F3A4D]"
           >
             <ArrowLeft size={19} className="mb-3 rotate-180 text-[#F0E76F]" />
-            <p
-              className="text-2xl font-light"
-              style={{ fontFamily: '"Fraunces", serif' }}
-            >
+            <p className="text-2xl font-light" style={{ fontFamily: '"Fraunces", serif' }}>
               Open food place
             </p>
             <p className="mt-2 font-['Plus_Jakarta_Sans'] text-sm leading-6 text-white/55">
-              See ratings, menu notes, address, visitor count, and entries for
-              this place.
+              See ratings, menu notes, address, visitor count, and entries for this place.
             </p>
           </Link>
         </section>

@@ -7,9 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "format": "node scripts/prettier-changed.mjs --write",
-    "format:check": "node scripts/prettier-changed.mjs --check",
-    "lint": "eslint . --cache --cache-location node_modules/.cache/eslint",
+    "format": "prettier --write .",
+    "lint:staged": "lint-staged",
     "prepare": "husky"
   },
   "dependencies": {
@@ -40,6 +39,10 @@
     "vite": "^5.3.4"
   },
   "lint-staged": {
-  "**/*.{js,jsx,ts,tsx,json,css,md}": "prettier --write"
-}
+    "*.{js,jsx,mjs,cjs}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{css,html,json,md,yml,yaml}": "prettier --write"
+  }
 }

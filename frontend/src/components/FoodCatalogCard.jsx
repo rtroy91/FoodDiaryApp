@@ -4,11 +4,7 @@ import { ImageIcon, MapPin, Star, UtensilsCrossed } from "lucide-react";
 import { categoryLabel } from "../utils/restaurants";
 
 function getLocation(restaurant) {
-  return [
-    restaurant?.barangay ? "Brgy. " + restaurant.barangay : null,
-    restaurant?.city,
-    restaurant?.province,
-  ]
+  return [restaurant?.barangay ? "Brgy. " + restaurant.barangay : null, restaurant?.city, restaurant?.province]
     .filter(Boolean)
     .join(", ");
 }
@@ -38,19 +34,13 @@ function FoodCatalogCardContent({ restaurant }) {
   const reach = restaurant.visitCount ?? 0;
   const thumbnailUrl = getThumbnailUrl(restaurant);
   const category = categoryLabel(restaurant.category);
-  const visitsLabel = `${formatReach(reach)} ${
-    reach > 1 ? "visits" : "visit"
-  }`;
+  const visitsLabel = `${formatReach(reach)} ${reach > 1 ? "visits" : "visit"}`;
 
   return (
     <>
       <div className="h-20 w-20 overflow-hidden rounded-xl border border-stone-100 bg-[#F5EEE4]">
         {thumbnailUrl ? (
-          <img
-            src={thumbnailUrl}
-            alt={restaurant.name}
-            className="h-full w-full object-cover"
-          />
+          <img src={thumbnailUrl} alt={restaurant.name} className="h-full w-full object-cover" />
         ) : (
           <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-stone-400">
             <UtensilsCrossed size={22} />
@@ -101,13 +91,7 @@ export function FoodCatalogCardSkeleton() {
       className="grid w-full min-w-0 grid-cols-[5rem_minmax(0,1fr)] items-center gap-4 overflow-hidden rounded-2xl border border-stone-100 bg-white px-3 py-2.5 text-left shadow-none"
       aria-hidden="true"
     >
-      <Skeleton
-        width={80}
-        height={80}
-        borderRadius={12}
-        baseColor="#e7dfd2"
-        highlightColor="#f8f4ec"
-      />
+      <Skeleton width={80} height={80} borderRadius={12} baseColor="#e7dfd2" highlightColor="#f8f4ec" />
 
       <div className="min-w-0 text-left">
         <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
@@ -125,34 +109,16 @@ export function FoodCatalogCardSkeleton() {
           <div className="flex shrink-0 items-center justify-end gap-2">
             <span className="inline-flex items-center gap-1 font-['Plus_Jakarta_Sans'] text-xs font-bold text-amber-500">
               <Star size={12} fill="currentColor" />
-              <Skeleton
-                width={24}
-                height={14}
-                borderRadius={6}
-                baseColor="#e7dfd2"
-                highlightColor="#f8f4ec"
-              />
+              <Skeleton width={24} height={14} borderRadius={6} baseColor="#e7dfd2" highlightColor="#f8f4ec" />
             </span>
-            <Skeleton
-              width={68}
-              height={22}
-              borderRadius={999}
-              baseColor="#e7dfd2"
-              highlightColor="#f8f4ec"
-            />
+            <Skeleton width={68} height={22} borderRadius={999} baseColor="#e7dfd2" highlightColor="#f8f4ec" />
           </div>
         </div>
 
         <div className="mt-2 space-y-1">
           <div className="flex min-w-0 items-center gap-1.5">
             <MapPin size={13} className="shrink-0 text-stone-400" />
-            <Skeleton
-              width={180}
-              height={14}
-              borderRadius={6}
-              baseColor="#f0ebe2"
-              highlightColor="#fbf8f2"
-            />
+            <Skeleton width={180} height={14} borderRadius={6} baseColor="#f0ebe2" highlightColor="#fbf8f2" />
           </div>
         </div>
 
@@ -172,12 +138,8 @@ export function FoodCatalogCardSkeleton() {
 export function FoodCatalogCard({ restaurant, isSelected = false, onSelect }) {
   const cardClassName = [
     "grid w-full min-w-0 cursor-pointer grid-cols-[5rem_minmax(0,1fr)] items-center gap-4 overflow-hidden rounded-2xl border bg-white px-3 py-2.5 text-left shadow-none transition-all hover:bg-stone-50",
-    isSelected
-      ? "border-[#E04B39]/40 ring-2 ring-[#E04B39]/10"
-      : "border-stone-100",
-    onSelect
-      ? "outline-none focus-visible:ring-2 focus-visible:ring-[#E04B39]/25"
-      : "",
+    isSelected ? "border-[#E04B39]/40 ring-2 ring-[#E04B39]/10" : "border-stone-100",
+    onSelect ? "outline-none focus-visible:ring-2 focus-visible:ring-[#E04B39]/25" : "",
   ].join(" ");
 
   function handleKeyDown(event) {
@@ -204,10 +166,7 @@ export function FoodCatalogCard({ restaurant, isSelected = false, onSelect }) {
   }
 
   return (
-    <Link
-      to={`/place-details/${restaurant.id}`}
-      className="block min-w-0 no-underline"
-    >
+    <Link to={`/place-details/${restaurant.id}`} className="block min-w-0 no-underline">
       <div className={cardClassName}>
         <FoodCatalogCardContent restaurant={restaurant} />
       </div>

@@ -2,10 +2,7 @@ import { useMemo, useState } from "react";
 import Skeleton from "react-loading-skeleton";
 import { MapPin, Search, UtensilsCrossed } from "lucide-react";
 import { FoodMap } from "../components/FoodMap";
-import {
-  FoodCatalogCard,
-  FoodCatalogCardSkeleton,
-} from "../components/FoodCatalogCard";
+import { FoodCatalogCard, FoodCatalogCardSkeleton } from "../components/FoodCatalogCard";
 import { PageHeader } from "../components/PageHeader";
 import { SelectInput } from "../components/SelectInput";
 import { useAllEntries, useRestaurantLists } from "../hooks/useDiaryData";
@@ -19,9 +16,7 @@ const pageShellStyle = {
 };
 
 function getCityName(city) {
-  return (
-    city.name ?? city.cityMunicipalityName ?? city.fullName ?? city.code ?? ""
-  );
+  return city.name ?? city.cityMunicipalityName ?? city.fullName ?? city.code ?? "";
 }
 
 function normalizeSearchText(value) {
@@ -58,23 +53,15 @@ function FoodMapSkeleton() {
 }
 
 export function FoodMapPage() {
-  const {
-    data: restaurants = [],
-    isLoading: isLoadingRestaurants,
-    isError,
-  } = useRestaurantLists();
+  const { data: restaurants = [], isLoading: isLoadingRestaurants, isError } = useRestaurantLists();
 
   const { data: entries = [], isLoading: isLoadingEntries } = useAllEntries();
-  const { data: bataanCities = [], isLoading: isLoadingCities } =
-    useBataanCities();
+  const { data: bataanCities = [], isLoading: isLoadingCities } = useBataanCities();
   const [selectedCity, setSelectedCity] = useState("all");
   const [selectedRestaurantId, setSelectedRestaurantId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const places = useMemo(
-    () => buildPlaceStats(restaurants, entries),
-    [restaurants, entries],
-  );
+  const places = useMemo(() => buildPlaceStats(restaurants, entries), [restaurants, entries]);
 
   const cityOptions = useMemo(
     () =>
@@ -85,15 +72,14 @@ export function FoodMapPage() {
         })
         .filter((city) => city.value)
         .sort((a, b) => a.label.localeCompare(b.label)),
-    [bataanCities],
+    [bataanCities]
   );
 
   const filteredRestaurants = useMemo(() => {
     const normalizedSearch = normalizeSearchText(searchTerm);
 
     return places.filter((restaurant) => {
-      const matchesCity =
-        selectedCity === "all" || restaurant.city === selectedCity;
+      const matchesCity = selectedCity === "all" || restaurant.city === selectedCity;
       const searchableText = [
         restaurant.name,
         categoryLabel(restaurant.category),
@@ -130,15 +116,9 @@ export function FoodMapPage() {
       className="flex h-full flex-col overflow-hidden bg-[#F5F0E8]"
       style={{ fontFamily: '"Geist Mono", monospace' }}
     >
-      <PageHeader
-        title="Discover Bataan's Best"
-        subtitle="View all top places pinned across Bataan in one easy map."
-      />
+      <PageHeader title="Discover Bataan's Best" subtitle="View all top places pinned across Bataan in one easy map." />
 
-      <div
-        className="mx-auto flex min-h-0 flex-1 flex-col px-4 pb-4"
-        style={pageShellStyle}
-      >
+      <div className="mx-auto flex min-h-0 flex-1 flex-col px-4 pb-4" style={pageShellStyle}>
         <div className="relative z-20 -mt-8 mb-5 grid shrink-0 gap-3 rounded-3xl border border-[#E8DFC8] bg-stone-50 p-3 shadow-[0_10px_28px_rgba(28,17,7,0.08)] md:grid-cols-[1fr_260px]">
           <div className="flex items-center gap-3 rounded-2xl border border-[#D8CDBB] bg-[#F5EEE4] px-4 py-3 text-sm text-[#5A4A34] transition focus-within:border-[#E04B39]/20 focus-within:ring-2 focus-within:ring-[#E04B39]/20">
             <Search size={16} className="shrink-0 text-stone-400" />
@@ -167,15 +147,8 @@ export function FoodMapPage() {
 
         {!isLoading && !isError && restaurants.length === 0 && (
           <div className="rounded-2xl border border-[#E8DFC8] bg-[#FFFBF4] px-5 py-12 text-center">
-            <UtensilsCrossed
-              size={36}
-              color="#C8B89A"
-              className="mx-auto mb-3"
-            />
-            <p
-              className="mb-1.5 text-xl text-[#1C1107]"
-              style={{ fontFamily: '"Fraunces", serif' }}
-            >
+            <UtensilsCrossed size={36} color="#C8B89A" className="mx-auto mb-3" />
+            <p className="mb-1.5 text-xl text-[#1C1107]" style={{ fontFamily: '"Fraunces", serif' }}>
               No top places yet
             </p>
           </div>
@@ -198,10 +171,7 @@ export function FoodMapPage() {
             <section className="flex min-h-0 min-w-0 flex-col overflow-hidden lg:h-full lg:pr-1">
               <div className="mb-3 flex shrink-0 items-end justify-between gap-3">
                 <div>
-                  <h2
-                    className="mt-1 text-2xl font-light text-[#1C1107]"
-                    style={{ fontFamily: '"Fraunces", serif' }}
-                  >
+                  <h2 className="mt-1 text-2xl font-light text-[#1C1107]" style={{ fontFamily: '"Fraunces", serif' }}>
                     Explore Places
                   </h2>
                 </div>
@@ -217,20 +187,12 @@ export function FoodMapPage() {
                 )}
                 {!isLoading && filteredRestaurants.length === 0 && (
                   <div className="rounded-2xl border border-[#E8DFC8] bg-[#FFFBF4] px-5 py-12 text-center">
-                    <MapPin
-                      size={34}
-                      color="#C8B89A"
-                      className="mx-auto mb-3"
-                    />
-                    <p
-                      className="mb-1.5 text-xl text-[#1C1107]"
-                      style={{ fontFamily: '"Fraunces", serif' }}
-                    >
+                    <MapPin size={34} color="#C8B89A" className="mx-auto mb-3" />
+                    <p className="mb-1.5 text-xl text-[#1C1107]" style={{ fontFamily: '"Fraunces", serif' }}>
                       No results found
                     </p>
                     <p className="text-xs text-stone-500">
-                      Try adjusting your filters or searching for a different
-                      area in Bataan.
+                      Try adjusting your filters or searching for a different area in Bataan.
                     </p>
                   </div>
                 )}

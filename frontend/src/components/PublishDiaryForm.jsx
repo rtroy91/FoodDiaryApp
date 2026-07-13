@@ -1,10 +1,6 @@
 import { useEffect, useId, useMemo, useState } from "react";
 import { Camera, ChevronDown, Clock, MapPin, Star, X } from "lucide-react";
-import {
-  useCreateEntry,
-  useRestaurantLists,
-  useUpdateEntry,
-} from "../hooks/useDiaryData";
+import { useCreateEntry, useRestaurantLists, useUpdateEntry } from "../hooks/useDiaryData";
 import { uploadPhoto } from "../api/entries";
 
 function formatVisitDate(date) {
@@ -31,12 +27,7 @@ function RatingStarButton({ star, rating, onChange }) {
 
   return (
     <span className="relative inline-flex h-7 w-7 items-center justify-center transition hover:scale-110">
-      <Star
-        size={22}
-        className="shrink-0"
-        fill={`url(#${gradientId})`}
-        stroke={strokeColor}
-      >
+      <Star size={22} className="shrink-0" fill={`url(#${gradientId})`} stroke={strokeColor}>
         <defs>
           <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset={`${fillPercent}%`} stopColor="#E89951" />
@@ -84,12 +75,8 @@ export function PublishDiaryForm({ restaurants = [], entry = null, onClose }) {
     caption: entry?.caption ?? "",
   });
 
-  const availableRestaurants = restaurants.length
-    ? restaurants
-    : fetchedRestaurants;
-  const displayedVisitDate = isEditing
-    ? new Date(entry.visitedAt)
-    : currentVisitDate;
+  const availableRestaurants = restaurants.length ? restaurants : fetchedRestaurants;
+  const displayedVisitDate = isEditing ? new Date(entry.visitedAt) : currentVisitDate;
 
   const restaurantOptions = useMemo(() => {
     const options = availableRestaurants.map((restaurant) => ({
@@ -97,10 +84,7 @@ export function PublishDiaryForm({ restaurants = [], entry = null, onClose }) {
       label: restaurant.name,
     }));
 
-    if (
-      entry?.restaurant?.id &&
-      !options.some((option) => option.value === entry.restaurant.id)
-    ) {
+    if (entry?.restaurant?.id && !options.some((option) => option.value === entry.restaurant.id)) {
       options.unshift({
         value: entry.restaurant.id,
         label: entry.restaurant.name,
@@ -146,16 +130,12 @@ export function PublishDiaryForm({ restaurants = [], entry = null, onClose }) {
     e.preventDefault();
     setErrorMessage(null);
 
-    if (
-      (!photoFile && !photoPreview) ||
-      !form.restaurantId ||
-      form.rating === 0
-    ) {
+    if ((!photoFile && !photoPreview) || !form.restaurantId || form.rating === 0) {
       setShowValidation(true);
       setErrorMessage(
         isEditing
           ? "Keep a photo, place, and rating before saving changes."
-          : "Add a photo, choose a place, and rate the visit before publishing.",
+          : "Add a photo, choose a place, and rate the visit before publishing."
       );
       return;
     }
@@ -196,15 +176,14 @@ export function PublishDiaryForm({ restaurants = [], entry = null, onClose }) {
       setErrorMessage(
         isEditing
           ? "We couldn't save your changes. Please try again."
-          : "We couldn't publish your post. Please try again.",
+          : "We couldn't publish your post. Please try again."
       );
     } finally {
       setIsUploading(false);
     }
   }
 
-  const isSaving =
-    createEntry.isPending || updateEntry.isPending || isUploading;
+  const isSaving = createEntry.isPending || updateEntry.isPending || isUploading;
   const showLocationNudge = showValidation && !form.restaurantId;
   const showRatingNudge = showValidation && form.rating === 0;
   const showPhotoNudge = showValidation && !photoFile && !photoPreview;
@@ -230,18 +209,12 @@ export function PublishDiaryForm({ restaurants = [], entry = null, onClose }) {
           <span className="sr-only">Add food photo</span>
           <div
             className={`relative mx-auto aspect-square max-h-72 max-w-72 overflow-hidden rounded-3xl border border-dashed bg-[#F7EFE5] transition ${
-              showPhotoNudge
-                ? "border-[#E04B39] bg-[#FFF2E8]"
-                : "border-[#D8CDBB]"
+              showPhotoNudge ? "border-[#E04B39] bg-[#FFF2E8]" : "border-[#D8CDBB]"
             }`}
           >
             {photoPreview ? (
               <>
-                <img
-                  src={photoPreview}
-                  alt="Selected food preview"
-                  className="h-full w-full object-cover"
-                />
+                <img src={photoPreview} alt="Selected food preview" className="h-full w-full object-cover" />
                 <span className="absolute bottom-3 left-3 rounded-full bg-black/55 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm">
                   Change photo
                 </span>
@@ -251,17 +224,10 @@ export function PublishDiaryForm({ restaurants = [], entry = null, onClose }) {
                 <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-[0_10px_30px_rgba(28,17,7,0.10)]">
                   <Camera size={24} />
                 </span>
-                <span className="font-['Plus_Jakarta_Sans'] text-sm font-extrabold">
-                  + Add food photo
-                </span>
+                <span className="font-['Plus_Jakarta_Sans'] text-sm font-extrabold">+ Add food photo</span>
               </div>
             )}
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handlePhotoChange}
-              className="hidden"
-            />
+            <input type="file" accept="image/*" onChange={handlePhotoChange} className="hidden" />
           </div>
         </label>
 
@@ -282,9 +248,7 @@ export function PublishDiaryForm({ restaurants = [], entry = null, onClose }) {
 
         <div className="mt-3 divide-y divide-[#EFE4D5] rounded-[22px] border border-[#EFE4D5] bg-[#FFFAF2]">
           <label
-            className={`flex items-center gap-3 px-4 py-2.5 transition ${
-              showLocationNudge ? "bg-[#FFF2E8]" : ""
-            }`}
+            className={`flex items-center gap-3 px-4 py-2.5 transition ${showLocationNudge ? "bg-[#FFF2E8]" : ""}`}
           >
             <MapPin size={19} className="shrink-0 text-[#E04B39]" />
             <span className="sr-only">Place Name</span>
@@ -315,9 +279,7 @@ export function PublishDiaryForm({ restaurants = [], entry = null, onClose }) {
           >
             <div className="flex min-w-0 items-center gap-3">
               <Star size={19} className="shrink-0 text-[#E89951]" />
-              <span className="text-sm font-semibold text-[#1F1B16]">
-                Rate your experience
-              </span>
+              <span className="text-sm font-semibold text-[#1F1B16]">Rate your experience</span>
             </div>
             <div
               className="flex shrink-0 items-center gap-1"
@@ -339,30 +301,19 @@ export function PublishDiaryForm({ restaurants = [], entry = null, onClose }) {
           <div className="flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-[#1F1B16]">
             <Clock size={19} className="shrink-0 text-[#8C7B6A]" />
             <span className="min-w-0 flex-1 truncate">
-              {formatVisitDate(displayedVisitDate)} at{" "}
-              {formatVisitTime(displayedVisitDate)}
+              {formatVisitDate(displayedVisitDate)} at {formatVisitTime(displayedVisitDate)}
             </span>
           </div>
         </div>
 
-        {errorMessage && (
-          <p className="mt-3 text-sm font-semibold text-[#E04B39]">
-            {errorMessage}
-          </p>
-        )}
+        {errorMessage && <p className="mt-3 text-sm font-semibold text-[#E04B39]">{errorMessage}</p>}
 
         <button
           type="submit"
           disabled={isSaving}
           className="mt-4 w-full rounded-2xl bg-[#E04B39] py-3.5 text-sm font-extrabold text-white shadow-[0_12px_30px_rgba(224,75,57,0.25)] transition hover:bg-[#c93c2f] disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSaving
-            ? isEditing
-              ? "Saving..."
-              : "Publishing..."
-            : isEditing
-              ? "Save Changes"
-              : "Publish to Diary"}
+          {isSaving ? (isEditing ? "Saving..." : "Publishing...") : isEditing ? "Save Changes" : "Publish to Diary"}
         </button>
       </form>
     </div>

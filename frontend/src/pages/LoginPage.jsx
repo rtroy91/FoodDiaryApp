@@ -51,19 +51,13 @@ export function LoginPage() {
         <section className="flex items-center justify-center bg-[#FFFBF4] px-6 py-10 sm:px-10">
           <div className="w-full max-w-md">
             <div className="mb-8">
-              <h2
-                className="mt-2 text-3xl font-semibold text-[#1F1B16]"
-                style={{ fontFamily: '"Fraunces", serif' }}
-              >
+              <h2 className="mt-2 text-3xl font-semibold text-[#1F1B16]" style={{ fontFamily: '"Fraunces", serif' }}>
                 Sign in
               </h2>
 
               <p className="mt-2 text-sm text-stone-500">
                 No Account?
-                <Link
-                  to="/register"
-                  className="ml-1 font-semibold text-[#E04B39]"
-                >
+                <Link to="/register" className="ml-1 font-semibold text-[#E04B39]">
                   Register here.
                 </Link>
               </p>
@@ -96,15 +90,12 @@ export function LoginPage() {
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
-                
               </FormInput>
               <p className="flex justify-end text-xs text-stone-500 hover:text-[#E04B39] cursor-pointer">
                 Forgot Password?
               </p>
 
-              <p className="text-xs text-stone-500 hover:text-[#E04B39] cursor-pointer">
-                Remember Me?
-              </p>
+              <p className="text-xs text-stone-500 hover:text-[#E04B39] cursor-pointer">Remember Me?</p>
 
               {errorMessage && (
                 <div className="rounded-2xl border border-[#E04B39]/20 bg-[#E04B39]/10 px-4 py-3 text-sm text-[#C44A3C]">

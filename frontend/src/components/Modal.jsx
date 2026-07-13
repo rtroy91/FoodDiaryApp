@@ -31,6 +31,6 @@ export function Modal({
     >
       {children}
     </div>,
-    document.body,
+    document.body
   );
 }

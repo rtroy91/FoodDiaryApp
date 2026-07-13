@@ -8,11 +8,7 @@ const BATAAN_CENTER = [14.676, 120.536];
 const DEFAULT_ZOOM = 10;
 
 function getLocation(restaurant) {
-  return [
-    restaurant?.barangay ? "Brgy. " + restaurant.barangay : null,
-    restaurant?.city,
-    restaurant?.province,
-  ]
+  return [restaurant?.barangay ? "Brgy. " + restaurant.barangay : null, restaurant?.city, restaurant?.province]
     .filter(Boolean)
     .join(", ");
 }
@@ -56,20 +52,13 @@ function MapViewport({ restaurants, selectedRestaurant }) {
 
   useEffect(() => {
     if (selectedRestaurant?.latitude && selectedRestaurant?.longitude) {
-      map.flyTo(
-        [selectedRestaurant.latitude, selectedRestaurant.longitude],
-        15,
-        {
-          duration: 0.6,
-        },
-      );
+      map.flyTo([selectedRestaurant.latitude, selectedRestaurant.longitude], 15, {
+        duration: 0.6,
+      });
       return;
     }
 
-    const points = restaurants.map((restaurant) => [
-      restaurant.latitude,
-      restaurant.longitude,
-    ]);
+    const points = restaurants.map((restaurant) => [restaurant.latitude, restaurant.longitude]);
 
     if (points.length === 0) {
       map.setView(BATAAN_CENTER, DEFAULT_ZOOM);
@@ -105,9 +94,7 @@ function RestaurantMarker({ restaurant, isSelected, onSelect }) {
             {categoryLabel(restaurant.category)}
           </span>
 
-          <p className="my-2! text-xl font-semibold leading-snug text-warmGray-900">
-            {restaurant.name}
-          </p>
+          <p className="my-2! text-xl font-semibold leading-snug text-warmGray-900">{restaurant.name}</p>
 
           {restaurant.address && (
             <p className="font-['Plus_Jakarta_Sans'] text-[11px] font-medium leading-snug text-[#6F7892]">
@@ -116,9 +103,7 @@ function RestaurantMarker({ restaurant, isSelected, onSelect }) {
           )}
 
           {location && (
-            <p className="font-['Plus_Jakarta_Sans'] text-[11px] font-medium leading-snug text-[#6F7892]">
-              {location}
-            </p>
+            <p className="font-['Plus_Jakarta_Sans'] text-[11px] font-medium leading-snug text-[#6F7892]">{location}</p>
           )}
         </div>
       </Popup>
@@ -126,41 +111,23 @@ function RestaurantMarker({ restaurant, isSelected, onSelect }) {
   );
 }
 
-export function FoodMap({
-  restaurants,
-  selectedRestaurantId,
-  onSelectRestaurant,
-}) {
+export function FoodMap({ restaurants, selectedRestaurantId, onSelectRestaurant }) {
   const pinnedRestaurants = useMemo(
-    () =>
-      restaurants.filter(
-        (restaurant) => restaurant.latitude && restaurant.longitude,
-      ),
-    [restaurants],
+    () => restaurants.filter((restaurant) => restaurant.latitude && restaurant.longitude),
+    [restaurants]
   );
   const selectedRestaurant = useMemo(
-    () =>
-      pinnedRestaurants.find(
-        (restaurant) => restaurant.id === selectedRestaurantId,
-      ),
-    [pinnedRestaurants, selectedRestaurantId],
+    () => pinnedRestaurants.find((restaurant) => restaurant.id === selectedRestaurantId),
+    [pinnedRestaurants, selectedRestaurantId]
   );
 
   return (
-    <MapContainer
-      center={BATAAN_CENTER}
-      zoom={DEFAULT_ZOOM}
-      scrollWheelZoom
-      className="mx-auto h-full min-h-90 w-full"
-    >
+    <MapContainer center={BATAAN_CENTER} zoom={DEFAULT_ZOOM} scrollWheelZoom className="mx-auto h-full min-h-90 w-full">
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      <MapViewport
-        restaurants={pinnedRestaurants}
-        selectedRestaurant={selectedRestaurant}
-      />
+      <MapViewport restaurants={pinnedRestaurants} selectedRestaurant={selectedRestaurant} />
       {pinnedRestaurants.map((restaurant) => (
         <RestaurantMarker
           key={restaurant.id}

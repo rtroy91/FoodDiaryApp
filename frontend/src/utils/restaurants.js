@@ -36,7 +36,5 @@ export function buildPlaceStats(restaurants = [], entries = []) {
     byId.set(id, current);
   });
 
-  return [...byId.values()].sort((a, b) =>
-    (a.name ?? "").localeCompare(b.name ?? ""),
-  );
+  return [...byId.values()].sort((a, b) => (a.name ?? "").localeCompare(b.name ?? ""));
 }
