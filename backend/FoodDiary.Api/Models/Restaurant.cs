@@ -10,6 +10,13 @@ public class Restaurant
     public string? City { get; set; }
     public string? Province { get; set; }
     public string? Category { get; set; }
+    public string? MenuPhotoUrl { get; set; }
+    public string? StorePhotoUrl { get; set; }
+    public string? Promo { get; set; }
+    public string? Budget { get; set; }
+    public double? Latitude { get; set; }
+    public double? Longitude { get; set; }
 
     public List<Entry> Entries { get; set; } = new();
+    public List<RestaurantOpeningHour> OpeningHours { get; set; } = new();
 }

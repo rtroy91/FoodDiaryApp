@@ -7,7 +7,15 @@ namespace FoodDiary.Api.Services;
 public class PhotoService : IPhotoService
 {
     private const long MaxFileSize = 5 * 1024 * 1024;
-    private const string UploadsPath = "uploads/entry-photos";
+    private const string DefaultUploadFolder = "entry-photos";
+    private const string UploadsRootPath = "uploads";
+
+    private static readonly HashSet<string> AllowedUploadFolders = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "entry-photos",
+        "store-menu",
+        "store-icon"
+    };
 
     private static readonly Dictionary<string, string[]> AllowedExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -31,14 +39,21 @@ public class PhotoService : IPhotoService
         Guid userId,
         IFormFile photo,
         string baseUrl,
+        string uploadFolder,
         CancellationToken cancellationToken)
     {
         ValidatePhoto(photo);
+        var safeUploadFolder = NormalizeUploadFolder(uploadFolder);
 
         var extension = Path.GetExtension(photo.FileName).ToLowerInvariant();
         var fileName = $"{Guid.NewGuid():N}{extension}";
-        var relativePath = $"{UploadsPath}/{userId}/{fileName}";
-        var absolutePath = GetAbsoluteUploadPath(userId.ToString(), fileName);
+        var usesUserFolder = safeUploadFolder.Equals(DefaultUploadFolder, StringComparison.OrdinalIgnoreCase);
+        var relativePath = usesUserFolder
+            ? $"{UploadsRootPath}/{safeUploadFolder}/{userId}/{fileName}"
+            : $"{UploadsRootPath}/{safeUploadFolder}/{fileName}";
+        var absolutePath = usesUserFolder
+            ? GetAbsoluteUploadPath(safeUploadFolder, userId.ToString(), fileName)
+            : GetAbsoluteUploadPath(safeUploadFolder, fileName);
 
         Directory.CreateDirectory(Path.GetDirectoryName(absolutePath)!);
 
@@ -103,21 +118,40 @@ public class PhotoService : IPhotoService
         }
     }
 
-    private string GetAbsoluteUploadPath(string userFolder, string fileName)
+    private string GetAbsoluteUploadPath(string uploadFolder, string userFolder, string fileName)
     {
-        var root = GetUploadRoot();
+        var root = GetUploadRoot(uploadFolder);
         return Path.GetFullPath(Path.Combine(root, userFolder, fileName));
     }
 
-    private string GetUploadRoot()
+    private string GetAbsoluteUploadPath(string uploadFolder, string fileName)
+    {
+        var root = GetUploadRoot(uploadFolder);
+        return Path.GetFullPath(Path.Combine(root, fileName));
+    }
+
+    private string GetUploadRoot(string? uploadFolder = null)
     {
         var webRoot = _environment.WebRootPath;
         if (string.IsNullOrWhiteSpace(webRoot))
             webRoot = Path.Combine(_environment.ContentRootPath, "wwwroot");
 
-        var root = Path.GetFullPath(Path.Combine(webRoot, UploadsPath));
+        var root = string.IsNullOrWhiteSpace(uploadFolder)
+            ? Path.GetFullPath(Path.Combine(webRoot, UploadsRootPath))
+            : Path.GetFullPath(Path.Combine(webRoot, UploadsRootPath, NormalizeUploadFolder(uploadFolder)));
         Directory.CreateDirectory(root);
         return root;
+    }
+
+    private static string NormalizeUploadFolder(string? uploadFolder)
+    {
+        if (string.IsNullOrWhiteSpace(uploadFolder))
+            return DefaultUploadFolder;
+
+        if (!AllowedUploadFolders.Contains(uploadFolder))
+            throw new InvalidOperationException("Upload folder is not supported.");
+
+        return uploadFolder;
     }
 
     private static string? GetRelativeUploadPath(string photoUrl)
@@ -128,7 +162,7 @@ public class PhotoService : IPhotoService
 
         path = path.Replace('\\', '/').TrimStart('/');
 
-        const string prefix = $"{UploadsPath}/";
+        const string prefix = $"{UploadsRootPath}/";
         return path.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
             ? path[prefix.Length..]
             : null;

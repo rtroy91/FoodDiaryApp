@@ -16,61 +16,45 @@ public class RestaurantService : IRestaurantService
         _db = db;
     }
 
-    public async Task<List<RestaurantResponse>> GetRestaurantLists()
-{
-
-        var result = await _db.Restaurants.OrderBy(x => x.Name)
-				.Select(x => new RestaurantResponse
-				{
-					Id = x.Id,
-					Name = x.Name,
-					Address = x.Address,
-					Barangay = x.Barangay,
-					City = x.City,
-					Province = x.Province,
-					Category = x.Category
-				}).ToListAsync();
-
-			return result;
-}
-
-
-    // public async Task<IEnumerable<RestaurantResponse>> GetNearbyAsync(
-    //     Guid userId, double lat, double lng, double radiusKm)
-    // {
-    //     // Load into memory first — fine at personal-diary scale;
-    //     // swap to PostGIS ST_DWithin if scale ever demands it.
-    //     var all = await _db.Restaurants
-    //         .Where(r => r.UserId == userId)
-    //         .Include(r => r.Entries)
-    //         .ToListAsync();
-
-    //     return all
-    //         .Where(r => GeoHelper.DistanceKm(lat, lng, r.Latitude, r.Longitude) <= radiusKm)
-    //         .OrderBy(r => GeoHelper.DistanceKm(lat, lng, r.Latitude, r.Longitude))
-    //         .Select(r => MapToResponse(r));
-    // }
-
-    public async Task<IEnumerable<RestaurantResponse>> GetMostVisitedAsync(Guid userId, int limit)
+    public async Task<List<RestaurantResponse>> GetRestaurantListsAsync(CancellationToken cancellationToken)
     {
-        return await _db.Restaurants
-            .Include(r => r.Entries)
-            .OrderByDescending(r => r.Entries.Count)
-            .Take(limit)
-            .Select(r => MapToResponse(r))
-            .ToListAsync();
+        var restaurants = await _db.Restaurants
+            .AsNoTracking()
+            .Include(r => r.OpeningHours)
+            .OrderBy(r => r.Name)
+            .ToListAsync(cancellationToken);
+
+        return restaurants.Select(MapToResponse).ToList();
     }
 
-    public async Task<RestaurantResponse?> GetByIdAsync(Guid id, Guid userId)
+    public async Task<IEnumerable<RestaurantResponse>> GetMostVisitedAsync(
+        Guid userId,
+        int limit,
+        CancellationToken cancellationToken)
+    {
+        var restaurants = await _db.Restaurants
+            .AsNoTracking()
+            .Include(r => r.OpeningHours)
+            .Where(r => r.Entries.Any(e => e.UserId == userId))
+            .OrderByDescending(r => r.Entries.Count(e => e.UserId == userId))
+            .Take(limit)
+            .ToListAsync(cancellationToken);
+
+        return restaurants.Select(MapToResponse);
+    }
+
+    public async Task<RestaurantResponse?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         var restaurant = await _db.Restaurants
-            .Include(r => r.Entries)
-            .FirstOrDefaultAsync(r => r.Id == id);
+            .AsNoTracking()
+            .Include(r => r.OpeningHours)
+            .Where(r => r.Id == id)
+            .FirstOrDefaultAsync(cancellationToken);
 
         return restaurant is null ? null : MapToResponse(restaurant);
     }
 
-    public async Task<RestaurantResponse> CreateAsync(Guid userId, CreateRestaurantRequest request)
+    public async Task<RestaurantResponse> CreateAsync(CreateRestaurantRequest request, CancellationToken cancellationToken)
     {
         var restaurant = new Restaurant
         {
@@ -80,21 +64,29 @@ public class RestaurantService : IRestaurantService
             City = request.City,
             Province = request.Province,
             Category = request.Category,
-            // Latitude = request.Latitude,
-            // Longitude = request.Longitude
+            MenuPhotoUrl = request.MenuPhotoUrl,
+            StorePhotoUrl = request.StorePhotoUrl,
+            Promo = request.Promo,
+            OpeningHours = MapOpeningHours(request.OpeningHours),
+            Budget = request.Budget,
+            Latitude = request.Latitude,
+            Longitude = request.Longitude
         };
 
         _db.Restaurants.Add(restaurant);
-        await _db.SaveChangesAsync();
+        await _db.SaveChangesAsync(cancellationToken);
 
         return MapToResponse(restaurant);
     }
 
-    public async Task<RestaurantResponse?> UpdateAsync(Guid id, Guid userId, UpdateRestaurantRequest request)
+    public async Task<RestaurantResponse?> UpdateAsync(
+        Guid id,
+        UpdateRestaurantRequest request,
+        CancellationToken cancellationToken)
     {
         var restaurant = await _db.Restaurants
-            .Include(r => r.Entries)
-            .FirstOrDefaultAsync(r => r.Id == id);
+            .Include(r => r.OpeningHours)
+            .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
 
         if (restaurant is null) return null;
 
@@ -104,27 +96,31 @@ public class RestaurantService : IRestaurantService
         restaurant.City = request.City;
         restaurant.Province = request.Province;
         restaurant.Category = request.Category;
-        // restaurant.Latitude = request.Latitude;
-        // restaurant.Longitude = request.Longitude;
+        restaurant.MenuPhotoUrl = request.MenuPhotoUrl;
+        restaurant.StorePhotoUrl = request.StorePhotoUrl;
+        restaurant.Promo = request.Promo;
+        restaurant.Budget = request.Budget;
+        restaurant.Latitude = request.Latitude;
+        restaurant.Longitude = request.Longitude;
+        restaurant.OpeningHours.Clear();
+        restaurant.OpeningHours.AddRange(MapOpeningHours(request.OpeningHours));
 
-        await _db.SaveChangesAsync();
+        await _db.SaveChangesAsync(cancellationToken);
 
         return MapToResponse(restaurant);
     }
 
-    public async Task<bool> DeleteAsync(Guid id, Guid userId)
+    public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken)
     {
         var restaurant = await _db.Restaurants
-            .FirstOrDefaultAsync(r => r.Id == id);
+            .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
 
         if (restaurant is null) return false;
 
         _db.Restaurants.Remove(restaurant);
-        await _db.SaveChangesAsync();
+        await _db.SaveChangesAsync(cancellationToken);
         return true;
     }
-
-    // ── Mapping ───────────────────────────────────────────────────────────
 
     private static RestaurantResponse MapToResponse(Restaurant r) => new()
     {
@@ -135,10 +131,37 @@ public class RestaurantService : IRestaurantService
         City = r.City,
         Province = r.Province,
         Category = r.Category,
-        // Latitude = r.Latitude,
-        // Longitude = r.Longitude,
-        // VisitCount = r.Entries.Count,
-        // AverageRating = r.Entries.Count > 0 ? r.Entries.Average(e => e.Rating) : null,
-        //CreatedAt = r.CreatedAt
+        MenuPhotoUrl = r.MenuPhotoUrl,
+        StorePhotoUrl = r.StorePhotoUrl,
+        Promo = r.Promo,
+        OpeningHours = r.OpeningHours
+            .OrderBy(h => h.Day)
+            .Select(h => new RestaurantOpeningHourResponse
+            {
+                Day = h.Day,
+                Open = h.Open,
+                Close = h.Close
+            })
+            .ToList(),
+        Budget = r.Budget,
+        Latitude = r.Latitude,
+        Longitude = r.Longitude
     };
+
+    private static List<RestaurantOpeningHour> MapOpeningHours(
+        IEnumerable<RestaurantOpeningHourRequest> openingHours)
+    {
+        return openingHours
+            .Where(h => h.Day is >= 1 and <= 7)
+            .GroupBy(h => h.Day)
+            .Select(group => group.First())
+            .OrderBy(h => h.Day)
+            .Select(h => new RestaurantOpeningHour
+            {
+                Day = h.Day,
+                Open = string.IsNullOrWhiteSpace(h.Open) ? null : h.Open,
+                Close = string.IsNullOrWhiteSpace(h.Close) ? null : h.Close
+            })
+            .ToList();
+    }
 }

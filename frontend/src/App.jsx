@@ -33,9 +33,9 @@ const FoodPlaceDetailPage = lazy(() =>
     default: module.FoodPlaceDetailPage,
   })),
 );
-const AddRestaurantForm = lazy(() =>
-  import("./components/AddRestaurantForm").then((module) => ({
-    default: module.AddRestaurantForm,
+const RestaurantForm = lazy(() =>
+  import("./components/RestaurantForm").then((module) => ({
+    default: module.RestaurantForm,
   })),
 );
 const LoginPage = lazy(() =>
@@ -80,7 +80,7 @@ export default function App() {
           <Route path="entries/:id" element={<EntryDetailPage />} />
           <Route path="food-map" element={<FoodMapPage />} />
           <Route path="top-places" element={<TopPlacePage />} />
-          <Route path="add-restaurant" element={<AddRestaurantForm />} />
+          <Route path="add-restaurant" element={<RestaurantForm />} />
           <Route path="place-details/:id" element={<FoodPlaceDetailPage />} />
         </Route>
       </Routes>

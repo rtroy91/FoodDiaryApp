@@ -74,6 +74,9 @@ namespace FoodDiary.Api.Migrations
                     b.Property<string>("Barangay")
                         .HasColumnType("text");
 
+                    b.Property<string>("Budget")
+                        .HasColumnType("text");
+
                     b.Property<string>("Category")
                         .HasColumnType("text");
 
@@ -86,16 +89,51 @@ namespace FoodDiary.Api.Migrations
                     b.Property<double?>("Longitude")
                         .HasColumnType("double precision");
 
+                    b.Property<string>("MenuPhotoUrl")
+                        .HasColumnType("text");
+
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Promo")
                         .HasColumnType("text");
 
                     b.Property<string>("Province")
                         .HasColumnType("text");
 
+                    b.Property<string>("StorePhotoUrl")
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
                     b.ToTable("Restaurants");
+                });
+
+            modelBuilder.Entity("FoodDiary.Api.Models.RestaurantOpeningHour", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Close")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Day")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Open")
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("RestaurantId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RestaurantId", "Day")
+                        .IsUnique();
+
+                    b.ToTable("RestaurantOpeningHours");
                 });
 
             modelBuilder.Entity("FoodDiary.Api.Models.User", b =>
@@ -137,9 +175,22 @@ namespace FoodDiary.Api.Migrations
                     b.Navigation("Restaurant");
                 });
 
+            modelBuilder.Entity("FoodDiary.Api.Models.RestaurantOpeningHour", b =>
+                {
+                    b.HasOne("FoodDiary.Api.Models.Restaurant", "Restaurant")
+                        .WithMany("OpeningHours")
+                        .HasForeignKey("RestaurantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Restaurant");
+                });
+
             modelBuilder.Entity("FoodDiary.Api.Models.Restaurant", b =>
                 {
                     b.Navigation("Entries");
+
+                    b.Navigation("OpeningHours");
                 });
 #pragma warning restore 612, 618
         }

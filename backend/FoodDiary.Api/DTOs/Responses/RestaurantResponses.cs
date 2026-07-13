@@ -9,9 +9,18 @@ public class RestaurantResponse
     public string? City { get; set; }
     public string? Province { get; set; }
     public string? Category { get; set; }
-    // public double Latitude { get; set; }
-    // public double Longitude { get; set; }
-    // public int VisitCount { get; set; }
-    //public double? AverageRating { get; set; }
-    public DateTime CreatedAt { get; set; }
+    public string? MenuPhotoUrl { get; set; }
+    public string? StorePhotoUrl { get; set; }
+    public string? Promo { get; set; }
+    public List<RestaurantOpeningHourResponse> OpeningHours { get; set; } = new();
+    public string? Budget { get; set; }
+    public double? Latitude { get; set; }
+    public double? Longitude { get; set; }
+}
+
+public class RestaurantOpeningHourResponse
+{
+    public int Day { get; set; }
+    public string? Open { get; set; }
+    public string? Close { get; set; }
 }

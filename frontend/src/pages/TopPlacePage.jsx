@@ -16,9 +16,9 @@ import { SelectInput } from "../components/SelectInput";
 import { useAllEntries, useRestaurantLists } from "../hooks/useDiaryData";
 import { buildPlaceStats, categoryLabel } from "../utils/restaurants";
 
-const AddRestaurantForm = lazy(() =>
-  import("../components/AddRestaurantForm").then((module) => ({
-    default: module.AddRestaurantForm,
+const RestaurantForm = lazy(() =>
+  import("../components/RestaurantForm").then((module) => ({
+    default: module.RestaurantForm,
   })),
 );
 
@@ -299,7 +299,7 @@ export function TopPlacePage() {
                   {popularPlaces.length > 0 ? (
                     <TopPlaceAccordion places={popularPlaces} mode="visits" />
                   ) : (
-                    <div className="flex min-h-42 flex-col items-center justify-center rounded-2xl border border-[#E8DFC8] bg-[#FFFBF4] px-5 py-8 text-center">
+                    <div className="flex min-h-42 flex-col items-center justify-center rounded-2xl border border-[#E8DFC8] bg-stone-50 px-5 py-8 text-center">
                       <Trophy
                         size={30}
                         className="mx-auto mb-3 text-stone-300"
@@ -319,7 +319,7 @@ export function TopPlacePage() {
                   {favoritePlaces.length > 0 ? (
                     <TopPlaceAccordion places={favoritePlaces} mode="rating" />
                   ) : (
-                    <div className="flex min-h-42 flex-col items-center justify-center rounded-2xl border border-[#E8DFC8] bg-[#FFFBF4] px-5 py-8 text-center">
+                    <div className="flex min-h-42 flex-col items-center justify-center rounded-2xl border border-[#E8DFC8] bg-stone-50 px-5 py-8 text-center">
                       <Star size={30} className="mx-auto mb-3 text-stone-300" />
                       <p className="text-sm text-stone-500">
                         Rate a few visits and favorites will show up here.
@@ -338,8 +338,8 @@ export function TopPlacePage() {
                   <button
                     type="button"
                     onClick={() => setShowAddModal(true)}
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#E8DFC8] bg-[#FFFBF4] px-4 py-3 text-xs font-semibold text-[#1C1107] transition hover:border-[#E89951]"
-                  >
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#E04B39] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#c93c2f]"
+                  > 
                     <Plus size={15} />
                     Cannot find a place?
                   </button>
@@ -353,7 +353,7 @@ export function TopPlacePage() {
                   </div>
                 ) : (
                   <div className="custom-scrollbar min-h-0 flex-1 overflow-y-auto overflow-x-hidden pb-20 pr-1">
-                    <div className="rounded-2xl border border-[#E8DFC8] bg-[#FFFBF4] px-5 py-12 text-center">
+                    <div className="rounded-2xl border border-[#E8DFC8] bg-stone-50 px-5 py-12 text-center">
                     <UtensilsCrossed
                       size={36}
                       color="#C8B89A"
@@ -363,10 +363,10 @@ export function TopPlacePage() {
                       className="mb-1.5 text-xl text-[#1C1107]"
                       style={{ fontFamily: '"Fraunces", serif' }}
                     >
-                      No matching place
+                      Place not found
                     </p>
                     <p className="mb-4 text-xs text-stone-500">
-                      Add it to your diary so it is ready for your next visit.
+                      Submit it to the team so we can add it to our directory for everyone.
                     </p>
                     </div>
                   </div>
@@ -378,9 +378,13 @@ export function TopPlacePage() {
       </div>
 
       {showAddModal && (
-        <Modal onClose={() => setShowAddModal(false)}>
+        <Modal
+          onClose={() => setShowAddModal(false)}
+          closeOnBackdrop={false}
+          closeOnEscape={false}
+        >
           <Suspense fallback={null}>
-            <AddRestaurantForm onClose={() => setShowAddModal(false)} />
+            <RestaurantForm onClose={() => setShowAddModal(false)} />
           </Suspense>
         </Modal>
       )}

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">DiarEat diary camera favicon</title>
+  <desc id="desc">A diary shaped like the letter D with a camera forming the outer edge.</desc>
+  <path d="M16 10h21c11 0 20 9 20 22s-9 22-20 22H16Z" fill="#f97316"/>
+  <path d="M16 10h21c11 0 20 9 20 22s-9 22-20 22H16Z" fill="none" stroke="#F5F0E8" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M16 10v44" stroke="#F5F0E8" stroke-width="6" stroke-linecap="round"/>
+  <path d="M25 22h11M25 31h8M25 40h10" stroke="#fed7aa" stroke-width="4" stroke-linecap="round"/>
+  <path d="M38 17h10l5 6v22a7 7 0 0 1-7 7H36c9-5 14-12 14-20s-5-15-14-20z" fill="#0f766e"/>
+  <path d="M38 17h10l5 6v22a7 7 0 0 1-7 7H36c9-5 14-12 14-20s-5-15-14-20z" fill="none" stroke="#F5F0E8" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M40 17h8l5 6" fill="none" stroke="#F5F0E8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="42" cy="34" r="7" fill="#f97316" stroke="#F5F0E8" stroke-width="4"/>
+  <circle cx="42" cy="34" r="2.5" fill="#F5F0E8"/>
+  <circle cx="51" cy="27" r="2.5" fill="#F5F0E8"/>
+</svg>

@@ -5,6 +5,11 @@ namespace FoodDiary.Api.Interfaces;
 
 public interface IPhotoService
 {
-    Task<PhotoUploadResponse> UploadAsync(Guid userId, IFormFile photo, string baseUrl, CancellationToken cancellationToken);
+    Task<PhotoUploadResponse> UploadAsync(
+        Guid userId,
+        IFormFile photo,
+        string baseUrl,
+        string uploadFolder,
+        CancellationToken cancellationToken);
     Task DeleteAsync(string? photoUrl);
 }

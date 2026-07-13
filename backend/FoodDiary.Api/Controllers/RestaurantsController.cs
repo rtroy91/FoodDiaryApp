@@ -19,66 +19,45 @@ public class RestaurantsController : ControllerBase
     }
 
     [HttpGet("restaurant-lists")]
-    public async Task<IActionResult> GetRestaurantLists()
+    public async Task<IActionResult> GetRestaurantLists(CancellationToken cancellationToken)
     {
-        var result = await _restaurantService.GetRestaurantLists();
+        var result = await _restaurantService.GetRestaurantListsAsync(cancellationToken);
         return Ok(result);
     }
 
-    /// <summary>Find restaurants within a radius of a given coordinate.</summary>
-    // [HttpGet("nearby")]
-    // public async Task<IActionResult> GetNearby(
-    //     [FromQuery] double lat,
-    //     [FromQuery] double lng,
-    //     [FromQuery] double radiusKm = 5)
-    // {
-    //     var userId = GetUserId();
-    //     var result = await _restaurantService.GetNearbyAsync(userId, lat, lng, radiusKm);
-    //     return Ok(result);
-    // }
-
-    /// <summary>Get top N most-visited restaurants for the current user.</summary>
     [HttpGet("most-visited")]
-    public async Task<IActionResult> GetMostVisited([FromQuery] int limit = 10)
+    public async Task<IActionResult> GetMostVisited([FromQuery] int limit = 10, CancellationToken cancellationToken = default)
     {
         var userId = GetUserId();
-        var result = await _restaurantService.GetMostVisitedAsync(userId, limit);
+        var result = await _restaurantService.GetMostVisitedAsync(userId, limit, cancellationToken);
         return Ok(result);
     }
 
-    /// <summary>Get a single restaurant by ID.</summary>
     [HttpGet("{id:guid}")]
-    public async Task<IActionResult> GetById(Guid id)
+    public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
     {
-        var userId = GetUserId();
-        var result = await _restaurantService.GetByIdAsync(id, userId);
+        var result = await _restaurantService.GetByIdAsync(id, cancellationToken);
         return result is null ? NotFound() : Ok(result);
     }
 
-    /// <summary>Create a new restaurant.</summary>
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateRestaurantRequest request)
+    public async Task<IActionResult> Create([FromBody] CreateRestaurantRequest request, CancellationToken cancellationToken)
     {
-        var userId = GetUserId();
-        var result = await _restaurantService.CreateAsync(userId, request);
+        var result = await _restaurantService.CreateAsync(request, cancellationToken);
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
-    /// <summary>Update an existing restaurant.</summary>
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateRestaurantRequest request)
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateRestaurantRequest request, CancellationToken cancellationToken)
     {
-        var userId = GetUserId();
-        var result = await _restaurantService.UpdateAsync(id, userId, request);
+        var result = await _restaurantService.UpdateAsync(id, request, cancellationToken);
         return result is null ? NotFound() : Ok(result);
     }
 
-    /// <summary>Delete a restaurant and all its diary entries.</summary>
     [HttpDelete("{id:guid}")]
-    public async Task<IActionResult> Delete(Guid id)
+    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
-        var userId = GetUserId();
-        var deleted = await _restaurantService.DeleteAsync(id, userId);
+        var deleted = await _restaurantService.DeleteAsync(id, cancellationToken);
         return deleted ? NoContent() : NotFound();
     }
 

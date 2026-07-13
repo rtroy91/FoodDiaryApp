@@ -9,6 +9,7 @@ public class FoodDiaryContext : DbContext
 
     public DbSet<User> Users => Set<User>();
     public DbSet<Restaurant> Restaurants => Set<Restaurant>();
+    public DbSet<RestaurantOpeningHour> RestaurantOpeningHours => Set<RestaurantOpeningHour>();
     public DbSet<Entry> Entries => Set<Entry>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -24,6 +25,16 @@ public class FoodDiaryContext : DbContext
             .WithOne(e => e.Restaurant)
             .HasForeignKey(e => e.RestaurantId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Restaurant>()
+            .HasMany(r => r.OpeningHours)
+            .WithOne(h => h.Restaurant)
+            .HasForeignKey(h => h.RestaurantId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<RestaurantOpeningHour>()
+            .HasIndex(h => new { h.RestaurantId, h.Day })
+            .IsUnique();
 
         // Entries
         modelBuilder.Entity<Entry>()

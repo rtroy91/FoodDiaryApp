@@ -29,10 +29,12 @@ export async function deleteEntry(id) {
 }
 
 // Upload the image to the backend, which stores the file and returns its public URL.
-export async function uploadPhoto(file) {
+export async function uploadPhoto(file, uploadFolder = "entry-photos") {
   const formData = new FormData();
   formData.append("photo", file);
 
-  const { data } = await apiClient.post("/photos/upload", formData);
+  const { data } = await apiClient.post("/photos/upload", formData, {
+    params: { uploadFolder },
+  });
   return data.photoUrl;
 }

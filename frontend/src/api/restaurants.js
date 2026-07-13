@@ -14,3 +14,12 @@ export async function createRestaurant(payload) {
   const { data } = await apiClient.post("/restaurants", payload);
   return data;
 }
+
+export async function updateRestaurant(id, payload) {
+  const { data } = await apiClient.put(`/restaurants/${id}`, payload);
+  return data;
+}
+
+export async function deleteRestaurant(id) {
+  await apiClient.delete(`/restaurants/${id}`);
+}

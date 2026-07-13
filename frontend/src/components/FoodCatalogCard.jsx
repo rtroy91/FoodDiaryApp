@@ -23,6 +23,7 @@ function formatReach(value = 0) {
 
 function getThumbnailUrl(restaurant) {
   return (
+    restaurant?.storePhotoUrl ??
     restaurant?.thumbnailUrl ??
     restaurant?.photoUrl ??
     restaurant?.imageUrl ??

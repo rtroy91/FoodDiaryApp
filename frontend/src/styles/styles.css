@@ -65,6 +65,49 @@ body {
   animation: entry-detail-in 180ms ease-out both;
 }
 
+.food-place-hero-shell {
+  display: grid;
+  gap: 2.5rem;
+}
+
+.food-place-hero-copy {
+  min-width: 0;
+  width: 100%;
+}
+
+.food-place-hero-media {
+  min-width: 0;
+  width: 100%;
+}
+
+.food-place-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.food-place-meta-item {
+  display: inline-flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 0.375rem;
+}
+
+.food-place-meta-item span {
+  max-width: 20rem;
+}
+
+@media (min-width: 1024px) {
+  .food-place-hero-shell {
+    grid-template-columns: minmax(0, 1.06fr) minmax(420px, 0.94fr);
+    align-items: center;
+  }
+
+  .food-place-hero-media {
+    justify-self: stretch;
+  }
+}
+
 @keyframes entry-detail-in {
   from {
     opacity: 0;

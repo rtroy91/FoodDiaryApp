@@ -49,6 +49,28 @@ export function useCreateRestaurant() {
   });
 }
 
+export function useUpdateRestaurant() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }) => restaurantsApi.updateRestaurant(id, payload),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["restaurants"] });
+      queryClient.invalidateQueries({ queryKey: ["restaurants", variables.id] });
+    },
+  });
+}
+
+export function useDeleteRestaurant() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: restaurantsApi.deleteRestaurant,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["restaurants"] });
+      queryClient.invalidateQueries({ queryKey: ["entries"] });
+    },
+  });
+}
+
 export function useCreateEntry() {
   const queryClient = useQueryClient();
   return useMutation({
