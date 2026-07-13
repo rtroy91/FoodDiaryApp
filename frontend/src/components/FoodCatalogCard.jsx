@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import Skeleton from "react-loading-skeleton";
 import { ImageIcon, MapPin, Star, UtensilsCrossed } from "lucide-react";
 import { categoryLabel } from "../utils/restaurants";
 
@@ -36,6 +37,9 @@ function FoodCatalogCardContent({ restaurant }) {
   const reach = restaurant.visitCount ?? 0;
   const thumbnailUrl = getThumbnailUrl(restaurant);
   const category = categoryLabel(restaurant.category);
+  const visitsLabel = `${formatReach(reach)} ${
+    reach > 1 ? "visits" : "visit"
+  }`;
 
   return (
     <>
@@ -54,32 +58,35 @@ function FoodCatalogCardContent({ restaurant }) {
         )}
       </div>
 
-      <div className="flex min-w-0 flex-col justify-center text-left">
-        <div className="min-w-0">
-          <div className="mb-1 flex min-w-0 items-start gap-3">
-            <h3 className="min-w-0 flex-1 truncate text-base font-semibold leading-snug text-stone-900 md:text-lg">
+      <div className="min-w-0 text-left">
+        <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
+          <div className="min-w-0 pt-0.5">
+            <h3 className="min-w-0 flex-1 truncate text-base font-['Fraunces'] font-semibold leading-snug text-stone-900 md:text-lg">
               {restaurant.name}
             </h3>
-            <span className="inline-flex shrink-0 items-center gap-1 text-sm font-bold text-amber-500">
-              <Star size={14} fill="currentColor" />
-              {rating != null ? rating.toFixed(1) : "-"}
-            </span>
           </div>
 
-          <div className="mt-2 space-y-1 font-['Plus_Jakarta_Sans'] text-xs font-medium text-stone-500">
-            {location && (
-              <p className="flex min-w-0 items-center gap-1.5">
-                <MapPin size={13} className="shrink-0 text-stone-400" />
-                <span className="truncate">{location}</span>
-              </p>
-            )}
-            <p>
-              {formatReach(reach)} {reach === 1 ? "diner" : "diners"} visited
-            </p>
+          <div className="flex shrink-0 items-center justify-end gap-2">
+            <span className="inline-flex items-center gap-1 font-['Plus_Jakarta_Sans'] text-xs font-bold text-amber-500">
+              <Star size={12} fill="currentColor" />
+              {rating != null ? rating.toFixed(1) : "-"}
+            </span>
+            <span className="inline-flex rounded-full bg-[#E8F7D3] px-2.5 py-1 font-['Plus_Jakarta_Sans'] text-xs font-bold leading-none text-[#365314]">
+              {visitsLabel}
+            </span>
           </div>
         </div>
 
-        <span className="mt-3 w-fit max-w-full truncate rounded-full border border-[#DDE5EF] bg-[#F7FAFD] px-3 py-0.5 font-['Plus_Jakarta_Sans'] text-[10px] font-semibold uppercase tracking-widest text-[#1C2A3D] shadow-[0_2px_8px_rgba(28,42,61,0.08)]">
+        <div className="mt-1 space-y-1 font-['Plus_Jakarta_Sans'] text-xs font-medium text-stone-500">
+          {location && (
+            <p className="flex min-w-0 items-center gap-1.5">
+              <MapPin size={13} className="shrink-0 text-stone-400" />
+              <span className="truncate">{location}</span>
+            </p>
+          )}
+        </div>
+
+        <span className="mt-3 inline-flex max-w-full truncate rounded-full border border-[#DDE5EF] bg-[#F7FAFD] px-3 py-0.5 font-['Plus_Jakarta_Sans'] text-[10px] font-semibold uppercase tracking-widest text-[#1C2A3D] shadow-[0_2px_8px_rgba(28,42,61,0.08)]">
           {category}
         </span>
       </div>
@@ -87,18 +94,89 @@ function FoodCatalogCardContent({ restaurant }) {
   );
 }
 
-export function FoodCatalogCard({
-  restaurant,
-  compact = false,
-  isSelected = false,
-  onSelect,
-}) {
+export function FoodCatalogCardSkeleton() {
+  return (
+    <article
+      className="grid w-full min-w-0 grid-cols-[5rem_minmax(0,1fr)] items-center gap-4 overflow-hidden rounded-2xl border border-stone-100 bg-white px-3 py-2.5 text-left shadow-none"
+      aria-hidden="true"
+    >
+      <Skeleton
+        width={80}
+        height={80}
+        borderRadius={12}
+        baseColor="#e7dfd2"
+        highlightColor="#f8f4ec"
+      />
+
+      <div className="min-w-0 text-left">
+        <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
+          <div className="min-w-0 pt-0.5">
+            <Skeleton
+              className="block"
+              width={150}
+              height={20}
+              borderRadius={6}
+              baseColor="#e7dfd2"
+              highlightColor="#f8f4ec"
+            />
+          </div>
+
+          <div className="flex shrink-0 items-center justify-end gap-2">
+            <span className="inline-flex items-center gap-1 font-['Plus_Jakarta_Sans'] text-xs font-bold text-amber-500">
+              <Star size={12} fill="currentColor" />
+              <Skeleton
+                width={24}
+                height={14}
+                borderRadius={6}
+                baseColor="#e7dfd2"
+                highlightColor="#f8f4ec"
+              />
+            </span>
+            <Skeleton
+              width={68}
+              height={22}
+              borderRadius={999}
+              baseColor="#e7dfd2"
+              highlightColor="#f8f4ec"
+            />
+          </div>
+        </div>
+
+        <div className="mt-2 space-y-1">
+          <div className="flex min-w-0 items-center gap-1.5">
+            <MapPin size={13} className="shrink-0 text-stone-400" />
+            <Skeleton
+              width={180}
+              height={14}
+              borderRadius={6}
+              baseColor="#f0ebe2"
+              highlightColor="#fbf8f2"
+            />
+          </div>
+        </div>
+
+        <Skeleton
+          className="mt-3 block"
+          width={72}
+          height={20}
+          borderRadius={999}
+          baseColor="#e7dfd2"
+          highlightColor="#f8f4ec"
+        />
+      </div>
+    </article>
+  );
+}
+
+export function FoodCatalogCard({ restaurant, isSelected = false, onSelect }) {
   const cardClassName = [
     "grid w-full min-w-0 cursor-pointer grid-cols-[5rem_minmax(0,1fr)] items-center gap-4 overflow-hidden rounded-2xl border bg-white px-3 py-2.5 text-left shadow-none transition-all hover:bg-stone-50",
     isSelected
       ? "border-[#E04B39]/40 ring-2 ring-[#E04B39]/10"
       : "border-stone-100",
-    onSelect ? "outline-none focus-visible:ring-2 focus-visible:ring-[#E04B39]/25" : "",
+    onSelect
+      ? "outline-none focus-visible:ring-2 focus-visible:ring-[#E04B39]/25"
+      : "",
   ].join(" ");
 
   function handleKeyDown(event) {
@@ -119,7 +197,7 @@ export function FoodCatalogCard({
         onKeyDown={handleKeyDown}
         className={cardClassName}
       >
-        <FoodCatalogCardContent restaurant={restaurant} compact={compact} />
+        <FoodCatalogCardContent restaurant={restaurant} />
       </article>
     );
   }
@@ -130,7 +208,7 @@ export function FoodCatalogCard({
       className="block min-w-0 no-underline"
     >
       <div className={cardClassName}>
-        <FoodCatalogCardContent restaurant={restaurant} compact={compact} />
+        <FoodCatalogCardContent restaurant={restaurant} />
       </div>
     </Link>
   );

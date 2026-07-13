@@ -152,12 +152,3 @@ export function LoginPage() {
     </div>
   );
 }
-
-{
-  /*
-  Change svg picture
-  Forgot Password
-  Remember Me
-  Continue with Google
-  */
-}

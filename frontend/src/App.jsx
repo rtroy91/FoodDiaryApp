@@ -1,10 +1,18 @@
 import { lazy, Suspense } from "react";
-import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { NavBar } from "./components/NavBar";
 import { ProtectedRoute } from "./components/ProtectedRoute";
-import { EntriesPage } from "./pages/EntriesPage";
-import { FeaturedPage } from "./pages/FeaturedPage";
 
+const FeaturedPage = lazy(() =>
+  import("./pages/FeaturedPage").then((module) => ({
+    default: module.FeaturedPage,
+  })),
+);
+const EntriesPage = lazy(() =>
+  import("./pages/EntriesPage").then((module) => ({
+    default: module.EntriesPage,
+  })),
+);
 const FoodMapPage = lazy(() =>
   import("./pages/FoodMapPage").then((module) => ({
     default: module.FoodMapPage,

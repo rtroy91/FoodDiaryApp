@@ -1,7 +1,11 @@
 import { useMemo, useState } from "react";
+import Skeleton from "react-loading-skeleton";
 import { MapPin, Search, UtensilsCrossed } from "lucide-react";
 import { FoodMap } from "../components/FoodMap";
-import { FoodCatalogCard } from "../components/FoodCatalogCard";
+import {
+  FoodCatalogCard,
+  FoodCatalogCardSkeleton,
+} from "../components/FoodCatalogCard";
 import { PageHeader } from "../components/PageHeader";
 import { SelectInput } from "../components/SelectInput";
 import { useAllEntries, useRestaurantLists } from "../hooks/useDiaryData";
@@ -28,6 +32,29 @@ function normalizeSearchText(value) {
     .replace(/[^\w\s.]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function FoodMapSkeleton() {
+  return (
+    <div className="relative h-full min-h-90 overflow-hidden bg-[#F5EEE4]">
+      <Skeleton
+        className="block h-full w-full"
+        containerClassName="block h-full w-full"
+        height="100%"
+        borderRadius={0}
+        baseColor="#e7dfd2"
+        highlightColor="#f8f4ec"
+      />
+      <div className="absolute inset-0 opacity-45">
+        <div className="absolute left-1/4 top-1/4 h-px w-3/5 rotate-[-18deg] bg-[#C8B89A]" />
+        <div className="absolute left-1/6 top-2/3 h-px w-2/3 rotate-12 bg-[#C8B89A]" />
+        <div className="absolute left-2/3 top-1/5 h-3/5 w-px rotate-8 bg-[#C8B89A]" />
+      </div>
+      <div className="absolute left-[24%] top-[34%] h-7 w-7 rounded-full border-4 border-[#A5CF83] bg-[#1C1107] shadow-[0_10px_22px_rgba(28,17,7,0.22)]" />
+      <div className="absolute left-[58%] top-[48%] h-8 w-8 rounded-full border-4 border-[#F0E76F] bg-[#E04B39] shadow-[0_10px_22px_rgba(28,17,7,0.22)]" />
+      <div className="absolute left-[72%] top-[28%] h-6 w-6 rounded-full border-4 border-[#A5CF83] bg-[#1C1107] shadow-[0_10px_22px_rgba(28,17,7,0.18)]" />
+    </div>
+  );
 }
 
 export function FoodMapPage() {
@@ -100,19 +127,19 @@ export function FoodMapPage() {
 
   return (
     <div
-      className="min-h-full bg-[#F5F0E8]"
+      className="flex h-full flex-col overflow-hidden bg-[#F5F0E8]"
       style={{ fontFamily: '"Geist Mono", monospace' }}
     >
       <PageHeader
-        title="Food Map"
+        title="Discover Bataan's Best"
         subtitle="View all top places pinned across Bataan in one easy map."
       />
 
       <div
-        className="mx-auto px-4 pb-24 lg:flex lg:h-[calc(100dvh-12rem)] lg:max-h-[calc(100dvh-12rem)] lg:flex-col lg:pb-4"
+        className="mx-auto flex min-h-0 flex-1 flex-col px-4 pb-4"
         style={pageShellStyle}
       >
-        <div className="relative z-20 -mt-8 mb-5 grid gap-3 rounded-3xl border border-[#E8DFC8] bg-stone-50 p-3 shadow-[0_10px_28px_rgba(28,17,7,0.08)] md:grid-cols-[1fr_260px]">
+        <div className="relative z-20 -mt-8 mb-5 grid shrink-0 gap-3 rounded-3xl border border-[#E8DFC8] bg-stone-50 p-3 shadow-[0_10px_28px_rgba(28,17,7,0.08)] md:grid-cols-[1fr_260px]">
           <div className="flex items-center gap-3 rounded-2xl border border-[#D8CDBB] bg-[#F5EEE4] px-4 py-3 text-sm text-[#5A4A34] transition focus-within:border-[#E04B39]/20 focus-within:ring-2 focus-within:ring-[#E04B39]/20">
             <Search size={16} className="shrink-0 text-stone-400" />
             <input
@@ -154,17 +181,21 @@ export function FoodMapPage() {
           </div>
         )}
 
-        {!isError && restaurants.length > 0 && (
-          <div className="grid gap-5 lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,1.1fr)_390px] lg:overflow-hidden">
+        {!isError && (isLoading || restaurants.length > 0) && (
+          <div className="grid min-h-0 flex-1 gap-5 overflow-hidden lg:grid-cols-[minmax(0,1.1fr)_390px]">
             <section className="h-105 overflow-hidden rounded-2xl border border-[#E8DFC8] bg-[#FFFBF4] shadow-[0_10px_28px_rgba(28,17,7,0.06)] lg:h-full">
-              <FoodMap
-                restaurants={filteredRestaurants}
-                selectedRestaurantId={selectedRestaurantId}
-                onSelectRestaurant={setSelectedRestaurantId}
-              />
+              {isLoading ? (
+                <FoodMapSkeleton />
+              ) : (
+                <FoodMap
+                  restaurants={filteredRestaurants}
+                  selectedRestaurantId={selectedRestaurantId}
+                  onSelectRestaurant={setSelectedRestaurantId}
+                />
+              )}
             </section>
 
-            <section className="min-w-0 overflow-hidden lg:flex lg:h-full lg:min-h-0 lg:flex-col lg:pr-1">
+            <section className="flex min-h-0 min-w-0 flex-col overflow-hidden lg:h-full lg:pr-1">
               <div className="mb-3 flex shrink-0 items-end justify-between gap-3">
                 <div>
                   <h2
@@ -176,11 +207,13 @@ export function FoodMapPage() {
                 </div>
               </div>
 
-              <div className="custom-scrollbar grid min-w-0 auto-rows-max content-start gap-3 overflow-x-hidden overflow-y-auto lg:min-h-0 lg:flex-1 lg:pr-1">
+              <div className="custom-scrollbar grid min-h-0 min-w-0 flex-1 auto-rows-max content-start gap-3 overflow-x-hidden overflow-y-auto lg:pr-1">
                 {isLoading && (
-                  <p className="rounded-2xl border border-[#E8DFC8] bg-[#FFFBF4] px-5 py-12 text-center text-sm text-stone-500">
-                    Loading top places...
-                  </p>
+                  <>
+                    {[0, 1, 2, 3, 4].map((item) => (
+                      <FoodCatalogCardSkeleton key={item} />
+                    ))}
+                  </>
                 )}
                 {!isLoading && filteredRestaurants.length === 0 && (
                   <div className="rounded-2xl border border-[#E8DFC8] bg-[#FFFBF4] px-5 py-12 text-center">

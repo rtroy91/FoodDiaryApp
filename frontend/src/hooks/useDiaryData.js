@@ -2,10 +2,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as restaurantsApi from "../api/restaurants";
 import * as entriesApi from "../api/entries";
 
-export function useRestaurantLists() {
+export function useRestaurantLists(options = {}) {
   return useQuery({
     queryKey: ["restaurants", "mine"],
     queryFn: restaurantsApi.GetRestaurantLists,
+    ...options,
   });
 }
 

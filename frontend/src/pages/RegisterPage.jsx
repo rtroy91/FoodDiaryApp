@@ -1,10 +1,16 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { register } from "../api/auth";
-import { Check, ArrowRight, Eye, EyeOff } from "lucide-react";
-import foodHero from "../assets/food-register.svg";
+import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import { AuthSidePanel } from "../components/AuthSidePanel";
 import { FormInput } from "../components/FormInput";
+
+const REGISTER_WORDS = ["Review", "Remember", "Rate"];
+const REGISTER_FEATURES = [
+  "Log every restaurant, cafe & street food stop",
+  "Infographic stats on your eating history",
+  "Searchable by city, cuisine, or dish",
+];
 
 export function RegisterPage() {
   const navigate = useNavigate();
@@ -19,18 +25,12 @@ export function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const words = ["Review", "Remember", "Rate"];
-  const [currentWord, setCurrentWord] = useState(words[0]);
-  const appFeatures = [
-    "Log every restaurant, cafe & street food stop",
-    "Infographic stats on your eating history",
-    "Searchable by city, cuisine, or dish",
-  ];
+  const [currentWord, setCurrentWord] = useState(REGISTER_WORDS[0]);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentWord((prev) => {
-        const available = words.filter((word) => word !== prev);
+        const available = REGISTER_WORDS.filter((word) => word !== prev);
         return available[Math.floor(Math.random() * available.length)];
       });
     }, 3000);
@@ -69,7 +69,7 @@ export function RegisterPage() {
       <div className="grid min-h-screen lg:grid-cols-2">
         {/* Left Panel */}
         <AuthSidePanel
-          appFeatures={appFeatures}
+          appFeatures={REGISTER_FEATURES}
           title={
             <>
               Eat

@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { Check } from "lucide-react";
 import foodHero from "../assets/food-register.svg";
 
@@ -16,7 +15,6 @@ function ShapeIllustration() {
 }
 
 export function AuthSidePanel({ appFeatures, title }) {
-
   return (
     <section className="relative overflow-hidden px-6 py-10 sm:px-10 lg:px-12 lg:py-16">
       <ShapeIllustration />

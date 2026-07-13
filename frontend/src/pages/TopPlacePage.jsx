@@ -1,5 +1,14 @@
 import { lazy, Suspense, useMemo, useState } from "react";
-import { Plus, Search, Star, Trophy, UtensilsCrossed } from "lucide-react";
+import { Link } from "react-router-dom";
+import {
+  ImageIcon,
+  MapPin,
+  Plus,
+  Search,
+  Star,
+  Trophy,
+  UtensilsCrossed,
+} from "lucide-react";
 import { FoodCatalogCard } from "../components/FoodCatalogCard";
 import { Modal } from "../components/Modal";
 import { PageHeader } from "../components/PageHeader";
@@ -34,6 +43,142 @@ const pageShellStyle = {
   maxWidth: "1180px",
   width: "100%",
 };
+
+function getLocation(place) {
+  return [
+    place?.barangay ? `Brgy. ${place.barangay}` : null,
+    place?.city,
+    place?.province,
+  ]
+    .filter(Boolean)
+    .join(", ");
+}
+
+function getThumbnailUrl(place) {
+  return (
+    place?.thumbnailUrl ??
+    place?.photoUrl ??
+    place?.imageUrl ??
+    place?.coverPhotoUrl ??
+    null
+  );
+}
+
+function formatReach(value = 0) {
+  if (value >= 1000) {
+    return `${(value / 1000).toFixed(value >= 10000 ? 0 : 1)}k`;
+  }
+
+  return value.toString();
+}
+
+function TopPlaceAccordionItem({ place, rank, mode, isExpanded, onMouseEnter }) {
+  const thumbnailUrl = getThumbnailUrl(place);
+  const location = getLocation(place);
+  const rating = place.averageRating;
+  const visitCount = place.visitCount ?? 0;
+  const visitLabel = `${formatReach(visitCount)} ${
+    visitCount === 1 ? "visit" : "visits"
+  }`;
+  const stat =
+    mode === "rating"
+      ? {
+          icon: <Star size={12} fill="currentColor" />,
+          value: rating != null ? rating.toFixed(1) : "-",
+          className: "text-amber-500",
+        }
+      : {
+          value: visitLabel,
+          className: "rounded-full bg-[#E8F7D3] px-2.5 py-1 text-[#365314]",
+        };
+  const detailsClassName = [
+    "ml-4 grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 text-left transition-opacity delay-75 duration-200",
+    isExpanded ? "opacity-100" : "opacity-100 sm:opacity-0",
+  ].join(" ");
+  const itemClassName = [
+    "group flex h-24 w-full min-w-0 items-center overflow-hidden rounded-2xl border border-stone-200 bg-white px-3 text-left no-underline shadow-none transition-all duration-300 ease-out hover:border-[#E8DFC8] hover:shadow-md focus-visible:border-[#E04B39]/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E04B39]/15 sm:w-auto",
+    isExpanded
+      ? "sm:max-w-[28rem] sm:flex-[1_1_24rem]"
+      : "sm:flex-[0_0_6rem]",
+  ].join(" ");
+
+  return (
+    <Link
+      to={`/place-details/${place.id}`}
+      className={itemClassName}
+      onMouseEnter={onMouseEnter}
+      onFocus={onMouseEnter}
+    >
+      <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#F5EEE4]">
+        {thumbnailUrl ? (
+          <img
+            src={thumbnailUrl}
+            alt={place.name}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center text-stone-400">
+            <ImageIcon size={20} />
+          </div>
+        )}
+        <span className="absolute bottom-1 right-1 rounded-full bg-[#1C1107] px-1.5 py-0.5 font-['Plus_Jakarta_Sans'] text-[10px] font-bold leading-none text-white">
+          #{rank}
+        </span>
+      </div>
+
+      <div className={detailsClassName}>
+        <div className="min-w-0">
+          <p className="min-w-0 truncate text-base font-['Fraunces'] font-semibold leading-snug text-stone-900">
+            {place.name}
+          </p>
+
+          <p className="mt-1 flex min-w-0 items-center gap-1.5 font-['Plus_Jakarta_Sans'] text-xs font-medium text-stone-500">
+            {location && (
+              <MapPin size={12} className="shrink-0 text-stone-400" />
+            )}
+            <span className="truncate">{location}</span>
+          </p>
+        </div>
+
+        <div className="flex shrink-0 justify-end self-start pt-0.5">
+          <span
+            className={`inline-flex items-center gap-1 font-['Plus_Jakarta_Sans'] text-xs font-bold ${stat.className}`}
+          >
+            {stat.icon}
+            {stat.value}
+          </span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function TopPlaceAccordion({ places, mode }) {
+  const [expandedIndex, setExpandedIndex] = useState(0);
+
+  return (
+    <div
+      className="flex w-full flex-col gap-3 overflow-hidden py-2 sm:flex-row sm:items-center"
+      onMouseLeave={() => setExpandedIndex(0)}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) {
+          setExpandedIndex(0);
+        }
+      }}
+    >
+      {places.map((place, index) => (
+        <TopPlaceAccordionItem
+          key={place.id}
+          place={place}
+          rank={index + 1}
+          mode={mode}
+          isExpanded={index === expandedIndex}
+          onMouseEnter={() => setExpandedIndex(index)}
+        />
+      ))}
+    </div>
+  );
+}
 
 export function TopPlacePage() {
   const { data: restaurants, isLoading: loadingRestaurants } =
@@ -102,7 +247,7 @@ export function TopPlacePage() {
   return (
     <>
       <div
-        className="relative min-h-screen bg-[#F5F0E8]"
+        className="relative flex h-full flex-col overflow-hidden bg-[#F5F0E8]"
         style={{ fontFamily: '"Geist Mono", monospace' }}
       >
         <PageHeader
@@ -111,8 +256,11 @@ export function TopPlacePage() {
           maxWidth="1180px"
         />
 
-        <div className="mx-auto px-4 pb-24" style={pageShellStyle}>
-          <div className="relative z-20 -mt-8 mb-8 grid gap-3 rounded-3xl border border-[#E8DFC8] bg-stone-50 p-3 shadow-[0_10px_28px_rgba(28,17,7,0.08)] md:grid-cols-[1fr_260px]">
+        <div
+          className="mx-auto flex min-h-0 flex-1 flex-col px-4 pb-4"
+          style={pageShellStyle}
+        >
+          <div className="relative z-20 -mt-8 mb-8 grid shrink-0 gap-3 rounded-3xl border border-[#E8DFC8] bg-stone-50 p-3 shadow-[0_10px_28px_rgba(28,17,7,0.08)] md:grid-cols-[1fr_260px]">
             <label className="flex items-center gap-3 rounded-2xl border border-[#D8CDBB] bg-[#F5EEE4] px-4 py-3 text-sm text-[#5A4A34] transition focus-within:border-[#E04B39]/20 focus-within:ring-2 focus-within:ring-[#E04B39]/20">
               <Search size={16} className="shrink-0 text-stone-400" />
               <input
@@ -144,20 +292,12 @@ export function TopPlacePage() {
           )}
 
           {!isLoading && (
-            <div className="space-y-10">
-              <div className="grid gap-6 lg:grid-cols-2">
+            <div className="flex min-h-0 flex-1 flex-col gap-10 overflow-hidden">
+              <div className="grid shrink-0 gap-6 lg:grid-cols-2">
                 <section className="min-w-0">
-                  <SectionHeader eyebrow="Popular" title="Popular places" />
+                  <SectionHeader eyebrow="TRENDING" title="Trending Spots" />
                   {popularPlaces.length > 0 ? (
-                    <div className="grid gap-3">
-                      {popularPlaces.map((place) => (
-                        <FoodCatalogCard
-                          key={place.id}
-                          restaurant={place}
-                          compact
-                        />
-                      ))}
-                    </div>
+                    <TopPlaceAccordion places={popularPlaces} mode="visits" />
                   ) : (
                     <div className="flex min-h-42 flex-col items-center justify-center rounded-2xl border border-[#E8DFC8] bg-[#FFFBF4] px-5 py-8 text-center">
                       <Trophy
@@ -165,7 +305,7 @@ export function TopPlacePage() {
                         className="mx-auto mb-3 text-stone-300"
                       />
                       <p className="text-sm text-stone-500">
-                        Log visits and your popular places will appear here.
+                        Log visits and popular places will appear here.
                       </p>
                     </div>
                   )}
@@ -173,15 +313,11 @@ export function TopPlacePage() {
 
                 <section className="min-w-0">
                   <SectionHeader
-                    eyebrow="Your favorite place"
+                    eyebrow="TOP TIERS"
                     title="Highest rated"
                   />
                   {favoritePlaces.length > 0 ? (
-                    <div className="grid gap-3">
-                      {favoritePlaces.map((place) => (
-                        <FoodCatalogCard key={place.id} restaurant={place} />
-                      ))}
-                    </div>
+                    <TopPlaceAccordion places={favoritePlaces} mode="rating" />
                   ) : (
                     <div className="flex min-h-42 flex-col items-center justify-center rounded-2xl border border-[#E8DFC8] bg-[#FFFBF4] px-5 py-8 text-center">
                       <Star size={30} className="mx-auto mb-3 text-stone-300" />
@@ -193,7 +329,7 @@ export function TopPlacePage() {
                 </section>
               </div>
 
-              <section>
+              <section className="flex min-h-0 flex-1 flex-col overflow-hidden">
                 <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                   <SectionHeader
                     eyebrow="All food place"
@@ -210,13 +346,14 @@ export function TopPlacePage() {
                 </div>
 
                 {filteredPlaces.length > 0 ? (
-                  <div className="grid gap-4 md:grid-cols-2">
+                  <div className="custom-scrollbar grid min-h-0 flex-1 gap-4 overflow-y-auto overflow-x-hidden pb-20 pr-1 md:grid-cols-2">
                     {filteredPlaces.map((place) => (
                       <FoodCatalogCard key={place.id} restaurant={place} />
                     ))}
                   </div>
                 ) : (
-                  <div className="rounded-2xl border border-[#E8DFC8] bg-[#FFFBF4] px-5 py-12 text-center">
+                  <div className="custom-scrollbar min-h-0 flex-1 overflow-y-auto overflow-x-hidden pb-20 pr-1">
+                    <div className="rounded-2xl border border-[#E8DFC8] bg-[#FFFBF4] px-5 py-12 text-center">
                     <UtensilsCrossed
                       size={36}
                       color="#C8B89A"
@@ -231,6 +368,7 @@ export function TopPlacePage() {
                     <p className="mb-4 text-xs text-stone-500">
                       Add it to your diary so it is ready for your next visit.
                     </p>
+                    </div>
                   </div>
                 )}
               </section>

@@ -68,7 +68,9 @@ export function PublishDiaryForm({ restaurants = [], entry = null, onClose }) {
   const isEditing = Boolean(entry);
   const createEntry = useCreateEntry();
   const updateEntry = useUpdateEntry();
-  const { data: fetchedRestaurants = [] } = useRestaurantLists();
+  const { data: fetchedRestaurants = [] } = useRestaurantLists({
+    enabled: restaurants.length === 0,
+  });
 
   const [currentVisitDate, setCurrentVisitDate] = useState(() => new Date());
   const [errorMessage, setErrorMessage] = useState(null);

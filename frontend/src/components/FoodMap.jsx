@@ -131,11 +131,19 @@ export function FoodMap({
   selectedRestaurantId,
   onSelectRestaurant,
 }) {
-  const pinnedRestaurants = restaurants.filter(
-    (restaurant) => restaurant.latitude && restaurant.longitude,
+  const pinnedRestaurants = useMemo(
+    () =>
+      restaurants.filter(
+        (restaurant) => restaurant.latitude && restaurant.longitude,
+      ),
+    [restaurants],
   );
-  const selectedRestaurant = pinnedRestaurants.find(
-    (restaurant) => restaurant.id === selectedRestaurantId,
+  const selectedRestaurant = useMemo(
+    () =>
+      pinnedRestaurants.find(
+        (restaurant) => restaurant.id === selectedRestaurantId,
+      ),
+    [pinnedRestaurants, selectedRestaurantId],
   );
 
   return (
@@ -143,7 +151,7 @@ export function FoodMap({
       center={BATAAN_CENTER}
       zoom={DEFAULT_ZOOM}
       scrollWheelZoom
-      className="h-full min-h-90 w-full"
+      className="mx-auto h-full min-h-90 w-full"
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

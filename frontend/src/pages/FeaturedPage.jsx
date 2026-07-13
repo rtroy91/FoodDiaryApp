@@ -147,7 +147,7 @@ export function FeaturedPage() {
   return (
     <>
       <div
-        className="relative h-dvh overflow-hidden bg-[#F5F0E8]"
+        className="relative h-full overflow-hidden bg-[#F5F0E8]"
         style={{ fontFamily: '"Geist Mono", monospace' }}
       >
         <div className="relative h-48 overflow-hidden bg-[#1C1107]">

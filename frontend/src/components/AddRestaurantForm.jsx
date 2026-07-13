@@ -134,19 +134,27 @@ export function AddRestaurantForm({ onClose }) {
   const { data: barangays = [], isLoading: loadingBarangays } =
     useBarangaysByCity(form.cityCode);
 
-  const cityOptions = [...cities]
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .map((city) => ({
-      value: city.code,
-      label: city.name,
-    }));
+  const cityOptions = useMemo(
+    () =>
+      [...cities]
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((city) => ({
+          value: city.code,
+          label: city.name,
+        })),
+    [cities],
+  );
 
-  const barangayOptions = [...barangays]
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .map((brgy) => ({
-      value: brgy.name,
-      label: brgy.name,
-    }));
+  const barangayOptions = useMemo(
+    () =>
+      [...barangays]
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((brgy) => ({
+          value: brgy.name,
+          label: brgy.name,
+        })),
+    [barangays],
+  );
 
   useEffect(() => {
     if (!pendingBarangay || !barangays.length) return;

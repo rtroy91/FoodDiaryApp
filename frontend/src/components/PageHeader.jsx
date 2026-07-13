@@ -34,7 +34,7 @@ function HeaderPattern() {
 
 export function PageHeader({ title, subtitle, maxWidth = "1180px" }) {
   return (
-    <div className="relative h-48 overflow-hidden bg-[#1C1107]">
+    <div className="relative h-48 shrink-0 overflow-hidden bg-[#1C1107]">
       <HeaderPattern />
 
       <div
