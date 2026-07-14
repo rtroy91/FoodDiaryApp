@@ -629,7 +629,7 @@ export function FoodPlaceDetailPage() {
 
   if (loadingRestaurant) {
     return (
-      <div className="min-h-screen bg-[#FDFBF7] px-4 py-16 text-center font-['Plus_Jakarta_Sans'] text-sm text-stone-500">
+      <div className="min-h-screen bg-[#FDFBF7] px-4 py-16 text-center text-sm text-stone-500">
         Loading food place...
       </div>
     );
@@ -637,7 +637,7 @@ export function FoodPlaceDetailPage() {
 
   if (!canViewPlaceDetail && loadingEntries) {
     return (
-      <div className="min-h-screen bg-[#FDFBF7] px-4 py-16 text-center font-['Plus_Jakarta_Sans'] text-sm text-stone-500">
+      <div className="min-h-screen bg-[#FDFBF7] px-4 py-16 text-center text-sm text-stone-500">
         Opening diary entry...
       </div>
     );
@@ -650,7 +650,7 @@ export function FoodPlaceDetailPage() {
 
   if (!restaurant) {
     return (
-      <div className="min-h-screen bg-[#FDFBF7] px-4 py-16 text-center font-['Plus_Jakarta_Sans']">
+      <div className="min-h-screen bg-[#FDFBF7] px-4 py-16 text-center">
         <p className="mb-3 text-2xl text-[#1C1107]" style={{ fontFamily: '"Fraunces", serif' }}>
           Food place not found
         </p>
@@ -663,7 +663,7 @@ export function FoodPlaceDetailPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-[#FDFBF7] font-['Plus_Jakarta_Sans'] text-[#1C1107] antialiased">
+      <div className="min-h-screen bg-[#FDFBF7] text-[#1C1107] antialiased">
         <header className="relative overflow-hidden border-b border-[#E8DFC8] bg-[#1C1107] text-white">
           <div className="food-place-hero-shell mx-auto px-5 py-10 lg:px-6 lg:py-16" style={pageShellStyle}>
             <div className="food-place-hero-copy lg:col-span-2">

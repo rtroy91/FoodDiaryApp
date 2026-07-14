@@ -417,7 +417,7 @@ export function EntryDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#FDFBF7] px-4 py-16 text-center font-['Plus_Jakarta_Sans'] text-sm text-stone-500">
+      <div className="min-h-screen bg-[#FDFBF7] px-4 py-16 text-center text-sm text-stone-500">
         Loading diary profile...
       </div>
     );
@@ -425,7 +425,7 @@ export function EntryDetailPage() {
 
   if (!selectedEntry && !restaurant) {
     return (
-      <div className="min-h-screen bg-[#FDFBF7] px-4 py-16 text-center font-['Plus_Jakarta_Sans']">
+      <div className="min-h-screen bg-[#FDFBF7] px-4 py-16 text-center">
         <p className="mb-3 text-2xl text-[#1C1107]" style={{ fontFamily: '"Fraunces", serif' }}>
           {isPlacePreview ? "Food place not found" : "Diary entry not found"}
         </p>
@@ -437,7 +437,7 @@ export function EntryDetailPage() {
   }
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-[#FDFBF7] font-['Plus_Jakarta_Sans'] text-[#1C1107] antialiased">
+    <div className="flex h-dvh flex-col overflow-hidden bg-[#FDFBF7] text-[#1C1107] antialiased">
       <header className="relative shrink-0 overflow-hidden border-b border-[#E8DFC8] bg-[#1C1107] text-white">
         <div className="absolute inset-0" aria-hidden="true">
           <div className="absolute left-10 top-10 h-24 w-24 rounded-full border border-[#F0E76F]/15" />

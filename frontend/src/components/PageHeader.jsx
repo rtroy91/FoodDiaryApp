@@ -29,7 +29,7 @@ export function PageHeader({ title, subtitle, maxWidth = "1180px" }) {
           <p className="text-3xl font-light leading-tight text-white" style={{ fontFamily: '"Fraunces", serif' }}>
             {title}
           </p>
-          {subtitle && <p className="mt-1 max-w-2xl font-['Plus_Jakarta_Sans'] text-sm text-white/55">{subtitle}</p>}
+          {subtitle && <p className="mt-1 max-w-2xl text-sm text-white/55">{subtitle}</p>}
         </div>
       </div>
     </div>

@@ -120,8 +120,8 @@ function DeleteEntrySheet({ entry, onCancel, onDeleted }) {
 
   return (
     <div className="w-full max-w-md rounded-[28px] bg-[#FFFDF9] p-5 shadow-[0_20px_70px_rgba(28,17,7,0.18)]">
-      <h2 className="font-['Plus_Jakarta_Sans'] text-lg font-extrabold tracking-tight text-[#1C1107]">Delete Post?</h2>
-      <p className="mt-3 font-['Plus_Jakarta_Sans'] text-sm leading-6 text-[#756450]">
+      <h2 className="text-lg font-extrabold tracking-tight text-[#1C1107]">Delete Post?</h2>
+      <p className="mt-3 text-sm leading-6 text-[#756450]">
         Are you sure you want to delete your visit to {restaurantName}? This action cannot be undone.
       </p>
       {deleteEntry.isError && (
@@ -211,7 +211,7 @@ function EntryActions({ onEdit, onDelete, tone = "photo", placement = "photo" })
           <button
             type="button"
             onClick={handleEdit}
-            className="flex w-full items-center gap-2.5 px-3.5 py-2 text-left font-['Plus_Jakarta_Sans'] text-sm font-bold text-[#1C1107] transition hover:bg-[#F7EFE5]"
+            className="flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-sm font-bold text-[#1C1107] transition hover:bg-[#F7EFE5]"
           >
             <Edit3 size={15} />
             Edit
@@ -220,7 +220,7 @@ function EntryActions({ onEdit, onDelete, tone = "photo", placement = "photo" })
           <button
             type="button"
             onClick={handleDelete}
-            className="flex w-full items-center gap-2.5 px-3.5 py-2 text-left font-['Plus_Jakarta_Sans'] text-sm font-bold text-[#D33B2F] transition hover:bg-[#FFF2E8]"
+            className="flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-sm font-bold text-[#D33B2F] transition hover:bg-[#FFF2E8]"
           >
             <Trash2 size={15} />
             Delete
@@ -301,7 +301,7 @@ function EntryDetailModal({ entry, location, onClose, onEdit, onDelete }) {
                 )}
               </div>
 
-              <div className="mt-3 shrink-0 space-y-2 font-['Plus_Jakarta_Sans'] text-sm font-medium leading-5 text-[#6F7892]">
+              <div className="mt-3 shrink-0 space-y-2 text-sm font-medium leading-5 text-[#6F7892]">
                 <div className="flex items-center gap-2 font-semibold text-[#253248]">
                   <Star size={17} fill="#F4B21B" className="text-[#F4B21B]" />
                   <span>{entry.rating != null ? Number(entry.rating).toFixed(1) : "-"}</span>
@@ -318,7 +318,7 @@ function EntryDetailModal({ entry, location, onClose, onEdit, onDelete }) {
 
               <div className="mt-5 flex min-h-0 flex-1 flex-col border-t border-[#E6DED1] pt-5">
                 <div className="custom-scrollbar min-h-0 grow overflow-y-auto pr-2">
-                  <p className="font-['Plus_Jakarta_Sans'] text-[0.95rem] leading-7 text-[#5A4A34]">
+                  <p className="text-[0.95rem] leading-7 text-[#5A4A34]">
                     {entry.caption || "No written note for this visit yet."}
                   </p>
                 </div>
@@ -327,7 +327,7 @@ function EntryDetailModal({ entry, location, onClose, onEdit, onDelete }) {
 
             {restaurant?.category && (
               <div className="mt-5 flex shrink-0 justify-start xl:justify-end">
-                <span className="inline-flex rounded-full border border-[#DDE5EF] bg-[#F7FAFD] px-4 py-1.5 font-['Plus_Jakarta_Sans'] text-[11px] font-semibold uppercase tracking-widest text-[#1C2A3D] shadow-[0_2px_8px_rgba(28,42,61,0.08)]">
+                <span className="inline-flex rounded-full border border-[#DDE5EF] bg-[#F7FAFD] px-4 py-1.5 text-[11px] font-semibold uppercase tracking-widest text-[#1C2A3D] shadow-[0_2px_8px_rgba(28,42,61,0.08)]">
                   {categoryLabel(restaurant.category)}
                 </span>
               </div>
@@ -424,7 +424,7 @@ export function EntryCard({ entry, featured = false }) {
           </div>
         </div>
 
-        <div className="flex min-h-5 items-center gap-2 font-['Plus_Jakarta_Sans'] text-xs font-medium leading-5 text-[#6F7892]">
+        <div className="flex min-h-5 items-center gap-2 text-xs font-medium leading-5 text-[#6F7892]">
           <MapPin size={12} className="shrink-0" />
           <span className="min-w-0 flex-1 truncate py-px">{location || "No Location"}</span>
         </div>
@@ -432,9 +432,7 @@ export function EntryCard({ entry, featured = false }) {
         <div className="mt-3 h-[3.2rem] overflow-hidden">
           {entry.caption && (
             <div className="border-l-2 border-[#DDE5EF] pl-2.5">
-              <p className="line-clamp-2 font-['Plus_Jakarta_Sans'] text-sm leading-[1.6rem] text-[#5A4A34]">
-                {entry.caption}
-              </p>
+              <p className="line-clamp-2 text-sm leading-[1.6rem] text-[#5A4A34]">{entry.caption}</p>
             </div>
           )}
         </div>

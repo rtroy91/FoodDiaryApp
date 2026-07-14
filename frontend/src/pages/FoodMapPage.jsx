@@ -125,7 +125,7 @@ export function FoodMapPage() {
               value={searchTerm}
               onChange={handleSearchChange}
               placeholder="Search place, category, address, barangay, or city"
-              className="min-w-0 flex-1 bg-transparent font-['Plus_Jakarta_Sans'] text-sm text-[#1C1107] outline-none placeholder:text-stone-400"
+              className="min-w-0 flex-1 bg-transparent text-sm text-[#1C1107] outline-none placeholder:text-stone-400"
             />
           </div>
 
@@ -139,7 +139,7 @@ export function FoodMapPage() {
         </div>
 
         {isError && (
-          <div className="rounded-2xl border border-[#E04B39]/20 bg-stone-50 px-5 py-4 font-['Plus_Jakarta_Sans'] text-sm text-[#8A2A1C]">
+          <div className="rounded-2xl border border-[#E04B39]/20 bg-stone-50 px-5 py-4 text-sm text-[#8A2A1C]">
             Could not load top places right now. Try again in a moment.
           </div>
         )}

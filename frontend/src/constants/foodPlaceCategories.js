@@ -1,0 +1,51 @@
+export const FOODPLACE_CATEGORIES = [
+  {
+    value: "Restaurant",
+    label: "Restaurant",
+    description: "Standard sit-down or casual dining places",
+    lightClassName: "bg-[#FDF2F2] text-[#9B1C1C]",
+    darkClassName: "bg-[#771D1D] text-[#FDE8E8]",
+  },
+  {
+    value: "Fast Food",
+    label: "Fast Food",
+    description: "Quick-service chains and drive-thrus",
+    lightClassName: "bg-[#FFF8E6] text-[#B45309]",
+    darkClassName: "bg-[#78350F] text-[#FEF3C7]",
+  },
+  {
+    value: "Cafe / Coffee Shop",
+    label: "Cafe / Coffee Shop",
+    description: "Coffee, tea, and light workspaces",
+    lightClassName: "bg-[#F5EBE6] text-[#5C3D2E]",
+    darkClassName: "bg-[#3E2723] text-[#EFEBE9]",
+  },
+  {
+    value: "Street Food / Food Stall",
+    label: "Street Food / Food Stall",
+    description: "Night markets, kiosks, and food trucks",
+    lightClassName: "bg-[#E6FFFA] text-[#0D9488]",
+    darkClassName: "bg-[#115E59] text-[#CCFBF1]",
+  },
+  {
+    value: "Bakery / Dessert Shop",
+    label: "Bakery / Dessert Shop",
+    description: "Bread, cakes, ice cream, and sweet treats",
+    lightClassName: "bg-[#FCE7F3] text-[#9D174D]",
+    darkClassName: "bg-[#701A75] text-[#FCE7F3]",
+  },
+  {
+    value: "Bar / Pub",
+    label: "Bar / Pub",
+    description: "Alcoholic drinks and nightlife",
+    lightClassName: "bg-[#F3E8FF] text-[#6B21A8]",
+    darkClassName: "bg-[#4C1D95] text-[#F3E8FF]",
+  },
+  {
+    value: "Food Court",
+    label: "Food Court",
+    description: "Shared dining spaces inside malls or commercial centers",
+    lightClassName: "bg-[#F3F4F6] text-[#374151]",
+    darkClassName: "bg-[#374151] text-[#F9FAFB]",
+  },
+];

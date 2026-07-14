@@ -25,7 +25,7 @@ export function AdminUsersPage() {
   }
 
   return (
-    <div className="min-h-full bg-[#F5F0E8] px-4 pb-10 pt-24 font-['Plus_Jakarta_Sans'] text-[#1C1107] sm:px-6">
+    <div className="min-h-full bg-[#F5F0E8] px-4 pb-10 pt-24 text-[#1C1107] sm:px-6">
       <div className="mx-auto w-full max-w-5xl">
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>

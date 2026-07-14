@@ -41,9 +41,9 @@ function FoodCatalogCardContent({ restaurant }) {
     <>
       <div className="h-20 w-20 overflow-hidden rounded-xl border border-stone-100 bg-[#F5EEE4]">
         {thumbnailUrl ? (
-          <img src={thumbnailUrl} alt={restaurant.name} className="h-full w-full object-cover" />
+          <img src={thumbnailUrl} alt={restaurant.name} loading="eager" className="h-full w-full object-cover" />
         ) : (
-          <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-stone-400">
+          <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-stone-600">
             <UtensilsCrossed size={22} />
             <ImageIcon size={14} />
           </div>
@@ -59,26 +59,26 @@ function FoodCatalogCardContent({ restaurant }) {
           </div>
 
           <div className="flex shrink-0 items-center justify-end gap-2">
-            <span className="inline-flex items-center gap-1 font-['Plus_Jakarta_Sans'] text-xs font-bold text-amber-500">
+            <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-700">
               <Star size={12} fill="currentColor" />
               {rating != null ? rating.toFixed(1) : "-"}
             </span>
-            <span className="inline-flex rounded-full bg-[#E8F7D3] px-2.5 py-1 font-['Plus_Jakarta_Sans'] text-xs font-bold leading-none text-[#365314]">
+            <span className="inline-flex rounded-full bg-[#E8F7D3] px-2.5 py-1 text-xs font-bold leading-none text-[#365314]">
               {visitsLabel}
             </span>
           </div>
         </div>
 
-        <div className="mt-1 space-y-1 font-['Plus_Jakarta_Sans'] text-xs font-medium text-stone-500">
+        <div className="mt-1 space-y-1 text-xs font-medium text-stone-600">
           {location && (
             <p className="flex min-w-0 items-center gap-1.5">
-              <MapPin size={13} className="shrink-0 text-stone-400" />
+              <MapPin size={13} className="shrink-0 text-stone-600" />
               <span className="truncate">{location}</span>
             </p>
           )}
         </div>
 
-        <span className="mt-3 inline-flex max-w-full truncate rounded-full border border-[#DDE5EF] bg-[#F7FAFD] px-3 py-0.5 font-['Plus_Jakarta_Sans'] text-[10px] font-semibold uppercase tracking-widest text-[#1C2A3D] shadow-[0_2px_8px_rgba(28,42,61,0.08)]">
+        <span className="mt-3 inline-flex max-w-full truncate rounded-full border border-[#DDE5EF] bg-[#F7FAFD] px-3 py-0.5  text-[10px] font-semibold uppercase tracking-widest text-[#1C2A3D] shadow-[0_2px_8px_rgba(28,42,61,0.08)]">
           {category}
         </span>
       </div>
@@ -108,7 +108,7 @@ export function FoodCatalogCardSkeleton() {
           </div>
 
           <div className="flex shrink-0 items-center justify-end gap-2">
-            <span className="inline-flex items-center gap-1 font-['Plus_Jakarta_Sans'] text-xs font-bold text-amber-500">
+            <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-700">
               <Star size={12} fill="currentColor" />
               <Skeleton width={24} height={14} borderRadius={6} baseColor="#e7dfd2" highlightColor="#f8f4ec" />
             </span>
@@ -118,7 +118,7 @@ export function FoodCatalogCardSkeleton() {
 
         <div className="mt-3 space-y-1">
           <div className="flex min-w-0 items-center gap-1.5">
-            <MapPin size={13} className="shrink-0 text-stone-400" />
+            <MapPin size={13} className="shrink-0 text-stone-600" />
             <Skeleton width={180} height={12} borderRadius={6} baseColor="#f0ebe2" highlightColor="#fbf8f2" />
           </div>
         </div>

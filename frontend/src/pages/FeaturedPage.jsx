@@ -147,9 +147,7 @@ export function FeaturedPage() {
               <p className="text-3xl font-light leading-tight text-white" style={{ fontFamily: '"Fraunces", serif' }}>
                 {getGreeting()}, <span className="italic text-[#F0E76F]">{userName}</span>
               </p>
-              <p className="mt-1 font-['Plus_Jakarta_Sans'] text-sm text-white/55">
-                Here's your food history at a glance.
-              </p>
+              <p className="mt-1 text-sm text-white/55">Here's your food history at a glance.</p>
             </div>
 
             <div className="text-right">

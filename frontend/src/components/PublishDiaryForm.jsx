@@ -191,7 +191,7 @@ export function PublishDiaryForm({ restaurants = [], entry = null, onClose }) {
   return (
     <div className="w-full max-w-md overflow-hidden rounded-[28px] bg-[#FFFDF9] shadow-[0_20px_70px_rgba(28,17,7,0.18)]">
       <div className="flex items-center justify-between border-b border-[#EFE4D5] px-5 py-4">
-        <h2 className="font-['Plus_Jakarta_Sans'] text-base font-extrabold tracking-tight text-[#1C1107]">
+        <h2 className="text-base font-extrabold tracking-tight text-[#1C1107]">
           {isEditing ? "Edit post" : "New post"}
         </h2>
         <button
@@ -224,7 +224,7 @@ export function PublishDiaryForm({ restaurants = [], entry = null, onClose }) {
                 <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-[0_10px_30px_rgba(28,17,7,0.10)]">
                   <Camera size={24} />
                 </span>
-                <span className="font-['Plus_Jakarta_Sans'] text-sm font-extrabold">+ Add food photo</span>
+                <span className="text-sm font-extrabold">+ Add food photo</span>
               </div>
             )}
             <input type="file" accept="image/*" onChange={handlePhotoChange} className="hidden" />

@@ -97,14 +97,10 @@ function RestaurantMarker({ restaurant, isSelected, onSelect }) {
           <p className="my-2! text-xl font-semibold leading-snug text-warmGray-900">{restaurant.name}</p>
 
           {restaurant.address && (
-            <p className="font-['Plus_Jakarta_Sans'] text-[11px] font-medium leading-snug text-[#6F7892]">
-              {restaurant.address}
-            </p>
+            <p className="text-[11px] font-medium leading-snug text-[#6F7892]">{restaurant.address}</p>
           )}
 
-          {location && (
-            <p className="font-['Plus_Jakarta_Sans'] text-[11px] font-medium leading-snug text-[#6F7892]">{location}</p>
-          )}
+          {location && <p className="text-[11px] font-medium leading-snug text-[#6F7892]">{location}</p>}
         </div>
       </Popup>
     </Marker>
