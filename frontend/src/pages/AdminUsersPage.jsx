@@ -65,7 +65,9 @@ export function AdminUsersPage() {
                 <div key={user.id} className="grid gap-3 px-5 py-4 md:grid-cols-[1.4fr_1fr_auto_auto] md:items-center">
                   <div className="min-w-0">
                     <p className="truncate text-sm font-extrabold text-[#1C1107]">{user.email}</p>
-                    <p className="mt-0.5 text-xs font-semibold text-stone-500">{user.displayName || "No display name"}</p>
+                    <p className="mt-0.5 text-xs font-semibold text-stone-500">
+                      {user.displayName || "No display name"}
+                    </p>
                   </div>
                   <p className="text-sm font-semibold text-[#756450]">{formatDate(user.createdAt)}</p>
                   <span className="w-fit rounded-full bg-[#F5EEE4] px-3 py-1 text-xs font-extrabold text-[#6F5130]">
