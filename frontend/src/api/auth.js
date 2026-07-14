@@ -6,6 +6,7 @@ function storeAuthSession(data) {
   setStoredUser({
     email: data.email,
     displayName: data.displayName,
+    role: data.role,
   });
 }
 
@@ -35,4 +36,8 @@ export function isAuthenticated() {
 
 export function getCurrentUser() {
   return getStoredUser();
+}
+
+export function isAdmin() {
+  return getStoredUser()?.role === "Admin";
 }

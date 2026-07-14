@@ -5,6 +5,7 @@ import { FoodCatalogCard } from "../components/FoodCatalogCard";
 import { Modal } from "../components/Modal";
 import { PageHeader } from "../components/PageHeader";
 import { SelectInput } from "../components/SelectInput";
+import { isAdmin } from "../api/auth";
 import { useAllEntries, useRestaurantLists } from "../hooks/useDiaryData";
 import { buildPlaceStats, categoryLabel } from "../utils/restaurants";
 
@@ -151,6 +152,7 @@ export function TopPlacePage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [category, setCategory] = useState("all");
   const [showAddModal, setShowAddModal] = useState(false);
+  const canManageRestaurants = isAdmin();
 
   const places = useMemo(() => buildPlaceStats(restaurants ?? [], entries ?? []), [restaurants, entries]);
 
@@ -263,14 +265,16 @@ export function TopPlacePage() {
               <section className="flex min-h-0 flex-1 flex-col overflow-hidden">
                 <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
                   <SectionHeader eyebrow="All food place" title="Browse every place" />
-                  <button
-                    type="button"
-                    onClick={() => setShowAddModal(true)}
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#E04B39] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#c93c2f]"
-                  >
-                    <Plus size={15} />
-                    Cannot find a place?
-                  </button>
+                  {canManageRestaurants && (
+                    <button
+                      type="button"
+                      onClick={() => setShowAddModal(true)}
+                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#E04B39] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#c93c2f]"
+                    >
+                      <Plus size={15} />
+                      Cannot find a place?
+                    </button>
+                  )}
                 </div>
 
                 {filteredPlaces.length > 0 ? (
@@ -298,7 +302,7 @@ export function TopPlacePage() {
         </div>
       </div>
 
-      {showAddModal && (
+      {showAddModal && canManageRestaurants && (
         <Modal onClose={() => setShowAddModal(false)} closeOnBackdrop={false} closeOnEscape={false}>
           <Suspense fallback={null}>
             <RestaurantForm onClose={() => setShowAddModal(false)} />

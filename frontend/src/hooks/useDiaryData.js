@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as restaurantsApi from "../api/restaurants";
 import * as entriesApi from "../api/entries";
+import * as usersApi from "../api/users";
 
 export function useRestaurantLists(options = {}) {
   return useQuery({
@@ -67,6 +68,14 @@ export function useDeleteRestaurant() {
       queryClient.invalidateQueries({ queryKey: ["restaurants"] });
       queryClient.invalidateQueries({ queryKey: ["entries"] });
     },
+  });
+}
+
+export function useUsers(options = {}) {
+  return useQuery({
+    queryKey: ["users"],
+    queryFn: usersApi.getUsers,
+    ...options,
   });
 }
 

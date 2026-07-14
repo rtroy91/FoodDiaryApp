@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import Skeleton from "react-loading-skeleton";
 import { ImageIcon, MapPin, Star, UtensilsCrossed } from "lucide-react";
+import { isAdmin } from "../api/auth";
 import { categoryLabel } from "../utils/restaurants";
 
 function getLocation(restaurant) {
@@ -136,6 +137,7 @@ export function FoodCatalogCardSkeleton() {
 }
 
 export function FoodCatalogCard({ restaurant, isSelected = false, onSelect }) {
+  const to = isAdmin() ? `/place-details/${restaurant.id}` : `/entries/place/${restaurant.id}`;
   const cardClassName = [
     "grid w-full min-w-0 cursor-pointer grid-cols-[5rem_minmax(0,1fr)] items-center gap-4 overflow-hidden rounded-2xl border bg-white px-3 py-2.5 text-left shadow-none transition-all hover:bg-stone-50",
     isSelected ? "border-[#E04B39]/40 ring-2 ring-[#E04B39]/10" : "border-stone-100",
@@ -166,7 +168,7 @@ export function FoodCatalogCard({ restaurant, isSelected = false, onSelect }) {
   }
 
   return (
-    <Link to={`/place-details/${restaurant.id}`} className="block min-w-0 no-underline">
+    <Link to={to} className="block min-w-0 no-underline">
       <div className={cardClassName}>
         <FoodCatalogCardContent restaurant={restaurant} />
       </div>

@@ -31,7 +31,8 @@ public class AuthService : IAuthService
         {
             Email = request.Email,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
-            DisplayName = request.DisplayName
+            DisplayName = request.DisplayName,
+            Role = GetRoleForEmail(request.Email)
         };
 
         _context.Users.Add(user);
@@ -43,12 +44,18 @@ public class AuthService : IAuthService
     public async Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken)
     {
         var user = await _context.Users
-            .AsNoTracking()
             .FirstOrDefaultAsync(u => u.Email == request.Email, cancellationToken)
             ?? throw new UnauthorizedAccessException("Invalid email or password.");
 
         if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             throw new UnauthorizedAccessException("Invalid email or password.");
+
+        var configuredRole = GetRoleForEmail(user.Email);
+        if (user.Role != configuredRole && configuredRole == "Admin")
+        {
+            user.Role = configuredRole;
+            await _context.SaveChangesAsync(cancellationToken);
+        }
 
         return BuildAuthResponse(user);
     }
@@ -60,7 +67,8 @@ public class AuthService : IAuthService
         Token = GenerateJwt(user),
         UserId = user.Id,
         Email = user.Email,
-        DisplayName = user.DisplayName
+        DisplayName = user.DisplayName,
+        Role = user.Role
     };
 
     private string GenerateJwt(User user)
@@ -68,7 +76,8 @@ public class AuthService : IAuthService
         var claims = new[]
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Email, user.Email)
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Role, user.Role)
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
@@ -82,5 +91,14 @@ public class AuthService : IAuthService
             signingCredentials: creds);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    private string GetRoleForEmail(string email)
+    {
+        var adminEmail = _config["Admin:InitialEmail"] ?? _config["INITIAL_ADMIN_EMAIL"];
+        return !string.IsNullOrWhiteSpace(adminEmail) &&
+               string.Equals(email.Trim(), adminEmail.Trim(), StringComparison.OrdinalIgnoreCase)
+            ? "Admin"
+            : "User";
     }
 }

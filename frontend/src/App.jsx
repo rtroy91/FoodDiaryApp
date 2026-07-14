@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { NavBar } from "./components/NavBar";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { isAdmin } from "./api/auth";
 
 const FeaturedPage = lazy(() =>
   import("./pages/FeaturedPage").then((module) => ({
@@ -33,6 +34,11 @@ const FoodPlaceDetailPage = lazy(() =>
     default: module.FoodPlaceDetailPage,
   }))
 );
+const AdminUsersPage = lazy(() =>
+  import("./pages/AdminUsersPage").then((module) => ({
+    default: module.AdminUsersPage,
+  }))
+);
 const RestaurantForm = lazy(() =>
   import("./components/RestaurantForm").then((module) => ({
     default: module.RestaurantForm,
@@ -53,6 +59,10 @@ function withRouteSuspense(element) {
   return <Suspense fallback={<RouteLoadingShell />}>{element}</Suspense>;
 }
 
+function AdminRoute({ children }) {
+  return isAdmin() ? children : <FeaturedPage />;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -70,11 +80,20 @@ export default function App() {
         >
           <Route index element={<FeaturedPage />} />
           <Route path="entries" element={<EntriesPage />} />
+          <Route path="entries/place/:restaurantId" element={<EntryDetailPage />} />
           <Route path="entries/:id" element={<EntryDetailPage />} />
           <Route path="food-map" element={<FoodMapPage />} />
           <Route path="top-places" element={<TopPlacePage />} />
-          <Route path="add-restaurant" element={<RestaurantForm />} />
+          <Route
+            path="add-restaurant"
+            element={
+              <AdminRoute>
+                <RestaurantForm />
+              </AdminRoute>
+            }
+          />
           <Route path="place-details/:id" element={<FoodPlaceDetailPage />} />
+          <Route path="admin/users" element={<AdminUsersPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

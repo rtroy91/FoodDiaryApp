@@ -41,6 +41,7 @@ public class RestaurantsController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create([FromBody] CreateRestaurantRequest request, CancellationToken cancellationToken)
     {
         var result = await _restaurantService.CreateAsync(request, cancellationToken);
@@ -48,6 +49,7 @@ public class RestaurantsController : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateRestaurantRequest request, CancellationToken cancellationToken)
     {
         var result = await _restaurantService.UpdateAsync(id, request, cancellationToken);
@@ -55,6 +57,7 @@ public class RestaurantsController : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
         var deleted = await _restaurantService.DeleteAsync(id, cancellationToken);

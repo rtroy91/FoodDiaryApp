@@ -1,7 +1,7 @@
 import { Suspense, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { LogOut } from "lucide-react";
-import { logout } from "../api/auth";
+import { isAdmin, logout } from "../api/auth";
 
 const NAV_ITEMS = [
   { to: "/", label: "Home", end: true },
@@ -18,6 +18,7 @@ export function NavBar() {
   const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = location.pathname;
+  const navItems = isAdmin() ? [...NAV_ITEMS, { to: "/admin/users", label: "Users", end: false }] : NAV_ITEMS;
 
   const isHomeRoute = pathname === "/";
   const isEntriesRoute = pathname.startsWith("/entries");
@@ -70,7 +71,7 @@ export function NavBar() {
             </NavLink>
 
             <div className="flex min-w-0 items-center gap-1 sm:gap-2">
-              {NAV_ITEMS.map(({ to, label, end }) => (
+              {navItems.map(({ to, label, end }) => (
                 <NavLink
                   key={to}
                   to={to}
