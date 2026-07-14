@@ -1,16 +1,15 @@
 import { lazy, Suspense, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import Skeleton from "react-loading-skeleton";
-import { ImageIcon, MapPin, Plus, Search, Star, Trophy, UtensilsCrossed, X } from "lucide-react";
+import { ImageIcon, MapPin, Plus, Star, Trophy, UtensilsCrossed } from "lucide-react";
 import { FoodCatalogCard, FoodCatalogCardSkeleton } from "../components/FoodCatalogCard";
+import { FoodPlaceFilters } from "../components/FoodPlaceFilters";
 import { Modal } from "../components/Modal";
 import { PageHeader } from "../components/PageHeader";
-import { SelectInput } from "../components/SelectInput";
 import { isAdmin } from "../api/auth";
 import { useAllEntries, useRestaurantLists } from "../hooks/useDiaryData";
-import { useBataanCities, useBarangaysByCity } from "../hooks/usePsgc";
-import { FOODPLACE_CATEGORIES } from "../constants/foodPlaceCategories";
-import { cleanLocationText, formatFoodPlaceLocation } from "../utils/location";
+import { useFoodPlaceFilters } from "../hooks/useFoodPlaceFilters";
+import { formatFoodPlaceLocation } from "../utils/location";
 import { buildPlaceStats } from "../utils/restaurants";
 
 const RestaurantForm = lazy(() =>
@@ -41,7 +40,11 @@ function TopPlaceAccordionSkeleton() {
           key={item}
           className={[
             "group flex h-24 w-[85vw] shrink-0 snap-start items-center overflow-hidden rounded-2xl border border-stone-200 bg-white px-3 shadow-none sm:w-auto",
-            item === 0 ? "sm:max-w-md sm:flex-[1_1_24rem]" : "sm:flex-[0_0_6rem]",
+            item === 0
+              ? "sm:flex-[1_1_24rem] md:flex-[1_1_0] lg:max-w-md lg:flex-[1_1_24rem]"
+              : item === 1
+                ? "sm:flex-[0_0_5.5rem] md:flex-[1_1_0] lg:max-w-md lg:flex-[1_1_24rem]"
+                : "sm:flex-[0_0_5.5rem] lg:flex-[0_0_6rem]",
           ].join(" ")}
         >
           <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#F5EEE4]">
@@ -52,7 +55,11 @@ function TopPlaceAccordionSkeleton() {
           <div
             className={[
               "ml-4 grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_auto] items-center gap-3",
-              item === 0 ? "opacity-100" : "opacity-100 sm:opacity-0",
+              item === 0
+                ? "opacity-100"
+                : item === 1
+                  ? "opacity-100 sm:opacity-0 md:opacity-100 lg:opacity-0"
+                  : "opacity-100 sm:opacity-0",
             ].join(" ")}
           >
             <div className="min-w-0">
@@ -71,18 +78,6 @@ function TopPlaceAccordionSkeleton() {
   );
 }
 
-function getCityName(city) {
-  return cleanLocationText(city.name);
-}
-
-function getCityCode(city) {
-  return cleanLocationText(city.code);
-}
-
-function getBarangayName(barangay) {
-  return cleanLocationText(barangay.name);
-}
-
 function formatReach(value = 0) {
   if (value >= 1000) {
     return `${(value / 1000).toFixed(value >= 10000 ? 0 : 1)}k`;
@@ -92,7 +87,7 @@ function formatReach(value = 0) {
 }
 
 // #region Expanded Card
-function TopPlaceAccordionItem({ place, rank, mode, isExpanded, onMouseEnter }) {
+function TopPlaceAccordionItem({ place, rank, mode, isExpanded, isPairedTabletExpansion, onMouseEnter }) {
   const thumbnailUrl = place?.thumbnailUrl ?? null;
   const location = formatFoodPlaceLocation(place);
   const rating = place.averageRating;
@@ -111,11 +106,19 @@ function TopPlaceAccordionItem({ place, rank, mode, isExpanded, onMouseEnter }) 
         };
   const detailsClassName = [
     "ml-4 grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 text-left transition-opacity delay-75 duration-200 motion-reduce:transition-none",
-    isExpanded ? "opacity-100" : "opacity-100 sm:opacity-0",
+    isExpanded
+      ? "opacity-100"
+      : isPairedTabletExpansion
+        ? "opacity-100 sm:opacity-0 md:opacity-100 lg:opacity-0"
+        : "opacity-100 sm:opacity-0",
   ].join(" ");
   const itemClassName = [
     "group flex h-24 w-[85vw] shrink-0 snap-start items-center overflow-hidden rounded-2xl border border-stone-200 bg-white px-3 text-left no-underline shadow-none transition-[border-color,box-shadow,background-color,flex-basis,max-width] duration-300 ease-out hover:border-[#E8DFC8] hover:shadow-md focus-visible:border-[#E04B39]/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E04B39]/15 motion-reduce:transition-none sm:w-auto",
-    isExpanded ? "sm:max-w-[28rem] sm:flex-[1_1_24rem]" : "sm:flex-[0_0_6rem]",
+    isExpanded
+      ? "sm:max-w-[28rem] sm:flex-[1_1_24rem] md:max-w-none md:flex-[1_1_0] lg:max-w-[28rem] lg:flex-[1_1_24rem]"
+      : isPairedTabletExpansion
+        ? "sm:flex-[0_0_5.5rem] md:flex-[1_1_0] lg:flex-[0_0_6rem]"
+        : "sm:flex-[0_0_5.5rem] lg:flex-[0_0_6rem]",
   ].join(" ");
 
   return (
@@ -181,6 +184,7 @@ function TopPlaceAccordion({ places, mode }) {
           rank={index + 1}
           mode={mode}
           isExpanded={index === expandedIndex}
+          isPairedTabletExpansion={(expandedIndex === 2 ? index === 1 : index < 2) && index !== expandedIndex}
           onMouseEnter={() => setExpandedIndex(index)}
         />
       ))}
@@ -192,36 +196,27 @@ function TopPlaceAccordion({ places, mode }) {
 export function TopPlacePage() {
   const { data: foodplace, isLoading: loadingRestaurants } = useRestaurantLists();
   const { data: entries, isLoading: loadingEntries } = useAllEntries();
-  const { data: bataanCities = [], isLoading: loadingCities, isError: isCitiesError } = useBataanCities();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [category, setCategory] = useState("all");
-  const [cityCode, setCityCode] = useState("");
-  const [city, setCity] = useState("all");
-  const [barangay, setBarangay] = useState("all");
   const [showAddModal, setShowAddModal] = useState(false);
   const canManageRestaurants = isAdmin();
 
-  const { data: psgcBarangays = [], isLoading: loadingBarangays } = useBarangaysByCity(cityCode);
-
   const places = useMemo(() => buildPlaceStats(foodplace ?? [], entries ?? []), [foodplace, entries]);
-
-  const cities = useMemo(() => {
-    return bataanCities
-      .map((item) => {
-        const code = getCityCode(item);
-        const name = getCityName(item);
-        return { value: code, label: name, name };
-      })
-      .filter((item) => item.value && item.label)
-      .sort((a, b) => a.label.localeCompare(b.label));
-  }, [bataanCities]);
-
-  const barangays = useMemo(() => {
-    return psgcBarangays
-      .map((item) => getBarangayName(item))
-      .filter(Boolean)
-      .sort((a, b) => a.localeCompare(b));
-  }, [psgcBarangays]);
+  const {
+    searchTerm,
+    category,
+    cityCode,
+    barangay,
+    cityOptions,
+    barangayOptions,
+    loadingCities,
+    isCitiesError,
+    loadingBarangays,
+    hasActiveFilters,
+    filteredPlaces,
+    handleSearchChange,
+    handleCategoryChange,
+    handleCityChange,
+    handleBarangayChange,
+  } = useFoodPlaceFilters(places);
 
   const popularPlaces = useMemo(
     () =>
@@ -244,28 +239,7 @@ export function TopPlacePage() {
     [places]
   );
 
-  const filteredPlaces = useMemo(() => {
-    const normalizedSearchTerm = searchTerm.trim().toLowerCase();
-
-    return places.filter((place) => {
-      const matchesCategory = category === "all" || place.category === category;
-      const matchesCity = city === "all" || cleanLocationText(place.city) === city;
-      const matchesBarangay = barangay === "all" || cleanLocationText(place.barangay) === barangay;
-      const text = (place.name || "").toLowerCase();
-
-      return matchesCategory && matchesCity && matchesBarangay && text.includes(normalizedSearchTerm);
-    });
-  }, [barangay, category, city, places, searchTerm]);
-
-  function handleCityChange(nextCityCode) {
-    const selectedCity = cities.find((item) => item.value === nextCityCode);
-    setCityCode(nextCityCode);
-    setCity(selectedCity?.label ?? "all");
-    setBarangay("all");
-  }
-
   const isLoading = loadingRestaurants || loadingEntries;
-  const hasActivePlaceFilters = searchTerm.trim() !== "" || category !== "all" || cityCode !== "" || barangay !== "all";
 
   return (
     <>
@@ -273,86 +247,37 @@ export function TopPlacePage() {
         <PageHeader title="Top Places" subtitle="Browse the spots you keep coming back to." maxWidth="1180px" />
 
         <div className="mx-auto flex min-h-0 w-full max-w-295 flex-1 flex-col px-4 pb-4">
-          <div className="relative z-20 -mt-8 mb-8 grid shrink-0 grid-cols-1 gap-3 rounded-3xl border border-[#E8DFC8] bg-stone-50 p-3 shadow-[0_10px_28px_rgba(28,17,7,0.08)] sm:grid-cols-3 lg:grid-cols-[minmax(0,1fr)_220px_180px_200px]">
-            <label className="flex h-11.5 items-center gap-3 rounded-2xl border border-[#D8CDBB] bg-[#F5EEE4] px-4 text-sm text-[#5A4A34] transition-colors focus-within:border-[#E04B39]/20 focus-within:ring-2 focus-within:ring-[#E04B39]/20 sm:col-span-3 lg:col-span-1">
-              <Search size={16} className="shrink-0 text-stone-600" />
-              <input
-                aria-label="Search food place"
-                name="foodPlaceSearch"
-                autoComplete="off"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search food place"
-                className="min-w-0 flex-1 bg-transparent text-sm text-[#1C1107] outline-none placeholder:text-stone-600"
-              />
-              <button
-                type="button"
-                onClick={() => setSearchTerm("")}
-                disabled={!searchTerm}
-                className={[
-                  "flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-stone-600 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E04B39]/20",
-                  searchTerm ? "hover:bg-white/70 hover:text-[#1C1107]" : "pointer-events-none opacity-0",
-                ].join(" ")}
-                aria-label="Clear search"
-              >
-                <X size={15} />
-              </button>
-            </label>
-
-            <SelectInput
-              ariaLabel="Filter by category"
-              value={category}
-              onChange={setCategory}
-              showPlaceholder={false}
-              options={[
-                { value: "all", label: "All Categories" },
-                ...FOODPLACE_CATEGORIES.map((item) => ({
-                  value: item.value,
-                  label: item.label,
-                })),
-              ]}
-            />
-
-            <SelectInput
-              ariaLabel="Filter by city"
-              value={cityCode}
-              onChange={handleCityChange}
-              disabled={loadingCities || isCitiesError || cities.length === 0}
-              showPlaceholder={false}
-              options={[{ value: "", label: loadingCities ? "Loading cities..." : "Select City" }, ...cities]}
-            />
-
-            <SelectInput
-              ariaLabel="Filter by barangay"
-              value={barangay}
-              onChange={setBarangay}
-              disabled={!cityCode || loadingBarangays}
-              showPlaceholder={false}
-              options={[
-                { value: "all", label: loadingBarangays ? "Loading barangays..." : "Select Barangay" },
-                ...barangays.map((item) => ({
-                  value: item,
-                  label: item,
-                })),
-              ]}
-            />
-          </div>
+          <FoodPlaceFilters
+            searchTerm={searchTerm}
+            onSearchChange={handleSearchChange}
+            category={category}
+            onCategoryChange={handleCategoryChange}
+            cityCode={cityCode}
+            onCityChange={handleCityChange}
+            cityOptions={cityOptions}
+            loadingCities={loadingCities}
+            cityError={isCitiesError}
+            barangay={barangay}
+            onBarangayChange={handleBarangayChange}
+            barangayOptions={barangayOptions}
+            loadingBarangays={loadingBarangays}
+          />
 
           {isLoading ? (
             <div className="custom-scrollbar flex min-h-0 flex-1 flex-col gap-10 overflow-y-auto overflow-x-hidden pr-1 lg:overflow-hidden lg:pr-0">
-              {!hasActivePlaceFilters && (
-                <div className="grid shrink-0 gap-6 lg:grid-cols-2">
-                  <section className="min-w-0">
-                    <SectionHeader eyebrow="TRENDING" title="Trending Spots" />
-                    <TopPlaceAccordionSkeleton />
-                  </section>
+              <div
+                className={["shrink-0 gap-6 lg:grid lg:grid-cols-2", hasActiveFilters ? "hidden" : "grid"].join(" ")}
+              >
+                <section className="min-w-0">
+                  <SectionHeader eyebrow="TRENDING" title="Trending Spots" />
+                  <TopPlaceAccordionSkeleton />
+                </section>
 
-                  <section className="min-w-0">
-                    <SectionHeader eyebrow="TOP TIERS" title="Highest rated" />
-                    <TopPlaceAccordionSkeleton />
-                  </section>
-                </div>
-              )}
+                <section className="min-w-0">
+                  <SectionHeader eyebrow="TOP TIERS" title="Highest rated" />
+                  <TopPlaceAccordionSkeleton />
+                </section>
+              </div>
 
               <section className="flex min-h-0 flex-1 flex-col overflow-visible lg:overflow-hidden">
                 <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -371,33 +296,33 @@ export function TopPlacePage() {
             </div>
           ) : (
             <div className="custom-scrollbar flex min-h-0 flex-1 flex-col gap-10 overflow-y-auto overflow-x-hidden pr-1 lg:overflow-hidden lg:pr-0">
-              {!hasActivePlaceFilters && (
-                <div className="grid shrink-0 gap-6 lg:grid-cols-2">
-                  <section className="min-w-0">
-                    <SectionHeader eyebrow="TRENDING" title="Trending Spots" />
-                    {popularPlaces.length > 0 ? (
-                      <TopPlaceAccordion places={popularPlaces} mode="visits" />
-                    ) : (
-                      <div className="flex min-h-42 flex-col items-center justify-center rounded-2xl border border-[#E8DFC8] bg-stone-50 px-5 py-8 text-center">
-                        <Trophy size={30} className="mx-auto mb-3 text-stone-600" />
-                        <p className="text-sm text-stone-600">Places you practically pay rent at.</p>
-                      </div>
-                    )}
-                  </section>
+              <div
+                className={["shrink-0 gap-6 lg:grid lg:grid-cols-2", hasActiveFilters ? "hidden" : "grid"].join(" ")}
+              >
+                <section className="min-w-0">
+                  <SectionHeader eyebrow="TRENDING" title="Trending Spots" />
+                  {popularPlaces.length > 0 ? (
+                    <TopPlaceAccordion places={popularPlaces} mode="visits" />
+                  ) : (
+                    <div className="flex min-h-42 flex-col items-center justify-center rounded-2xl border border-[#E8DFC8] bg-stone-50 px-5 py-8 text-center">
+                      <Trophy size={30} className="mx-auto mb-3 text-stone-600" />
+                      <p className="text-sm text-stone-600">Places you practically pay rent at.</p>
+                    </div>
+                  )}
+                </section>
 
-                  <section className="min-w-0">
-                    <SectionHeader eyebrow="TOP TIERS" title="Highest rated" />
-                    {favoritePlaces.length > 0 ? (
-                      <TopPlaceAccordion places={favoritePlaces} mode="rating" />
-                    ) : (
-                      <div className="flex min-h-42 flex-col items-center justify-center rounded-2xl border border-[#E8DFC8] bg-stone-50 px-5 py-8 text-center">
-                        <Star size={30} className="mx-auto mb-3 text-stone-600" />
-                        <p className="text-sm text-stone-600">Approved by your tastebuds (and your wallet).</p>
-                      </div>
-                    )}
-                  </section>
-                </div>
-              )}
+                <section className="min-w-0">
+                  <SectionHeader eyebrow="TOP TIERS" title="Highest rated" />
+                  {favoritePlaces.length > 0 ? (
+                    <TopPlaceAccordion places={favoritePlaces} mode="rating" />
+                  ) : (
+                    <div className="flex min-h-42 flex-col items-center justify-center rounded-2xl border border-[#E8DFC8] bg-stone-50 px-5 py-8 text-center">
+                      <Star size={30} className="mx-auto mb-3 text-stone-600" />
+                      <p className="text-sm text-stone-600">Approved by your tastebuds (and your wallet).</p>
+                    </div>
+                  )}
+                </section>
+              </div>
 
               <section className="flex min-h-0 flex-1 flex-col overflow-visible lg:overflow-hidden">
                 <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">

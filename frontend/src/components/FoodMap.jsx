@@ -1,5 +1,7 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import L from "leaflet";
+import { ArrowRight, Star } from "lucide-react";
+import { Link } from "react-router-dom";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { categoryLabel } from "../utils/restaurants";
@@ -7,10 +9,12 @@ import { categoryLabel } from "../utils/restaurants";
 const BATAAN_CENTER = [14.676, 120.536];
 const DEFAULT_ZOOM = 10;
 
-function getLocation(restaurant) {
-  return [restaurant?.barangay ? "Brgy. " + restaurant.barangay : null, restaurant?.city, restaurant?.province]
-    .filter(Boolean)
-    .join(", ");
+function formatReach(value = 0) {
+  if (value >= 1000) {
+    return `${(value / 1000).toFixed(value >= 10000 ? 0 : 1)}k`;
+  }
+
+  return value.toString();
 }
 
 function makePinIcon(isSelected) {
@@ -77,30 +81,62 @@ function MapViewport({ restaurants, selectedRestaurant }) {
 }
 
 function RestaurantMarker({ restaurant, isSelected, onSelect }) {
+  const markerRef = useRef(null);
   const icon = useMemo(() => makePinIcon(isSelected), [isSelected]);
-  const location = getLocation(restaurant);
+  const rating = restaurant.averageRating;
+  const visitCount = restaurant.visitCount ?? 0;
+  const visitsLabel = `${formatReach(visitCount)} ${visitCount === 1 ? "visit" : "visits"}`;
+
+  useEffect(() => {
+    if (isSelected) {
+      markerRef.current?.openPopup();
+    }
+  }, [isSelected]);
 
   return (
     <Marker
+      ref={markerRef}
       position={[restaurant.latitude, restaurant.longitude]}
       icon={icon}
+      title={restaurant.name}
+      alt={`${restaurant.name} map marker`}
       eventHandlers={{
         click: () => onSelect(restaurant.id),
       }}
     >
-      <Popup>
-        <div className="min-w-44 max-w-52 rounded-2xl bg-white px-4 py-2 text-center">
-          <span className="mb-1 inline-flex rounded-full border border-[#DDE5EF] bg-[#F7FAFD] px-3 py-0.5 text-[9px] font-semibold uppercase tracking-widest text-[#1C2A3D] shadow-[0_2px_8px_rgba(28,42,61,0.08)]">
-            {categoryLabel(restaurant.category)}
-          </span>
+      <Popup className="food-map-popup" closeButton={false}>
+        <div className="w-56 overflow-hidden rounded-2xl  bg-[#FFFBF4] text-left">
+          <div className="px-3.5 py-3">
+            <div className="flex min-w-0 items-start justify-between gap-3">
+              <p className="min-w-0 truncate text-base font-semibold leading-snug text-[#1C1107]">{restaurant.name}</p>
+              <span className="shrink-0 rounded-full border border-[#F3D7AD] bg-[#FFF4DD] px-2 py-1 text-[9px] font-bold uppercase leading-none tracking-widest text-[#9A4B12]">
+                {categoryLabel(restaurant.category)}
+              </span>
+            </div>
 
-          <p className="my-2! text-xl font-semibold leading-snug text-warmGray-900">{restaurant.name}</p>
+            <div className="-mt-1 flex items-center gap-2 text-xs font-semibold text-stone-600">
+              <span
+                className="inline-flex items-center gap-1 text-amber-700"
+                aria-label={`Rating ${rating != null ? rating.toFixed(1) : "not rated"}`}
+              >
+                <Star size={12} fill="currentColor" aria-hidden="true" />
+                {rating != null ? rating.toFixed(1) : "-"}
+              </span>
+              <span className="text-stone-300" aria-hidden="true">
+                {"\u2022"}
+              </span>
+              <span className="text-[#365314]">{visitsLabel}</span>
+            </div>
 
-          {restaurant.address && (
-            <p className="text-[11px] font-medium leading-snug text-[#6F7892]">{restaurant.address}</p>
-          )}
-
-          {location && <p className="text-[11px] font-medium leading-snug text-[#6F7892]">{location}</p>}
+            <Link
+              to={`/entries/place/${restaurant.id}`}
+              onClick={() => onSelect(restaurant.id)}
+              className="food-map-popup-action mt-3 inline-flex h-7 items-center gap-1.5 rounded-full bg-[#E04B39] px-4 text-xs font-semibold text-white transition hover:bg-[#c93c2f] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              View
+              <ArrowRight size={13} aria-hidden="true" />
+            </Link>
+          </div>
         </div>
       </Popup>
     </Marker>
@@ -118,7 +154,13 @@ export function FoodMap({ restaurants, selectedRestaurantId, onSelectRestaurant 
   );
 
   return (
-    <MapContainer center={BATAAN_CENTER} zoom={DEFAULT_ZOOM} scrollWheelZoom className="mx-auto h-full min-h-90 w-full">
+    <MapContainer
+      center={BATAAN_CENTER}
+      zoom={DEFAULT_ZOOM}
+      scrollWheelZoom
+      className="mx-auto h-full min-h-90 w-full"
+      aria-label="Food places map"
+    >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

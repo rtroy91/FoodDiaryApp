@@ -158,6 +158,7 @@ export function FoodCatalogCard({ restaurant, isSelected = false, onSelect }) {
       <article
         role="button"
         tabIndex={0}
+        aria-label={`Select ${restaurant.name}`}
         onClick={() => onSelect(restaurant.id)}
         onKeyDown={handleKeyDown}
         className={cardClassName}

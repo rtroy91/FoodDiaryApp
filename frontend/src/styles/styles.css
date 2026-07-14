@@ -30,6 +30,15 @@ body {
   outline-offset: 2px;
 }
 
+.food-map-popup .leaflet-popup-content {
+  margin: 0;
+}
+
+.food-map-popup a.food-map-popup-action {
+  color: #ffffff;
+  text-decoration: none;
+}
+
 .custom-scrollbar,
 .select-scrollbar {
   scrollbar-width: thin;
