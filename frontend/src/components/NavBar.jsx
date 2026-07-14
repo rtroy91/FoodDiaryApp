@@ -81,7 +81,7 @@ export function NavBar() {
 
                     return [
                       "whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium no-underline transition-colors duration-200 sm:px-4 sm:text-sm",
-                      isActive || isHomeActive ? "bg-[#A3E635] text-stone-900" : "text-stone-300 hover:text-white",
+                      isActive || isHomeActive ? "bg-[#E04B39] text-stone-50" : "text-stone-50 hover:text-stone-200",
                     ].join(" ");
                   }}
                 >

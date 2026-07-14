@@ -1,63 +1,23 @@
-import { lazy, Suspense } from "react";
+import { lazy } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { NavBar } from "./components/NavBar";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { isAdmin } from "./api/auth";
+import { FeaturedPage } from "./pages/FeaturedPage";
+import { EntriesPage } from "./pages/EntriesPage";
+import { FoodMapPage } from "./pages/FoodMapPage";
+import { EntryDetailPage } from "./pages/EntryDetailPage";
+import { TopPlacePage } from "./pages/TopPlacePage";
+import { FoodPlaceDetailPage } from "./pages/FoodPlaceDetailPage";
+import { AdminUsersPage } from "./pages/AdminUsersPage";
+import { LoginPage } from "./pages/LoginPage";
+import { RegisterPage } from "./pages/RegisterPage";
 
-const FeaturedPage = lazy(() =>
-  import("./pages/FeaturedPage").then((module) => ({
-    default: module.FeaturedPage,
-  }))
-);
-const EntriesPage = lazy(() =>
-  import("./pages/EntriesPage").then((module) => ({
-    default: module.EntriesPage,
-  }))
-);
-const FoodMapPage = lazy(() =>
-  import("./pages/FoodMapPage").then((module) => ({
-    default: module.FoodMapPage,
-  }))
-);
-const EntryDetailPage = lazy(() =>
-  import("./pages/EntryDetailPage").then((module) => ({
-    default: module.EntryDetailPage,
-  }))
-);
-const TopPlacePage = lazy(() =>
-  import("./pages/TopPlacePage").then((module) => ({
-    default: module.TopPlacePage,
-  }))
-);
-const FoodPlaceDetailPage = lazy(() =>
-  import("./pages/FoodPlaceDetailPage").then((module) => ({
-    default: module.FoodPlaceDetailPage,
-  }))
-);
-const AdminUsersPage = lazy(() =>
-  import("./pages/AdminUsersPage").then((module) => ({
-    default: module.AdminUsersPage,
-  }))
-);
 const RestaurantForm = lazy(() =>
   import("./components/RestaurantForm").then((module) => ({
     default: module.RestaurantForm,
   }))
 );
-const LoginPage = lazy(() => import("./pages/LoginPage").then((module) => ({ default: module.LoginPage })));
-const RegisterPage = lazy(() =>
-  import("./pages/RegisterPage").then((module) => ({
-    default: module.RegisterPage,
-  }))
-);
-
-function RouteLoadingShell() {
-  return <div className="min-h-dvh bg-[#F5F0E8]" style={{ fontFamily: '"Geist Mono", monospace' }} />;
-}
-
-function withRouteSuspense(element) {
-  return <Suspense fallback={<RouteLoadingShell />}>{element}</Suspense>;
-}
 
 function AdminRoute({ children }) {
   return isAdmin() ? children : <FeaturedPage />;
@@ -67,8 +27,8 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={withRouteSuspense(<LoginPage />)} />
-        <Route path="/register" element={withRouteSuspense(<RegisterPage />)} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
 
         <Route
           path="/"
