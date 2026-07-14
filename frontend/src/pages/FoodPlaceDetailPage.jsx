@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useParams, useNavigate } from "react-router-dom";
+import { Link, Navigate, useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Camera,
@@ -10,7 +10,6 @@ import {
   Image as ImageIcon,
   MapPin,
   MoreVertical,
-  Navigation,
   Star,
   TrendingUp,
   Trash2,
@@ -21,6 +20,7 @@ import { useDeleteRestaurant, useEntries, useRestaurant } from "../hooks/useDiar
 import { categoryLabel } from "../utils/restaurants";
 import { Modal } from "../components/Modal";
 import { RestaurantForm } from "../components/RestaurantForm";
+import { isAdmin } from "../api/auth";
 
 const pageShellStyle = {
   boxSizing: "border-box",
@@ -392,7 +392,7 @@ function DetailTile({ icon: Icon, label, value, compact = false, className = "" 
         </div>
         <div className="min-w-0">
           <p className="text-[11px] font-semibold text-stone-500">{label}</p>
-          <p className="mt-0.5 text-sm font-bold leading-5 text-[#1C1107]">{value || "Not added"}</p>
+          <div className="mt-0.5 text-sm font-bold leading-5 text-[#1C1107]">{value || "Not added"}</div>
         </div>
       </div>
     );
@@ -404,8 +404,27 @@ function DetailTile({ icon: Icon, label, value, compact = false, className = "" 
         <Icon size={18} />
       </div>
       <p className="text-xs font-semibold text-stone-500">{label}</p>
-      <p className="mt-1 text-sm font-bold leading-5 text-[#1C1107]">{value || "Not added"}</p>
+      <div className="mt-1 text-sm font-bold leading-5 text-[#1C1107]">{value || "Not added"}</div>
     </div>
+  );
+}
+
+function AddressTile({ value, restaurantId, className = "" }) {
+  return (
+    <Link
+      to={`/food-map?placeId=${restaurantId}`}
+      className={`group relative flex items-start gap-3 rounded-2xl bg-[#F5EEE4] px-3 py-2.5 text-[#1C1107] no-underline transition hover:bg-[#EFE5D8] ${className}`}
+      title="View on map"
+      aria-label="View address on map"
+    >
+      <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/75 text-[#6F5130]">
+        <MapPin size={15} />
+      </div>
+      <div className="min-w-0">
+        <p className="text-[11px] font-semibold text-stone-500">Address</p>
+        <div className="mt-0.5 text-sm font-bold leading-5 text-[#1C1107]">{value || "Not added"}</div>
+      </div>
+    </Link>
   );
 }
 
@@ -425,24 +444,65 @@ function formatOpeningHours(value) {
 
   return [...value]
     .sort((a, b) => a.day - b.day)
-    .map((item) => {
-      const day = OPENING_DAY_LABELS[item.day] ?? `Day ${item.day}`;
-      return item.open && item.close ? `${day} ${item.open}-${item.close}` : `${day} Closed`;
-    })
-    .join(", ");
+    .map((item) => ({
+      day: OPENING_DAY_LABELS[item.day] ?? `Day ${item.day}`,
+      hours: item.open && item.close ? `${item.open} - ${item.close}` : "Closed",
+      isClosed: !item.open || !item.close,
+    }));
 }
 
-function PlaceProfile({ restaurant, category, fullAddress, location }) {
+function OpeningHoursValue({ value }) {
+  if (typeof value === "string") return value;
+
+  return (
+    <div className="grid gap-1.5">
+      {value.map((item) => (
+        <div key={item.day} className="grid grid-cols-[2.25rem_1fr] items-baseline gap-2 text-xs leading-4">
+          <span className="font-extrabold text-[#1C1107]">{item.day}</span>
+          <span className={item.isClosed ? "font-semibold text-stone-500" : "font-bold text-[#1C1107]"}>
+            {item.hours}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function BudgetValue({ value }) {
+  if (!value) return "N/A";
+
+  const match = value.match(/^(.*?)\s*(\(.*\))$/);
+  if (!match) return value;
+
+  return (
+    <span>
+      <span>{match[1].trim()}</span>
+      <span className="block">{match[2]}</span>
+    </span>
+  );
+}
+
+function PlaceProfile({ restaurant, category, fullAddress }) {
   const openingHours =
     formatOpeningHours(restaurant.openingHours) ?? restaurant.hours ?? restaurant.businessHours ?? "N/A";
 
   return (
     <div className="grid gap-2 sm:grid-cols-2">
-      <DetailTile icon={MapPin} label="Address" value={fullAddress || "N/A"} compact className="sm:col-span-2" />
-      <DetailTile icon={Navigation} label="Area" value={location || restaurant.city || "N/A"} compact />
+      <AddressTile value={fullAddress || "N/A"} restaurantId={restaurant.id} className="sm:col-span-2" />
       <DetailTile icon={UtensilsCrossed} label="Category" value={category} compact />
-      <DetailTile icon={Clock3} label="Opening hours" value={openingHours} compact />
-      <DetailTile icon={Wallet} label="Budget" value={restaurant.priceRange || restaurant.budget || "N/A"} compact />
+      <DetailTile
+        icon={Clock3}
+        label="Opening hours"
+        value={<OpeningHoursValue value={openingHours} />}
+        compact
+        className="sm:row-span-2"
+      />
+      <DetailTile
+        icon={Wallet}
+        label="Budget"
+        value={<BudgetValue value={restaurant.priceRange || restaurant.budget} />}
+        compact
+      />
     </div>
   );
 }
@@ -544,6 +604,7 @@ export function FoodPlaceDetailPage() {
   const [menuExpanded, setMenuExpanded] = useState(false);
   const [isEditingPlace, setIsEditingPlace] = useState(false);
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const canViewPlaceDetail = isAdmin();
 
   const sortedEntries = useMemo(
     () => [...(entries ?? [])].sort((a, b) => new Date(b.visitedAt).getTime() - new Date(a.visitedAt).getTime()),
@@ -572,6 +633,19 @@ export function FoodPlaceDetailPage() {
         Loading food place...
       </div>
     );
+  }
+
+  if (!canViewPlaceDetail && loadingEntries) {
+    return (
+      <div className="min-h-screen bg-[#FDFBF7] px-4 py-16 text-center font-['Plus_Jakarta_Sans'] text-sm text-stone-500">
+        Opening diary entry...
+      </div>
+    );
+  }
+
+  if (!canViewPlaceDetail) {
+    const firstEntry = sortedEntries[0];
+    return <Navigate to={firstEntry ? `/entries/${firstEntry.id}` : `/entries/place/${restaurant.id}`} replace />;
   }
 
   if (!restaurant) {
@@ -619,12 +693,20 @@ export function FoodPlaceDetailPage() {
                       <ImageIcon size={28} />
                     )}
                   </span>
-                  <h1
-                    className="min-w-0 max-w-4xl text-5xl font-normal leading-none text-white sm:text-6xl lg:text-7xl"
-                    style={{ fontFamily: '"Fraunces", serif' }}
-                  >
-                    {restaurant.name}
-                  </h1>
+                  <div className="min-w-0">
+                    <h1
+                      className="min-w-0 max-w-4xl text-5xl font-normal leading-none text-white sm:text-6xl lg:text-7xl"
+                      style={{ fontFamily: '"Fraunces", serif' }}
+                    >
+                      {restaurant.name}
+                    </h1>
+                    {(location || restaurant.city) && (
+                      <p className="mt-3 flex items-center gap-2 text-sm font-semibold leading-5 text-white/65 sm:text-base">
+                        <MapPin size={16} className="shrink-0 text-[#F0E76F]" />
+                        <span>{location || restaurant.city}</span>
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 <div className="w-full rounded-[28px] border border-white/10 bg-white/5 p-5 shadow-2xl backdrop-blur lg:justify-self-end">
@@ -648,7 +730,7 @@ export function FoodPlaceDetailPage() {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-12">
             <BentoCard className="bg-white p-4 md:col-span-2 lg:col-span-5">
               <SectionLabel title="Directory Information" />
-              <PlaceProfile restaurant={restaurant} category={category} fullAddress={fullAddress} location={location} />
+              <PlaceProfile restaurant={restaurant} category={category} fullAddress={fullAddress} />
             </BentoCard>
 
             <BentoCard className="bg-white md:col-span-2 lg:col-span-7">

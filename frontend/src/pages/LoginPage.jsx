@@ -120,12 +120,7 @@ export function LoginPage() {
 
               <div className="flex items-center gap-4 py-1">
                 <div className="h-px flex-1 bg-[#D8CDBB]" />
-                <span
-                  className="text-xs font-semibold uppercase tracking-[0.2em] text-[#8C7B6A]"
-                  style={{ fontFamily: '"Geist Mono", monospace' }}
-                >
-                  or
-                </span>
+                <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[#8C7B6A]">or</span>
                 <div className="h-px flex-1 bg-[#D8CDBB]" />
               </div>
 

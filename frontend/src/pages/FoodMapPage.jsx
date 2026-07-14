@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import Skeleton from "react-loading-skeleton";
 import { MapPin, Search, UtensilsCrossed } from "lucide-react";
 import { FoodMap } from "../components/FoodMap";
@@ -53,12 +54,13 @@ function FoodMapSkeleton() {
 }
 
 export function FoodMapPage() {
+  const [searchParams] = useSearchParams();
   const { data: restaurants = [], isLoading: isLoadingRestaurants, isError } = useRestaurantLists();
 
   const { data: entries = [], isLoading: isLoadingEntries } = useAllEntries();
   const { data: bataanCities = [], isLoading: isLoadingCities } = useBataanCities();
   const [selectedCity, setSelectedCity] = useState("all");
-  const [selectedRestaurantId, setSelectedRestaurantId] = useState(null);
+  const [selectedRestaurantId, setSelectedRestaurantId] = useState(() => searchParams.get("placeId") ?? null);
   const [searchTerm, setSearchTerm] = useState("");
 
   const places = useMemo(() => buildPlaceStats(restaurants, entries), [restaurants, entries]);
@@ -112,10 +114,7 @@ export function FoodMapPage() {
   }
 
   return (
-    <div
-      className="flex h-full flex-col overflow-hidden bg-[#F5F0E8]"
-      style={{ fontFamily: '"Geist Mono", monospace' }}
-    >
+    <div className="flex h-full flex-col overflow-hidden bg-[#F5F0E8]">
       <PageHeader title="Discover Bataan's Best" subtitle="View all top places pinned across Bataan in one easy map." />
 
       <div className="mx-auto flex min-h-0 flex-1 flex-col px-4 pb-4" style={pageShellStyle}>
@@ -140,13 +139,13 @@ export function FoodMapPage() {
         </div>
 
         {isError && (
-          <div className="rounded-2xl border border-[#E04B39]/20 bg-[#FFF5F1] px-5 py-4 font-['Plus_Jakarta_Sans'] text-sm text-[#8A2A1C]">
+          <div className="rounded-2xl border border-[#E04B39]/20 bg-stone-50 px-5 py-4 font-['Plus_Jakarta_Sans'] text-sm text-[#8A2A1C]">
             Could not load top places right now. Try again in a moment.
           </div>
         )}
 
         {!isLoading && !isError && restaurants.length === 0 && (
-          <div className="rounded-2xl border border-[#E8DFC8] bg-[#FFFBF4] px-5 py-12 text-center">
+          <div className="rounded-2xl border border-[#E8DFC8] bg-stone-50 px-5 py-12 text-center">
             <UtensilsCrossed size={36} color="#C8B89A" className="mx-auto mb-3" />
             <p className="mb-1.5 text-xl text-[#1C1107]" style={{ fontFamily: '"Fraunces", serif' }}>
               No top places yet

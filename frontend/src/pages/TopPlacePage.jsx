@@ -1,7 +1,8 @@
 import { lazy, Suspense, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import Skeleton from "react-loading-skeleton";
 import { ImageIcon, MapPin, Plus, Search, Star, Trophy, UtensilsCrossed } from "lucide-react";
-import { FoodCatalogCard } from "../components/FoodCatalogCard";
+import { FoodCatalogCard, FoodCatalogCardSkeleton } from "../components/FoodCatalogCard";
 import { Modal } from "../components/Modal";
 import { PageHeader } from "../components/PageHeader";
 import { SelectInput } from "../components/SelectInput";
@@ -22,6 +23,44 @@ function SectionHeader({ eyebrow, title }) {
       <h2 className="mt-1 text-2xl font-light text-[#1C1107]" style={{ fontFamily: '"Fraunces", serif' }}>
         {title}
       </h2>
+    </div>
+  );
+}
+
+function TopPlaceAccordionSkeleton() {
+  return (
+    <div className="flex w-full flex-col gap-3 overflow-hidden py-2 sm:flex-row sm:items-center" aria-hidden="true">
+      {[0, 1, 2].map((item) => (
+        <div
+          key={item}
+          className={[
+            "group flex h-24 w-full min-w-0 items-center overflow-hidden rounded-2xl border border-stone-200 bg-white px-3 shadow-none sm:w-auto",
+            item === 0 ? "sm:max-w-md sm:flex-[1_1_24rem]" : "sm:flex-[0_0_6rem]",
+          ].join(" ")}
+        >
+          <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#F5EEE4]">
+            <Skeleton width={64} height={64} borderRadius={12} baseColor="#e7dfd2" highlightColor="#f8f4ec" />
+            <span className="absolute bottom-1 right-1 h-4 w-6 rounded-full bg-[#1C1107]/20" />
+          </div>
+
+          <div
+            className={[
+              "ml-4 grid min-w-0 flex-1 grid-cols-[minmax(0,1fr)_auto] items-center gap-3",
+              item === 0 ? "opacity-100" : "opacity-100 sm:opacity-0",
+            ].join(" ")}
+          >
+            <div className="min-w-0">
+              <Skeleton width={150} height={20} borderRadius={6} baseColor="#e7dfd2" highlightColor="#f8f4ec" />
+              <div className="mt-2 flex min-w-0 items-center gap-1.5">
+                <MapPin size={12} className="shrink-0 text-stone-300" />
+                <Skeleton width={130} height={14} borderRadius={6} baseColor="#f0ebe2" highlightColor="#fbf8f2" />
+              </div>
+            </div>
+
+            <Skeleton width={58} height={22} borderRadius={999} baseColor="#e7dfd2" highlightColor="#f8f4ec" />
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -200,10 +239,7 @@ export function TopPlacePage() {
 
   return (
     <>
-      <div
-        className="relative flex h-full flex-col overflow-hidden bg-[#F5F0E8]"
-        style={{ fontFamily: '"Geist Mono", monospace' }}
-      >
+      <div className="relative flex h-full flex-col overflow-hidden bg-[#F5F0E8]">
         <PageHeader title="Top Places" subtitle="Browse the spots you keep coming back to." maxWidth="1180px" />
 
         <div className="mx-auto flex min-h-0 flex-1 flex-col px-4 pb-4" style={pageShellStyle}>
@@ -232,9 +268,36 @@ export function TopPlacePage() {
             />
           </div>
 
-          {isLoading && <p className="py-14 text-center text-sm text-stone-500">Loading top places...</p>}
+          {isLoading ? (
+            <div className="flex min-h-0 flex-1 flex-col gap-10 overflow-hidden">
+              <div className="grid shrink-0 gap-6 lg:grid-cols-2">
+                <section className="min-w-0">
+                  <SectionHeader eyebrow="TRENDING" title="Trending Spots" />
+                  <TopPlaceAccordionSkeleton />
+                </section>
 
-          {!isLoading && (
+                <section className="min-w-0">
+                  <SectionHeader eyebrow="TOP TIERS" title="Highest rated" />
+                  <TopPlaceAccordionSkeleton />
+                </section>
+              </div>
+
+              <section className="flex min-h-0 flex-1 flex-col overflow-hidden">
+                <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                  <SectionHeader eyebrow="All food place" title="Browse every place" />
+                  {canManageRestaurants && (
+                    <div className="h-12 w-full rounded-xl bg-[#E04B39]/20 sm:w-44" aria-hidden="true" />
+                  )}
+                </div>
+
+                <div className="custom-scrollbar grid min-h-0 flex-1 gap-4 overflow-y-auto overflow-x-hidden pb-20 pr-1 md:grid-cols-2">
+                  {[0, 1, 2, 3, 4, 5].map((item) => (
+                    <FoodCatalogCardSkeleton key={item} />
+                  ))}
+                </div>
+              </section>
+            </div>
+          ) : (
             <div className="flex min-h-0 flex-1 flex-col gap-10 overflow-hidden">
               <div className="grid shrink-0 gap-6 lg:grid-cols-2">
                 <section className="min-w-0">
@@ -244,7 +307,7 @@ export function TopPlacePage() {
                   ) : (
                     <div className="flex min-h-42 flex-col items-center justify-center rounded-2xl border border-[#E8DFC8] bg-stone-50 px-5 py-8 text-center">
                       <Trophy size={30} className="mx-auto mb-3 text-stone-300" />
-                      <p className="text-sm text-stone-500">Log visits and popular places will appear here.</p>
+                      <p className="text-sm text-stone-500">Places you practically pay rent at.</p>
                     </div>
                   )}
                 </section>
@@ -256,7 +319,7 @@ export function TopPlacePage() {
                   ) : (
                     <div className="flex min-h-42 flex-col items-center justify-center rounded-2xl border border-[#E8DFC8] bg-stone-50 px-5 py-8 text-center">
                       <Star size={30} className="mx-auto mb-3 text-stone-300" />
-                      <p className="text-sm text-stone-500">Rate a few visits and favorites will show up here.</p>
+                      <p className="text-sm text-stone-500">Approved by your tastebuds (and your wallet).</p>
                     </div>
                   )}
                 </section>
@@ -286,7 +349,7 @@ export function TopPlacePage() {
                 ) : (
                   <div className="custom-scrollbar min-h-0 flex-1 overflow-y-auto overflow-x-hidden pb-20 pr-1">
                     <div className="rounded-2xl border border-[#E8DFC8] bg-stone-50 px-5 py-12 text-center">
-                      <UtensilsCrossed size={36} color="#C8B89A" className="mx-auto mb-3" />
+                      <UtensilsCrossed size={36} className="mx-auto mb-3 text-stone-300" />
                       <p className="mb-1.5 text-xl text-[#1C1107]" style={{ fontFamily: '"Fraunces", serif' }}>
                         Place not found
                       </p>

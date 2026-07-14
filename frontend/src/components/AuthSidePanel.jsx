@@ -27,10 +27,7 @@ export function AuthSidePanel({ appFeatures, title }) {
           >
             {title}
           </h1>
-          <span
-            className="inline-flex rounded-full py-2 text-sm font-semibold uppercase tracking-[0.2em] text-[#F5E642]"
-            style={{ fontFamily: '"Geist Mono", monospace' }}
-          >
+          <span className="inline-flex rounded-full py-2 text-sm font-semibold uppercase tracking-[0.2em] text-[#F5E642]">
             Food diary
           </span>
         </div>

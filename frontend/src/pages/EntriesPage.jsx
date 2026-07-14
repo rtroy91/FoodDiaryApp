@@ -63,10 +63,7 @@ export function EntriesPage() {
 
   return (
     <>
-      <div
-        className="flex h-dvh flex-col overflow-hidden bg-[#F5F0E8]"
-        style={{ fontFamily: '"Geist Mono", monospace' }}
-      >
+      <div className="flex h-dvh flex-col overflow-hidden bg-[#F5F0E8]">
         <div className="relative h-48 shrink-0 overflow-hidden bg-[#1C1107]">
           <svg
             className="absolute inset-0 h-full w-full"

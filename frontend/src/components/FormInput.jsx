@@ -12,10 +12,7 @@ export function FormInput({
 }) {
   return (
     <label className="block">
-      <span
-        className="mb-2 block text-xs font-medium uppercase text-[#8C7B6A]"
-        style={{ fontFamily: '"Geist Mono", monospace' }}
-      >
+      <span className="mb-2 block text-xs font-medium uppercase text-[#8C7B6A]">
         {label}
         {required && <span className="ml-0.5 text-[#E04B39]">*</span>}
       </span>

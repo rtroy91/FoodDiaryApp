@@ -14,12 +14,7 @@ export function StatCard({ value, label, icon: Icon, iconColor, iconBgColor }) {
       <p className="text-2xl font-semibold leading-none text-[#1C1107]" style={{ fontFamily: '"Fraunces", serif' }}>
         {value}
       </p>
-      <p
-        className="mt-1 text-xs font-medium uppercase tracking-wider text-stone-500"
-        style={{ fontFamily: '"Geist Mono", monospace' }}
-      >
-        {label}
-      </p>
+      <p className="mt-1 text-xs font-medium uppercase tracking-wider text-stone-500">{label}</p>
     </div>
   );
 }

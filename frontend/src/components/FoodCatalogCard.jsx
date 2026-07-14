@@ -89,10 +89,10 @@ function FoodCatalogCardContent({ restaurant }) {
 export function FoodCatalogCardSkeleton() {
   return (
     <article
-      className="grid w-full min-w-0 grid-cols-[5rem_minmax(0,1fr)] items-center gap-4 overflow-hidden rounded-2xl border border-stone-100 bg-white px-3 py-2.5 text-left shadow-none"
+      className="grid min-h-29 w-full min-w-0 grid-cols-[4.5rem_minmax(0,1fr)] items-center gap-4 overflow-hidden rounded-2xl border border-stone-100 bg-white px-3.5 py-3.5 text-left shadow-none"
       aria-hidden="true"
     >
-      <Skeleton width={80} height={80} borderRadius={12} baseColor="#e7dfd2" highlightColor="#f8f4ec" />
+      <Skeleton width={72} height={72} borderRadius={12} baseColor="#e7dfd2" highlightColor="#f8f4ec" />
 
       <div className="min-w-0 text-left">
         <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
@@ -116,17 +116,17 @@ export function FoodCatalogCardSkeleton() {
           </div>
         </div>
 
-        <div className="mt-2 space-y-1">
+        <div className="mt-3 space-y-1">
           <div className="flex min-w-0 items-center gap-1.5">
             <MapPin size={13} className="shrink-0 text-stone-400" />
-            <Skeleton width={180} height={14} borderRadius={6} baseColor="#f0ebe2" highlightColor="#fbf8f2" />
+            <Skeleton width={180} height={12} borderRadius={6} baseColor="#f0ebe2" highlightColor="#fbf8f2" />
           </div>
         </div>
 
         <Skeleton
-          className="mt-3 block"
+          className="mt-4 block"
           width={72}
-          height={20}
+          height={18}
           borderRadius={999}
           baseColor="#e7dfd2"
           highlightColor="#f8f4ec"
