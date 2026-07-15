@@ -1,13 +1,16 @@
 import { Plus, UtensilsCrossed } from "lucide-react";
 
-export function NoEntriesState({ message = "Add your first food place visit.", onAddPost }) {
+export function NoEntriesState({
+  message = "Your map is empty and your stomach is filing noise complaints. Drop your first food spot below!",
+  onAddPost,
+}) {
   return (
-    <div className="mx-auto w-fit rounded-2xl border border-[#E8DFC8] bg-stone-50 px-24 py-12 text-center">
-      <UtensilsCrossed size={36} color="#C8B89A" className="mx-auto mb-3" />
+    <div className="mx-auto w-fit rounded-2xl border border-[#E8DFC8] bg-stone-50 px-20 py-12 text-center">
+      <UtensilsCrossed size={36} className="mx-auto mb-3 text-stone-600" />
       <p className="mb-1.5 text-xl text-[#1C1107]" style={{ fontFamily: '"Fraunces", serif' }}>
         No entries yet
       </p>
-      <p className="mb-4 text-xs text-stone-500">{message}</p>
+      <p className="mb-4 text-xs text-stone-600">{message}</p>
       {onAddPost && (
         <button
           type="button"

@@ -2,6 +2,7 @@ import { lazy, Suspense, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import Skeleton from "react-loading-skeleton";
 import { ImageIcon, MapPin, Plus, Star, Trophy, UtensilsCrossed } from "lucide-react";
+import { ConnectionErrorState } from "../components/ConnectionErrorState";
 import { FoodCatalogCard, FoodCatalogCardSkeleton } from "../components/FoodCatalogCard";
 import { FoodPlaceFilters } from "../components/FoodPlaceFilters";
 import { Modal } from "../components/Modal";
@@ -194,8 +195,8 @@ function TopPlaceAccordion({ places, mode }) {
 // #endregion
 
 export function TopPlacePage() {
-  const { data: foodplace, isLoading: loadingRestaurants } = useRestaurantLists();
-  const { data: entries, isLoading: loadingEntries } = useAllEntries();
+  const { data: foodplace, isLoading: loadingRestaurants, isError: isRestaurantsError } = useRestaurantLists();
+  const { data: entries, isLoading: loadingEntries, isError: isEntriesError } = useAllEntries();
   const [showAddModal, setShowAddModal] = useState(false);
   const canManageRestaurants = isAdmin();
 
@@ -240,6 +241,7 @@ export function TopPlacePage() {
   );
 
   const isLoading = loadingRestaurants || loadingEntries;
+  const hasConnectionError = isRestaurantsError || isEntriesError;
 
   return (
     <>
@@ -263,7 +265,9 @@ export function TopPlacePage() {
             loadingBarangays={loadingBarangays}
           />
 
-          {isLoading ? (
+          {hasConnectionError ? (
+            <ConnectionErrorState />
+          ) : isLoading ? (
             <div className="custom-scrollbar flex min-h-0 flex-1 flex-col gap-10 overflow-y-auto overflow-x-hidden pr-1 lg:overflow-hidden lg:pr-0">
               <div
                 className={["shrink-0 gap-6 lg:grid lg:grid-cols-2", hasActiveFilters ? "hidden" : "grid"].join(" ")}

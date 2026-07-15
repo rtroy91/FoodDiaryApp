@@ -72,7 +72,7 @@ export function EntryCardSkeleton({ featured = false, captionLines = 2 }) {
         </div>
 
         <div className="flex min-h-5 items-center gap-2">
-          <MapPin size={12} className="shrink-0 text-[#6F7892]" />
+          <MapPin size={12} className="shrink-0 text-[#4B5563]" />
           <Skeleton
             width={featured ? 96 : 120}
             height={14}
@@ -131,7 +131,7 @@ function DeleteEntrySheet({ entry, onCancel, onDeleted }) {
         type="button"
         onClick={handleDelete}
         disabled={deleteEntry.isPending}
-        className="mt-5 w-full rounded-2xl bg-[#E04B39] py-3.5 text-sm font-extrabold text-white shadow-[0_12px_30px_rgba(224,75,57,0.25)] transition hover:bg-[#c93c2f] disabled:cursor-not-allowed disabled:opacity-60"
+        className="mt-5 w-full rounded-2xl bg-[#B83224] py-3.5 text-sm font-extrabold text-white shadow-[0_12px_30px_rgba(184,50,36,0.25)] transition hover:bg-[#8F261C] disabled:cursor-not-allowed disabled:opacity-60"
       >
         {deleteEntry.isPending ? "Deleting..." : "Delete Post"}
       </button>
@@ -301,7 +301,7 @@ function EntryDetailModal({ entry, location, onClose, onEdit, onDelete }) {
                 )}
               </div>
 
-              <div className="mt-3 shrink-0 space-y-2 text-sm font-medium leading-5 text-[#6F7892]">
+              <div className="mt-3 shrink-0 space-y-2 text-sm font-medium leading-5 text-[#4B5563]">
                 <div className="flex items-center gap-2 font-semibold text-[#253248]">
                   <Star size={17} fill="#F4B21B" className="text-[#F4B21B]" />
                   <span>{entry.rating != null ? Number(entry.rating).toFixed(1) : "-"}</span>
@@ -418,13 +418,13 @@ export function EntryCard({ entry, featured = false }) {
           >
             {restaurant?.name ?? "Unknown restaurant"}
           </p>
-          <div className="flex shrink-0 items-center gap-1.5 text-sm font-semibold text-[#253248]">
-            <Star size={15} fill="#F4B21B" className="text-[#F4B21B]" />
+          <div className="flex shrink-0 items-center gap-1 text-base font-bold text-amber-700">
+            <Star size={12} fill="currentColor" />
             <p>{entry.rating != null ? Number(entry.rating).toFixed(1) : "-"}</p>
           </div>
         </div>
 
-        <div className="flex min-h-5 items-center gap-2 text-xs font-medium leading-5 text-[#6F7892]">
+        <div className="flex min-h-5 items-center gap-2 text-xs font-semibold leading-5 text-[#4B5563]">
           <MapPin size={12} className="shrink-0" />
           <span className="min-w-0 flex-1 truncate py-px">{location || "No Location"}</span>
         </div>
@@ -438,7 +438,7 @@ export function EntryCard({ entry, featured = false }) {
         </div>
 
         <div className="mt-auto flex shrink-0 items-center justify-between gap-3 pt-3">
-          <span className="flex min-w-0 items-center gap-1.5 text-[10px] tracking-wide text-stone-500">
+          <span className="flex min-w-0 items-center gap-1.5 text-[10px] font-semibold tracking-wide text-stone-700">
             <span>{timeAgo(entry.visitedAt)}</span>
             {wasEdited && (
               <>

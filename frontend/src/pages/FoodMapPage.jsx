@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import Skeleton from "react-loading-skeleton";
 import { MapPin, UtensilsCrossed } from "lucide-react";
+import { ConnectionErrorState } from "../components/ConnectionErrorState";
 import { FoodMap } from "../components/FoodMap";
 import { FoodCatalogCard, FoodCatalogCardSkeleton } from "../components/FoodCatalogCard";
 import { FoodPlaceFilters } from "../components/FoodPlaceFilters";
@@ -42,7 +43,7 @@ function FoodMapSkeleton() {
 export function FoodMapPage() {
   const [searchParams] = useSearchParams();
   const { data: restaurants = [], isLoading: isLoadingRestaurants, isError: isRestaurantsError } = useRestaurantLists();
-  const { data: entries = [], isLoading: isLoadingEntries } = useAllEntries();
+  const { data: entries = [], isLoading: isLoadingEntries, isError: isEntriesError } = useAllEntries();
   const [selectedRestaurantId, setSelectedRestaurantId] = useState(() => searchParams.get("placeId") ?? null);
 
   const places = useMemo(() => buildPlaceStats(restaurants, entries), [restaurants, entries]);
@@ -67,6 +68,7 @@ export function FoodMapPage() {
   });
 
   const isLoading = isLoadingRestaurants || isLoadingEntries;
+  const hasConnectionError = isRestaurantsError || isEntriesError;
 
   return (
     <div className="flex h-full flex-col overflow-hidden bg-[#F5F0E8]">
@@ -92,13 +94,9 @@ export function FoodMapPage() {
           className="-mt-8 mb-5"
         />
 
-        {isRestaurantsError && (
-          <div className="rounded-2xl border border-[#E04B39]/20 bg-stone-50 px-5 py-4 text-sm text-[#8A2A1C]">
-            Could not load top places right now. Try again in a moment.
-          </div>
-        )}
+        {hasConnectionError && <ConnectionErrorState />}
 
-        {!isLoading && !isRestaurantsError && restaurants.length === 0 && (
+        {!isLoading && !hasConnectionError && restaurants.length === 0 && (
           <div className="rounded-2xl border border-[#E8DFC8] bg-stone-50 px-5 py-12 text-center">
             <UtensilsCrossed size={36} color="#C8B89A" className="mx-auto mb-3" />
             <p className="mb-1.5 text-xl text-[#1C1107]" style={{ fontFamily: '"Fraunces", serif' }}>
@@ -107,7 +105,7 @@ export function FoodMapPage() {
           </div>
         )}
 
-        {!isRestaurantsError && (isLoading || restaurants.length > 0) && (
+        {!hasConnectionError && (isLoading || restaurants.length > 0) && (
           <div className="custom-scrollbar grid min-h-0 flex-1 gap-5 overflow-y-auto overflow-x-hidden pr-1 lg:overflow-hidden lg:pr-0 lg:grid-cols-[minmax(0,1.1fr)_390px]">
             <section className="h-105 overflow-hidden rounded-2xl border border-[#E8DFC8] bg-[#FFFBF4] shadow-[0_10px_28px_rgba(28,17,7,0.06)] lg:h-full">
               {isLoading ? (
