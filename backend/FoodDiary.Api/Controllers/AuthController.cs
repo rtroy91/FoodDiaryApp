@@ -1,6 +1,8 @@
 using FoodDiary.Api.DTOs.Requests;
 using FoodDiary.Api.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace FoodDiary.Api.Controllers;
 
@@ -30,7 +32,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
     {
         var response = await _authService.LoginAsync(request, cancellationToken);
-        SetAuthCookie(response.Token);
+        SetAuthCookie(response.Token, request.RememberMe);
         return Ok(response);
     }
 
@@ -41,17 +43,40 @@ public class AuthController : ControllerBase
         return NoContent();
     }
 
-    private void SetAuthCookie(string token)
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<IActionResult> Me(CancellationToken cancellationToken)
     {
-        Response.Cookies.Append(AuthCookieName, token, BuildAuthCookieOptions());
+        var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (!Guid.TryParse(userIdValue, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        var response = await _authService.GetCurrentUserAsync(userId, cancellationToken);
+        return response is null ? Unauthorized() : Ok(response);
     }
 
-    private static CookieOptions BuildAuthCookieOptions() => new()
+    private void SetAuthCookie(string token, bool rememberMe = true)
     {
-        HttpOnly = true,
-        Secure = true,
-        SameSite = SameSiteMode.Lax,
-        Path = "/",
-        Expires = DateTimeOffset.UtcNow.AddDays(30)
-    };
+        Response.Cookies.Append(AuthCookieName, token, BuildAuthCookieOptions(rememberMe));
+    }
+
+    private static CookieOptions BuildAuthCookieOptions(bool rememberMe = true)
+    {
+        var options = new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.Lax,
+            Path = "/"
+        };
+
+        if (rememberMe)
+        {
+            options.Expires = DateTimeOffset.UtcNow.AddDays(30);
+        }
+
+        return options;
+    }
 }

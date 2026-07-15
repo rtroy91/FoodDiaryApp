@@ -93,8 +93,14 @@ export function RegisterPage() {
     try {
       await register(normalizedEmail, form.password, normalizedDisplayName);
       navigate("/");
-    } catch {
-      setErrorMessage("Could not create your account. That email may already be taken.");
+    } catch (error) {
+      if (!error.response) {
+        setErrorMessage(
+          "Lost connection to the pantry. The servers are in a deep food coma. Give us a moment to wake them up!"
+        );
+      } else {
+        setErrorMessage("Could not create your account. That email may already be taken.");
+      }
     } finally {
       setSubmitting(false);
     }

@@ -20,15 +20,21 @@ export function DiaryHeader({ userName, subtitle = "Here's your food history at 
         <circle cx="200" cy="140" r="10" fill="#F0E76F" opacity="0.08" />
       </svg>
 
-      <div className="relative z-10 mx-auto flex max-w-140 items-end justify-between px-5 pb-7 pt-20">
-        <div>
-          <p className="text-3xl font-light leading-tight text-white" style={{ fontFamily: '"Fraunces", serif' }}>
-            {getGreeting()}, <span className="italic text-[#F0E76F]">{userName}</span>
+      <div className="relative z-10 mx-auto flex max-w-140 items-end justify-between gap-4 px-5 pb-7 pt-20">
+        <div className="min-w-0 flex-1">
+          <p
+            className="flex min-w-0 items-baseline gap-x-2 text-3xl font-light leading-tight text-white"
+            style={{ fontFamily: '"Fraunces", serif' }}
+          >
+            <span className="shrink-0">{getGreeting()},</span>
+            <span className="min-w-0 flex-1 truncate italic text-[#F0E76F]" title={userName}>
+              {userName}
+            </span>
           </p>
           <p className="mt-1 text-sm text-white/75">{subtitle}</p>
         </div>
 
-        <div className="text-right">
+        <div className="shrink-0 text-right">
           <p className="text-[36px] font-light leading-none text-white/12" style={{ fontFamily: '"Fraunces", serif' }}>
             {String(today.getDate()).padStart(2, "0")}
           </p>

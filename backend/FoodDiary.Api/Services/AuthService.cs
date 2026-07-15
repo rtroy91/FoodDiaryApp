@@ -68,11 +68,20 @@ public class AuthService : IAuthService
         return BuildAuthResponse(user);
     }
 
+    public async Task<AuthResponse?> GetCurrentUserAsync(Guid userId, CancellationToken cancellationToken)
+    {
+        var user = await _context.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+
+        return user is null ? null : BuildAuthResponse(user, includeToken: false);
+    }
+
     // ── Private helpers ────────────────────────────────────────────────────
 
-    private AuthResponse BuildAuthResponse(User user) => new()
+    private AuthResponse BuildAuthResponse(User user, bool includeToken = true) => new()
     {
-        Token = GenerateJwt(user),
+        Token = includeToken ? GenerateJwt(user) : string.Empty,
         UserId = user.Id,
         Email = user.Email,
         DisplayName = user.DisplayName,

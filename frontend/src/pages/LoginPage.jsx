@@ -12,6 +12,7 @@ export function LoginPage() {
   const [errorMessage, setErrorMessage] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const loginHighlights = [
     "Your food diary misses your bad decisions.",
@@ -24,10 +25,18 @@ export function LoginPage() {
     setSubmitting(true);
     setErrorMessage(null);
     try {
-      await login(email.trim(), password);
+      await login(email.trim(), password, rememberMe);
       navigate("/");
-    } catch {
-      setErrorMessage("Incorrect email or password.");
+    } catch (error) {
+      if (!error.response) {
+        setErrorMessage(
+          "Lost connection to the pantry. The servers are in a deep food coma. Give us a moment to wake them up!"
+        );
+      } else if (error.response.status === 401) {
+        setErrorMessage("Incorrect email or password.");
+      } else {
+        setErrorMessage("Something went wrong while signing in. Please try again.");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -97,11 +106,19 @@ export function LoginPage() {
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </FormInput>
-              <p className="flex cursor-pointer justify-end text-xs font-semibold text-stone-700 hover:text-[#8F261C]">
+              <p className="-mb-2 flex cursor-pointer justify-end text-xs font-semibold text-stone-700 hover:text-[#8F261C]">
                 Forgot Password?
               </p>
 
-              <p className="cursor-pointer text-xs font-semibold text-stone-700 hover:text-[#8F261C]">Remember Me?</p>
+              <label className="flex min-h-11 cursor-pointer items-center gap-2 text-xs font-semibold text-stone-700">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(event) => setRememberMe(event.target.checked)}
+                  className="h-4 w-4 rounded border-[#BFAF99] text-[#B83224] accent-[#B83224] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B83224]/25"
+                />
+                <span>Remember me</span>
+              </label>
 
               {errorMessage && (
                 <div className="rounded-2xl border border-[#E04B39]/20 bg-[#E04B39]/10 px-4 py-3 text-sm font-semibold text-[#8A2A1C]">

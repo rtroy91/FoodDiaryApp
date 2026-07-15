@@ -1,7 +1,9 @@
 import { lazy } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 import { NavBar } from "./components/NavBar";
+import { useAuthSession } from "./components/AuthSessionProvider";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { SessionLoadingState } from "./components/SessionLoadingState";
 import { isAdmin } from "./api/auth";
 import { FeaturedPage } from "./pages/FeaturedPage";
 import { EntriesPage } from "./pages/EntriesPage";
@@ -24,12 +26,36 @@ function AdminRoute({ children }) {
   return isAdmin() ? children : <FeaturedPage />;
 }
 
+function PublicOnlyRoute({ children }) {
+  const { isAuthenticated, isChecking } = useAuthSession();
+
+  if (isChecking) {
+    return <SessionLoadingState />;
+  }
+
+  return isAuthenticated ? <Navigate to="/" replace /> : children;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+        <Route
+          path="/login"
+          element={
+            <PublicOnlyRoute>
+              <LoginPage />
+            </PublicOnlyRoute>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <PublicOnlyRoute>
+              <RegisterPage />
+            </PublicOnlyRoute>
+          }
+        />
 
         <Route
           path="/"
