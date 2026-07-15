@@ -2,41 +2,57 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import * as restaurantsApi from "../api/restaurants";
 import * as entriesApi from "../api/entries";
 import * as usersApi from "../api/users";
+import { getCurrentUser } from "../api/auth";
+
+function getCurrentUserQueryKey() {
+  const user = getCurrentUser();
+  return user?.email ?? "anonymous";
+}
 
 export function useRestaurantLists(options = {}) {
+  const userKey = getCurrentUserQueryKey();
+
   return useQuery({
-    queryKey: ["restaurants", "mine"],
+    queryKey: ["restaurants", "mine", userKey],
     queryFn: restaurantsApi.GetRestaurantLists,
     ...options,
   });
 }
 
 export function useRestaurant(id) {
+  const userKey = getCurrentUserQueryKey();
+
   return useQuery({
-    queryKey: ["restaurants", id],
+    queryKey: ["restaurants", id, userKey],
     queryFn: () => restaurantsApi.getRestaurantById(id),
     enabled: Boolean(id),
   });
 }
 
 export function useEntries(restaurantId) {
+  const userKey = getCurrentUserQueryKey();
+
   return useQuery({
-    queryKey: ["entries", restaurantId],
+    queryKey: ["entries", restaurantId, userKey],
     queryFn: () => entriesApi.getEntries(restaurantId),
     enabled: Boolean(restaurantId),
   });
 }
 
 export function useAllEntries() {
+  const userKey = getCurrentUserQueryKey();
+
   return useQuery({
-    queryKey: ["entries", "all"],
+    queryKey: ["entries", "all", userKey],
     queryFn: () => entriesApi.getEntries(),
   });
 }
 
 export function useRecentEntries(limit = 20) {
+  const userKey = getCurrentUserQueryKey();
+
   return useQuery({
-    queryKey: ["entries", "recent", limit],
+    queryKey: ["entries", "recent", limit, userKey],
     queryFn: () => entriesApi.getRecentEntries(limit),
   });
 }

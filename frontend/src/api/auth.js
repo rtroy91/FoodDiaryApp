@@ -1,8 +1,20 @@
 import { apiClient } from "./client";
-import { clearAuthStorage, getAuthToken, getStoredUser, setAuthToken, setStoredUser } from "./authStorage";
+import { clearAuthStorage, getStoredUser, setStoredUser } from "./authStorage";
+import { queryClient } from "../lib/queryClient";
+
+const DISPLAY_NAME_MAX_LENGTH = 15;
+
+function normalizeEmail(email) {
+  return email.trim().toLowerCase();
+}
+
+function normalizeDisplayName(displayName) {
+  return displayName.trim();
+}
 
 function storeAuthSession(data) {
-  setAuthToken(data.token);
+  queryClient.clear();
+  clearAuthStorage();
   setStoredUser({
     email: data.email,
     displayName: data.displayName,
@@ -11,27 +23,43 @@ function storeAuthSession(data) {
 }
 
 export async function login(email, password) {
-  const { data } = await apiClient.post("/auth/login", { email, password });
+  const { data } = await apiClient.post("/auth/login", { email: normalizeEmail(email), password });
   storeAuthSession(data);
   return data;
 }
 
 export async function register(email, password, displayName) {
+  const normalizedDisplayName = normalizeDisplayName(displayName);
+
+  if (normalizedDisplayName.length > DISPLAY_NAME_MAX_LENGTH) {
+    throw new Error("Display name is too long.");
+  }
+
   const { data } = await apiClient.post("/auth/register", {
-    email,
+    email: normalizeEmail(email),
     password,
-    displayName,
+    displayName: normalizedDisplayName,
   });
   storeAuthSession(data);
   return data;
 }
 
-export function logout() {
+export async function logout() {
+  try {
+    await apiClient.post("/auth/logout");
+  } finally {
+    queryClient.clear();
+    clearAuthStorage();
+  }
+}
+
+export function clearLocalSession() {
+  queryClient.clear();
   clearAuthStorage();
 }
 
 export function isAuthenticated() {
-  return Boolean(getAuthToken());
+  return Boolean(getStoredUser());
 }
 
 export function getCurrentUser() {

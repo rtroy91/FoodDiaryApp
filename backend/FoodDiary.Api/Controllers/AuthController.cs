@@ -8,6 +8,7 @@ namespace FoodDiary.Api.Controllers;
 [Route("api/auth")]
 public class AuthController : ControllerBase
 {
+    private const string AuthCookieName = "food_diary_auth";
     private readonly IAuthService _authService;
 
     public AuthController(IAuthService authService)
@@ -20,6 +21,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
     {
         var response = await _authService.RegisterAsync(request, cancellationToken);
+        SetAuthCookie(response.Token);
         return Ok(response);
     }
 
@@ -28,6 +30,28 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
     {
         var response = await _authService.LoginAsync(request, cancellationToken);
+        SetAuthCookie(response.Token);
         return Ok(response);
     }
+
+    [HttpPost("logout")]
+    public IActionResult Logout()
+    {
+        Response.Cookies.Delete(AuthCookieName, BuildAuthCookieOptions());
+        return NoContent();
+    }
+
+    private void SetAuthCookie(string token)
+    {
+        Response.Cookies.Append(AuthCookieName, token, BuildAuthCookieOptions());
+    }
+
+    private static CookieOptions BuildAuthCookieOptions() => new()
+    {
+        HttpOnly = true,
+        Secure = true,
+        SameSite = SameSiteMode.Lax,
+        Path = "/",
+        Expires = DateTimeOffset.UtcNow.AddDays(30)
+    };
 }

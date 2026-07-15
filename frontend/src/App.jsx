@@ -11,6 +11,7 @@ import { TopPlacePage } from "./pages/TopPlacePage";
 import { FoodPlaceDetailPage } from "./pages/FoodPlaceDetailPage";
 import { AdminUsersPage } from "./pages/AdminUsersPage";
 import { LoginPage } from "./pages/LoginPage";
+import { NotFoundPage } from "./pages/NotFoundPage";
 import { RegisterPage } from "./pages/RegisterPage";
 
 const RestaurantForm = lazy(() =>
@@ -55,6 +56,14 @@ export default function App() {
           <Route path="place-details/:id" element={<FoodPlaceDetailPage />} />
           <Route path="admin/users" element={<AdminUsersPage />} />
         </Route>
+        <Route
+          path="*"
+          element={
+            <ProtectedRoute>
+              <NotFoundPage />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

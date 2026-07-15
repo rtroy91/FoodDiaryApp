@@ -13,6 +13,7 @@ namespace FoodDiary.Api.Services;
 
 public class AuthService : IAuthService
 {
+    private const int DisplayNameMaxLength = 15;
     private readonly FoodDiaryContext _context;
     private readonly IConfiguration _config;
 
@@ -24,15 +25,21 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken)
     {
-        if (await _context.Users.AnyAsync(u => u.Email == request.Email, cancellationToken))
+        var email = NormalizeEmail(request.Email);
+        var displayName = NormalizeDisplayName(request.DisplayName);
+
+        if (displayName?.Length > DisplayNameMaxLength)
+            throw new InvalidOperationException("Display name must be 15 characters or fewer.");
+
+        if (await _context.Users.AnyAsync(u => u.Email == email, cancellationToken))
             throw new InvalidOperationException("Email already registered.");
 
         var user = new User
         {
-            Email = request.Email,
+            Email = email,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
-            DisplayName = request.DisplayName,
-            Role = GetRoleForEmail(request.Email)
+            DisplayName = displayName,
+            Role = GetRoleForEmail(email)
         };
 
         _context.Users.Add(user);
@@ -43,8 +50,9 @@ public class AuthService : IAuthService
 
     public async Task<AuthResponse> LoginAsync(LoginRequest request, CancellationToken cancellationToken)
     {
+        var email = NormalizeEmail(request.Email);
         var user = await _context.Users
-            .FirstOrDefaultAsync(u => u.Email == request.Email, cancellationToken)
+            .FirstOrDefaultAsync(u => u.Email == email, cancellationToken)
             ?? throw new UnauthorizedAccessException("Invalid email or password.");
 
         if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
@@ -100,5 +108,13 @@ public class AuthService : IAuthService
                string.Equals(email.Trim(), adminEmail.Trim(), StringComparison.OrdinalIgnoreCase)
             ? "Admin"
             : "User";
+    }
+
+    private static string NormalizeEmail(string email) => email.Trim().ToLowerInvariant();
+
+    private static string? NormalizeDisplayName(string? displayName)
+    {
+        var normalized = displayName?.Trim();
+        return string.IsNullOrEmpty(normalized) ? null : normalized;
     }
 }

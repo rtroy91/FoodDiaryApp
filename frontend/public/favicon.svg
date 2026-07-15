@@ -1,14 +1,76 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
-  <title id="title">DiarEat diary camera favicon</title>
-  <desc id="desc">A diary shaped like the letter D with a camera forming the outer edge.</desc>
-  <path d="M16 10h21c11 0 20 9 20 22s-9 22-20 22H16Z" fill="#f97316"/>
-  <path d="M16 10h21c11 0 20 9 20 22s-9 22-20 22H16Z" fill="none" stroke="#F5F0E8" stroke-width="4" stroke-linejoin="round"/>
-  <path d="M16 10v44" stroke="#F5F0E8" stroke-width="6" stroke-linecap="round"/>
-  <path d="M25 22h11M25 31h8M25 40h10" stroke="#fed7aa" stroke-width="4" stroke-linecap="round"/>
-  <path d="M38 17h10l5 6v22a7 7 0 0 1-7 7H36c9-5 14-12 14-20s-5-15-14-20z" fill="#0f766e"/>
-  <path d="M38 17h10l5 6v22a7 7 0 0 1-7 7H36c9-5 14-12 14-20s-5-15-14-20z" fill="none" stroke="#F5F0E8" stroke-width="4" stroke-linejoin="round"/>
-  <path d="M40 17h8l5 6" fill="none" stroke="#F5F0E8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="42" cy="34" r="7" fill="#f97316" stroke="#F5F0E8" stroke-width="4"/>
-  <circle cx="42" cy="34" r="2.5" fill="#F5F0E8"/>
-  <circle cx="51" cy="27" r="2.5" fill="#F5F0E8"/>
+  <title id="title">DiarEat notebook camera icon</title>
+  <desc id="desc">A sky blue capital D shaped like a spiral notebook and camera with a glossy lens.</desc>
+  <defs>
+    <linearGradient id="body" x1="13" y1="9" x2="56" y2="55" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7fc8e8"/>
+      <stop offset="1" stop-color="#4f9fc8"/>
+    </linearGradient>
+    <linearGradient id="lens" x1="26" y1="24" x2="43" y2="43" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#164e63"/>
+      <stop offset="0.54" stop-color="#0f7895"/>
+      <stop offset="1" stop-color="#082f49"/>
+    </linearGradient>
+  </defs>
+
+  <path
+    d="M18 9h17c13.6 0 23 9.2 23 23s-9.4 23-23 23H18Z"
+    fill="url(#body)"
+  />
+  <path
+    d="M18 9h17c13.6 0 23 9.2 23 23s-9.4 23-23 23H18Z"
+    fill="none"
+    stroke="#F5F0E8"
+    stroke-linejoin="round"
+    stroke-width="4"
+  />
+
+  <path
+    d="M18 9v46"
+    fill="none"
+    stroke="#F5F0E8"
+    stroke-linecap="round"
+    stroke-width="5.5"
+  />
+  <path
+    d="M12 17h8M12 25h8M12 33h8M12 41h8M12 49h8"
+    fill="none"
+    stroke="#F5F0E8"
+    stroke-linecap="round"
+    stroke-width="4"
+  />
+  <path
+    d="M13 17c0-2 1.5-3.5 3.5-3.5S20 15 20 17M13 25c0-2 1.5-3.5 3.5-3.5S20 23 20 25M13 33c0-2 1.5-3.5 3.5-3.5S20 31 20 33M13 41c0-2 1.5-3.5 3.5-3.5S20 39 20 41M13 49c0-2 1.5-3.5 3.5-3.5S20 47 20 49"
+    fill="none"
+    stroke="#2f86ad"
+    stroke-linecap="round"
+    stroke-width="2.2"
+  />
+
+  <path
+    d="M37 13h10l4.5 5.4C55.6 22 58 26.8 58 32c0 13.8-9.4 23-23 23h-4.5C42.1 50.7 49 42.1 49 32s-6.9-18.7-18.5-23H37Z"
+    fill="#5fb2d6"
+  />
+  <path
+    d="M37 13h10l4.5 5.4"
+    fill="none"
+    stroke="#F5F0E8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="4"
+  />
+  <path
+    d="M52 18.5C55.8 22 58 26.8 58 32c0 13.8-9.4 23-23 23h-4.5"
+    fill="none"
+    stroke="#F5F0E8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="4"
+  />
+
+  <circle cx="36" cy="33" r="10.5" fill="url(#lens)" stroke="#F5F0E8" stroke-width="4" />
+  <circle cx="36" cy="33" r="5.2" fill="none" stroke="#93d7ef" stroke-opacity="0.8" stroke-width="2" />
+  <path d="M30.5 28.5c2-2.3 5.4-3.1 8.3-1.9" fill="none" stroke="#e0f7ff" stroke-linecap="round" stroke-width="2.4" />
+  <circle cx="42.7" cy="25" r="2.2" fill="#F5F0E8" />
+  <rect x="47.5" y="21" width="5.5" height="3.6" rx="1.8" fill="#F5F0E8" />
 </svg>

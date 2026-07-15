@@ -39,8 +39,8 @@ export function NavBar() {
       : "border-b border-transparent bg-transparent",
   ].join(" ");
 
-  function handleLogout() {
-    logout();
+  async function handleLogout() {
+    await logout();
     navigate("/login");
   }
 
