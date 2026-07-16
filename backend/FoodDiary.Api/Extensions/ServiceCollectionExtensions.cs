@@ -25,6 +25,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IEntryService, EntryService>();
         services.AddScoped<IPhotoService, PhotoService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddHttpClient<IEmailService, ResendEmailService>();
 
         return services;
     }

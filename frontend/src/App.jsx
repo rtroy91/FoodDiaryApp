@@ -12,9 +12,11 @@ import { EntryDetailPage } from "./pages/EntryDetailPage";
 import { TopPlacePage } from "./pages/TopPlacePage";
 import { FoodPlaceDetailPage } from "./pages/FoodPlaceDetailPage";
 import { AdminUsersPage } from "./pages/AdminUsersPage";
+import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
 import { LoginPage } from "./pages/LoginPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { RegisterPage } from "./pages/RegisterPage";
+import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 
 const RestaurantForm = lazy(() =>
   import("./components/RestaurantForm").then((module) => ({
@@ -53,6 +55,22 @@ export default function App() {
           element={
             <PublicOnlyRoute>
               <RegisterPage />
+            </PublicOnlyRoute>
+          }
+        />
+        <Route
+          path="/forgot-password"
+          element={
+            <PublicOnlyRoute>
+              <ForgotPasswordPage />
+            </PublicOnlyRoute>
+          }
+        />
+        <Route
+          path="/reset-password"
+          element={
+            <PublicOnlyRoute>
+              <ResetPasswordPage />
             </PublicOnlyRoute>
           }
         />

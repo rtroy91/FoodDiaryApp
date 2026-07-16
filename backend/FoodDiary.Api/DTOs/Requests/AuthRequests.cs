@@ -24,3 +24,18 @@ public class LoginRequest
 
     public bool RememberMe { get; set; }
 }
+
+public class ForgotPasswordRequest
+{
+    [Required, EmailAddress, MaxLength(254)]
+    public string Email { get; set; } = string.Empty;
+}
+
+public class ResetPasswordRequest
+{
+    [Required]
+    public string Token { get; set; } = string.Empty;
+
+    [Required, MinLength(8)]
+    public string NewPassword { get; set; } = string.Empty;
+}

@@ -98,7 +98,7 @@ export function FoodMapPage() {
 
         {!isLoading && !hasConnectionError && restaurants.length === 0 && (
           <div className="rounded-2xl border border-[#E8DFC8] bg-stone-50 px-5 py-12 text-center">
-            <UtensilsCrossed size={36} color="#C8B89A" className="mx-auto mb-3" />
+            <UtensilsCrossed size={36} className="mx-auto mb-3 text-stone-600" />
             <p className="mb-1.5 text-xl text-[#1C1107]" style={{ fontFamily: '"Fraunces", serif' }}>
               No food places yet
             </p>

@@ -92,7 +92,10 @@ export function RegisterPage() {
     setSubmitting(true);
     try {
       await register(normalizedEmail, form.password, normalizedDisplayName);
-      navigate("/");
+      navigate("/login", {
+        replace: true,
+        state: { accountCreatedMessage: "Account created. Sign in to start your food diary." },
+      });
     } catch (error) {
       if (!error.response) {
         setErrorMessage(

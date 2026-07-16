@@ -50,8 +50,16 @@ export async function register(email, password, displayName) {
     password,
     displayName: normalizedDisplayName,
   });
-  storeAuthSession(data);
   return data;
+}
+
+export async function requestPasswordReset(email) {
+  const { data } = await apiClient.post("/auth/forgot-password", { email: normalizeEmail(email) });
+  return data;
+}
+
+export async function resetPassword(token, newPassword) {
+  await apiClient.post("/auth/reset-password", { token, newPassword });
 }
 
 export async function logout() {

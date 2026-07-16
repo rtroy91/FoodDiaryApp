@@ -3,15 +3,33 @@ import { clearLocalSession, getCurrentUser, onAuthSessionChanged, refreshCurrent
 import { queryClient } from "../lib/queryClient";
 
 const AuthSessionContext = createContext(null);
+const AUTH_PAGE_PATHS = new Set(["/login", "/register", "/forgot-password", "/reset-password"]);
+
+function isAuthPage() {
+  if (typeof window === "undefined") return false;
+  return AUTH_PAGE_PATHS.has(window.location.pathname);
+}
+
+function getInitialSessionStatus() {
+  if (!isAuthPage()) return "checking";
+  return getCurrentUser() ? "authenticated" : "unauthenticated";
+}
 
 export function AuthSessionProvider({ children }) {
   const [user, setUser] = useState(() => getCurrentUser());
-  const [status, setStatus] = useState("checking");
+  const [status, setStatus] = useState(getInitialSessionStatus);
 
   useEffect(() => {
     let isMounted = true;
 
     async function checkSession() {
+      if (isAuthPage()) {
+        const storedUser = getCurrentUser();
+        setUser(storedUser);
+        setStatus(storedUser ? "authenticated" : "unauthenticated");
+        return;
+      }
+
       try {
         const currentUser = await refreshCurrentUser();
 

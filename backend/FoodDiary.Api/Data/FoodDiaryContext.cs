@@ -8,6 +8,7 @@ public class FoodDiaryContext : DbContext
     public FoodDiaryContext(DbContextOptions<FoodDiaryContext> options) : base(options) { }
 
     public DbSet<User> Users => Set<User>();
+    public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
     public DbSet<Restaurant> Restaurants => Set<Restaurant>();
     public DbSet<RestaurantOpeningHour> RestaurantOpeningHours => Set<RestaurantOpeningHour>();
     public DbSet<Entry> Entries => Set<Entry>();
@@ -18,6 +19,19 @@ public class FoodDiaryContext : DbContext
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Email)
             .IsUnique();
+
+        modelBuilder.Entity<PasswordResetToken>()
+            .HasIndex(t => t.TokenHash)
+            .IsUnique();
+
+        modelBuilder.Entity<PasswordResetToken>()
+            .HasIndex(t => t.UserId);
+
+        modelBuilder.Entity<PasswordResetToken>()
+            .HasOne(t => t.User)
+            .WithMany()
+            .HasForeignKey(t => t.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         // Restaurants
         modelBuilder.Entity<Restaurant>()

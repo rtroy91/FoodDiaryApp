@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { login } from "../api/auth";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import { AuthSidePanel } from "../components/AuthSidePanel";
@@ -7,6 +7,7 @@ import { FormInput } from "../components/FormInput";
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState(null);
@@ -74,6 +75,18 @@ export function LoginPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              {location.state?.resetMessage && (
+                <div className="rounded-2xl border border-[#A5CF83]/40 bg-[#F1F7EA] px-4 py-3 text-sm font-semibold text-[#294B20]">
+                  {location.state.resetMessage}
+                </div>
+              )}
+
+              {location.state?.accountCreatedMessage && (
+                <div className="rounded-2xl border border-[#A5CF83]/40 bg-[#F1F7EA] px-4 py-3 text-sm font-semibold text-[#294B20]">
+                  {location.state.accountCreatedMessage}
+                </div>
+              )}
+
               <FormInput
                 label="Email Address"
                 type="email"
@@ -106,19 +119,25 @@ export function LoginPage() {
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </FormInput>
-              <p className="-mb-2 flex cursor-pointer justify-end text-xs font-semibold text-stone-700 hover:text-[#8F261C]">
-                Forgot Password?
-              </p>
+              <div className="flex min-h-11 items-center justify-between gap-4">
+                <div className="flex items-center gap-2 text-xs font-semibold text-stone-700">
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(event) => setRememberMe(event.target.checked)}
+                    className="h-4 w-4 rounded border-[#BFAF99] text-[#B83224] accent-[#B83224] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B83224]/25"
+                    aria-label="Remember me"
+                  />
+                  <span>Remember me</span>
+                </div>
 
-              <label className="flex min-h-11 cursor-pointer items-center gap-2 text-xs font-semibold text-stone-700">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(event) => setRememberMe(event.target.checked)}
-                  className="h-4 w-4 rounded border-[#BFAF99] text-[#B83224] accent-[#B83224] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B83224]/25"
-                />
-                <span>Remember me</span>
-              </label>
+                <Link
+                  to="/forgot-password"
+                  className="text-xs font-semibold text-stone-700 no-underline hover:text-[#8F261C]"
+                >
+                  Forgot Password?
+                </Link>
+              </div>
 
               {errorMessage && (
                 <div className="rounded-2xl border border-[#E04B39]/20 bg-[#E04B39]/10 px-4 py-3 text-sm font-semibold text-[#8A2A1C]">

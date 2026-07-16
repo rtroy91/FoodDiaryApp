@@ -1,7 +1,7 @@
 import { Plus, UtensilsCrossed } from "lucide-react";
 
 export function NoEntriesState({
-  message = "Your map is empty and your stomach is filing noise complaints. Drop your first food spot below!",
+  message = "Your diary is empty and your stomach is filing noise complaints. Drop your first food spot below!",
   onAddPost,
 }) {
   return (
