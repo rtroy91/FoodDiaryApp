@@ -26,6 +26,9 @@ jobs:
       - name: Restore
         run: dotnet restore FoodDiary.sln
 
+      - name: Check backend formatting
+        run: dotnet format FoodDiary.sln --verify-no-changes --no-restore
+
       - name: Build
         run: dotnet build FoodDiary.sln --configuration Release --no-restore
 

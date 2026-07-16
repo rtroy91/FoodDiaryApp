@@ -4,6 +4,7 @@ import { queryClient } from "../lib/queryClient";
 
 const DISPLAY_NAME_MAX_LENGTH = 15;
 const AUTH_SESSION_CHANGED_EVENT = "food-diary-auth-session-changed";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://localhost:5001/api";
 
 function normalizeEmail(email) {
   return email.trim().toLowerCase();
@@ -36,6 +37,12 @@ export async function login(email, password, rememberMe = false) {
   const { data } = await apiClient.post("/auth/login", { email: normalizeEmail(email), password, rememberMe });
   storeAuthSession(data);
   return data;
+}
+
+export function getGoogleLoginUrl(rememberMe = false) {
+  const url = new URL(`${API_BASE_URL.replace(/\/$/, "")}/auth/google/login`);
+  url.searchParams.set("rememberMe", rememberMe ? "true" : "false");
+  return url.toString();
 }
 
 export async function register(email, password, displayName) {

@@ -4,6 +4,7 @@ import { register } from "../api/auth";
 import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import { AuthSidePanel } from "../components/AuthSidePanel";
 import { FormInput } from "../components/FormInput";
+import { GoogleSignInButton } from "../components/GoogleSignInButton";
 
 const REGISTER_WORDS = ["Review", "Remember", "Rate"];
 const REGISTER_FEATURES = [
@@ -258,24 +259,11 @@ export function RegisterPage() {
                 <div className="h-px flex-1 bg-[#D8CDBB]" />
               </div>
 
-              <button
-                type="button"
-                disabled={submitting}
-                className="min-h-12 w-full touch-manipulation rounded-2xl border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-black transition-colors hover:bg-[#F7EFE5] disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                Continue with Google
-              </button>
+              <GoogleSignInButton disabled={submitting} text="Sign up with Google" />
             </form>
           </div>
         </section>
       </div>
     </main>
   );
-}
-
-{
-  /*
-  Implement COnfirm Password field
-  Continue with google field
-  */
 }

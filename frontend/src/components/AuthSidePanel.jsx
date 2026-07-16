@@ -1,18 +1,6 @@
 import { Check } from "lucide-react";
+import authSideShapes from "../assets/authside-shapes.svg";
 import foodHero from "../assets/food-register.svg";
-
-function ShapeIllustration() {
-  return (
-    <>
-      <div className="absolute left-8 top-8 h-24 w-24 rounded-full bg-[#F0D96B]/40" />
-      <div className="absolute bottom-10 right-10 h-32 w-32 rotate-12 bg-[#E04B39]/20" />
-      <div className="absolute left-1/2 top-1/2 h-40 w-40 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/35" />
-      <div className="absolute right-10 top-28 h-16 w-16 rounded-full bg-white/20" />
-      <div className="absolute left-10 bottom-24 h-20 w-20 rotate-45 rounded-2xl bg-[#F5E642]/20" />
-      <div className="absolute left-1/3 top-10 h-28 w-28 rounded-4xl border border-[#F0D96B]/30" />
-    </>
-  );
-}
 
 export function AuthSidePanel({ appFeatures, title, compactOnMobile = false }) {
   const sectionClassName = compactOnMobile
@@ -26,7 +14,7 @@ export function AuthSidePanel({ appFeatures, title, compactOnMobile = false }) {
 
   return (
     <section className={sectionClassName}>
-      <ShapeIllustration />
+      <img src={authSideShapes} alt="" className="absolute inset-0 h-full w-full object-cover" aria-hidden="true" />
 
       <div className={contentClassName}>
         <div className="max-w-xl mt-4">

@@ -6,7 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ── Controllers & API docs ────────────────────────────────────────────────
+// Controllers and API docs
 builder.Services.AddControllers();
 builder.Services.AddExceptionHandler<ApiExceptionHandler>();
 builder.Services.AddProblemDetails();
@@ -15,7 +15,7 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new() { Title = "Food Diary API", Version = "v1" });
 
-    // Add JWT auth header to Swagger UI
+    // Add JWT auth header to Swagger UI.
     c.AddSecurityDefinition("Bearer", new()
     {
         Name = "Authorization",
@@ -34,10 +34,10 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// ── Application services (all DI bindings live in this extension) ─────────
+// Application services
 builder.Services.AddApplicationServices(builder.Configuration);
 
-// ── JWT Authentication ────────────────────────────────────────────────────
+// JWT authentication
 builder.Services
     .AddAuthentication(options =>
     {
@@ -73,7 +73,7 @@ builder.Services
 
 builder.Services.AddAuthorization();
 
-// ── CORS ──────────────────────────────────────────────────────────────────
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
@@ -89,7 +89,6 @@ builder.Services.AddCors(options =>
     });
 });
 
-// ─────────────────────────────────────────────────────────────────────────
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -98,7 +97,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// app.UseHttpsRedirection(); // Comment out if running on HTTP locally
+// app.UseHttpsRedirection(); // Comment out if running on HTTP locally.
 app.UseExceptionHandler();
 app.UseCors("Frontend");
 app.UseStaticFiles();

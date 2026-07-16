@@ -1,7 +1,5 @@
-const TOKEN_KEY = "food_diary_token";
 const USER_KEY = "food_diary_user";
 
-let tokenCache;
 let userCache;
 
 function readStorage(key) {
@@ -17,24 +15,6 @@ function writeStorage(key, value) {
 function removeStorage(key) {
   if (typeof window === "undefined") return;
   window.localStorage.removeItem(key);
-}
-
-export function getAuthToken() {
-  if (tokenCache === undefined) {
-    tokenCache = readStorage(TOKEN_KEY);
-  }
-
-  return tokenCache;
-}
-
-export function setAuthToken(token) {
-  tokenCache = token;
-  writeStorage(TOKEN_KEY, token);
-}
-
-export function clearAuthToken() {
-  tokenCache = null;
-  removeStorage(TOKEN_KEY);
 }
 
 export function getStoredUser() {
@@ -69,6 +49,5 @@ export function clearStoredUser() {
 }
 
 export function clearAuthStorage() {
-  clearAuthToken();
   clearStoredUser();
 }

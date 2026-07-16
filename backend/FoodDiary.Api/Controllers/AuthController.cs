@@ -12,10 +12,20 @@ public class AuthController : ControllerBase
 {
     private const string AuthCookieName = "food_diary_auth";
     private readonly IAuthService _authService;
+    private readonly IConfiguration _config;
+    private readonly IHostEnvironment _environment;
+    private readonly ILogger<AuthController> _logger;
 
-    public AuthController(IAuthService authService)
+    public AuthController(
+        IAuthService authService,
+        IConfiguration config,
+        IHostEnvironment environment,
+        ILogger<AuthController> logger)
     {
         _authService = authService;
+        _config = config;
+        _environment = environment;
+        _logger = logger;
     }
 
     /// <summary>Register a new account.</summary>
@@ -23,7 +33,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
     {
         var response = await _authService.RegisterAsync(request, cancellationToken);
-        return Ok(response);
+        return Ok(response.User);
     }
 
     /// <summary>Log in and receive a JWT.</summary>
@@ -32,7 +42,38 @@ public class AuthController : ControllerBase
     {
         var response = await _authService.LoginAsync(request, cancellationToken);
         SetAuthCookie(response.Token, request.RememberMe);
-        return Ok(response);
+        return Ok(response.User);
+    }
+
+    [HttpGet("google/login")]
+    public IActionResult GoogleRedirectLogin([FromQuery] bool rememberMe = false)
+    {
+        return Redirect(_authService.BuildGoogleAuthorizationUrl(rememberMe));
+    }
+
+    [HttpGet("google/callback")]
+    public async Task<IActionResult> GoogleRedirectCallback(
+        [FromQuery] string? code,
+        [FromQuery] string? state,
+        [FromQuery] string? error,
+        CancellationToken cancellationToken)
+    {
+        if (!string.IsNullOrWhiteSpace(error) || string.IsNullOrWhiteSpace(code) || string.IsNullOrWhiteSpace(state))
+        {
+            return Redirect(BuildFrontendRedirect("/login?googleError=1"));
+        }
+
+        try
+        {
+            var result = await _authService.CompleteGoogleRedirectLoginAsync(code, state, cancellationToken);
+            SetAuthCookie(result.Auth.Token, result.RememberMe);
+            return Redirect(BuildFrontendRedirect(result.ReturnPath));
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException or InvalidOperationException)
+        {
+            _logger.LogWarning(ex, "Google sign-in failed during callback.");
+            return Redirect(BuildFrontendRedirect("/login?googleError=1"));
+        }
     }
 
     [HttpPost("logout")]
@@ -80,13 +121,13 @@ public class AuthController : ControllerBase
         Response.Cookies.Append(AuthCookieName, token, BuildAuthCookieOptions(rememberMe));
     }
 
-    private static CookieOptions BuildAuthCookieOptions(bool rememberMe = true)
+    private CookieOptions BuildAuthCookieOptions(bool rememberMe = true)
     {
         var options = new CookieOptions
         {
             HttpOnly = true,
             Secure = true,
-            SameSite = SameSiteMode.Lax,
+            SameSite = GetConfiguredSameSiteMode(),
             Path = "/"
         };
 
@@ -96,5 +137,23 @@ public class AuthController : ControllerBase
         }
 
         return options;
+    }
+
+    private SameSiteMode GetConfiguredSameSiteMode()
+    {
+        var configuredValue = _config["AuthCookie:SameSite"] ?? _config["AUTH_COOKIE_SAME_SITE"];
+        if (Enum.TryParse<SameSiteMode>(configuredValue, ignoreCase: true, out var configuredMode))
+        {
+            return configuredMode;
+        }
+
+        return _environment.IsDevelopment() ? SameSiteMode.None : SameSiteMode.Lax;
+    }
+
+    private string BuildFrontendRedirect(string path)
+    {
+        var frontendBaseUrl = _config["Frontend:BaseUrl"] ?? _config["FRONTEND_BASE_URL"] ?? "http://localhost:5173";
+        var safePath = path.StartsWith("/", StringComparison.Ordinal) ? path : "/";
+        return $"{frontendBaseUrl.TrimEnd('/')}{safePath}";
     }
 }

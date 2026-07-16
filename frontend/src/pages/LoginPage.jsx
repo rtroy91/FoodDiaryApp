@@ -4,6 +4,7 @@ import { login } from "../api/auth";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import { AuthSidePanel } from "../components/AuthSidePanel";
 import { FormInput } from "../components/FormInput";
+import { GoogleSignInButton } from "../components/GoogleSignInButton";
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ export function LoginPage() {
     "Go stalk your favorite eating spots.",
     "Keep documenting your food obsession.",
   ];
+  const googleRedirectFailed = new URLSearchParams(location.search).has("googleError");
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -84,6 +86,12 @@ export function LoginPage() {
               {location.state?.accountCreatedMessage && (
                 <div className="rounded-2xl border border-[#A5CF83]/40 bg-[#F1F7EA] px-4 py-3 text-sm font-semibold text-[#294B20]">
                   {location.state.accountCreatedMessage}
+                </div>
+              )}
+
+              {googleRedirectFailed && (
+                <div className="rounded-2xl border border-[#E04B39]/20 bg-[#E04B39]/10 px-4 py-3 text-sm font-semibold text-[#8A2A1C]">
+                  Google sign-in could not be completed. Please try again.
                 </div>
               )}
 
@@ -166,13 +174,7 @@ export function LoginPage() {
                 <div className="h-px flex-1 bg-[#D8CDBB]" />
               </div>
 
-              <button
-                type="button"
-                disabled={submitting}
-                className="min-h-12 w-full touch-manipulation rounded-2xl border border-gray-300 bg-white px-4 py-3 text-sm font-semibold text-black transition-colors hover:bg-[#F7EFE5] disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                Continue with Google
-              </button>
+              <GoogleSignInButton disabled={submitting} rememberMe={rememberMe} />
             </form>
           </div>
         </section>

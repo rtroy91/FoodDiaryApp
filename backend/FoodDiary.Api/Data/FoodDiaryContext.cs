@@ -20,6 +20,10 @@ public class FoodDiaryContext : DbContext
             .HasIndex(u => u.Email)
             .IsUnique();
 
+        modelBuilder.Entity<User>()
+            .HasIndex(u => u.GoogleSubject)
+            .IsUnique();
+
         modelBuilder.Entity<PasswordResetToken>()
             .HasIndex(t => t.TokenHash)
             .IsUnique();
