@@ -1,7 +1,7 @@
 import { lazy } from "react";
 import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 import { NavBar } from "./components/NavBar";
-import { useAuthSession } from "./components/AuthSessionProvider";
+import { useAuthSession } from "./context/AuthSessionContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { SessionLoadingState } from "./components/SessionLoadingState";
 import { isAdmin } from "./api/auth";

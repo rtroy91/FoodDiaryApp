@@ -1,8 +1,8 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { clearLocalSession, getCurrentUser, onAuthSessionChanged, refreshCurrentUser } from "../api/auth";
 import { queryClient } from "../lib/queryClient";
+import { AuthSessionContext } from "../context/AuthSessionContext";
 
-const AuthSessionContext = createContext(null);
 const AUTH_PAGE_PATHS = new Set(["/login", "/register", "/forgot-password", "/reset-password"]);
 
 function isAuthPage() {
@@ -85,14 +85,4 @@ export function AuthSessionProvider({ children }) {
   );
 
   return <AuthSessionContext.Provider value={value}>{children}</AuthSessionContext.Provider>;
-}
-
-export function useAuthSession() {
-  const context = useContext(AuthSessionContext);
-
-  if (!context) {
-    throw new Error("useAuthSession must be used inside AuthSessionProvider.");
-  }
-
-  return context;
 }

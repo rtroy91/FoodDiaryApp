@@ -1,5 +1,5 @@
 import { Navigate } from "react-router-dom";
-import { useAuthSession } from "./AuthSessionProvider";
+import { useAuthSession } from "../context/AuthSessionContext";
 import { ConnectionErrorState } from "./ConnectionErrorState";
 import { SessionLoadingState } from "./SessionLoadingState";
 
