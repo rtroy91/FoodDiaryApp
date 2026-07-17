@@ -7,15 +7,8 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace FoodDiary.Api.Services;
 
-public sealed class JwtTokenService : IJwtTokenService
+public sealed class JwtTokenService(IConfiguration config) : IJwtTokenService
 {
-    private readonly IConfiguration _config;
-
-    public JwtTokenService(IConfiguration config)
-    {
-        _config = config;
-    }
-
     public string Generate(User user)
     {
         var claims = new[]
@@ -25,12 +18,12 @@ public sealed class JwtTokenService : IJwtTokenService
             new Claim(ClaimTypes.Role, user.Role)
         };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]!));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
-            issuer: _config["Jwt:Issuer"],
-            audience: _config["Jwt:Audience"],
+            issuer: config["Jwt:Issuer"],
+            audience: config["Jwt:Audience"],
             claims: claims,
             expires: DateTime.UtcNow.AddDays(30),
             signingCredentials: creds);

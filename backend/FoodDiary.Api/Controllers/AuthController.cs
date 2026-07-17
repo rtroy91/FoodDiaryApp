@@ -8,31 +8,19 @@ namespace FoodDiary.Api.Controllers;
 
 [ApiController]
 [Route("api/auth")]
-public class AuthController : ControllerBase
+public class AuthController(
+    IAuthService authService,
+    IConfiguration config,
+    IHostEnvironment environment,
+    ILogger<AuthController> logger) : ControllerBase
 {
     private const string AuthCookieName = "food_diary_auth";
-    private readonly IAuthService _authService;
-    private readonly IConfiguration _config;
-    private readonly IHostEnvironment _environment;
-    private readonly ILogger<AuthController> _logger;
-
-    public AuthController(
-        IAuthService authService,
-        IConfiguration config,
-        IHostEnvironment environment,
-        ILogger<AuthController> logger)
-    {
-        _authService = authService;
-        _config = config;
-        _environment = environment;
-        _logger = logger;
-    }
 
     /// <summary>Register a new account.</summary>
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
     {
-        var response = await _authService.RegisterAsync(request, cancellationToken);
+        var response = await authService.RegisterAsync(request, cancellationToken);
         return Ok(response.User);
     }
 
@@ -40,7 +28,7 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
     {
-        var response = await _authService.LoginAsync(request, cancellationToken);
+        var response = await authService.LoginAsync(request, cancellationToken);
         SetAuthCookie(response.Token, request.RememberMe);
         return Ok(response.User);
     }
@@ -48,7 +36,7 @@ public class AuthController : ControllerBase
     [HttpGet("google/login")]
     public IActionResult GoogleRedirectLogin([FromQuery] bool rememberMe = false)
     {
-        return Redirect(_authService.BuildGoogleAuthorizationUrl(rememberMe));
+        return Redirect(authService.BuildGoogleAuthorizationUrl(rememberMe));
     }
 
     [HttpGet("google/callback")]
@@ -65,13 +53,13 @@ public class AuthController : ControllerBase
 
         try
         {
-            var result = await _authService.CompleteGoogleRedirectLoginAsync(code, state, cancellationToken);
+            var result = await authService.CompleteGoogleRedirectLoginAsync(code, state, cancellationToken);
             SetAuthCookie(result.Auth.Token, result.RememberMe);
             return Redirect(BuildFrontendRedirect(result.ReturnPath));
         }
         catch (Exception ex) when (ex is UnauthorizedAccessException or InvalidOperationException)
         {
-            _logger.LogWarning(ex, "Google sign-in failed during callback.");
+            logger.LogWarning(ex, "Google sign-in failed during callback.");
             return Redirect(BuildFrontendRedirect("/login?googleError=1"));
         }
     }
@@ -88,7 +76,7 @@ public class AuthController : ControllerBase
         [FromBody] ForgotPasswordRequest request,
         CancellationToken cancellationToken)
     {
-        await _authService.RequestPasswordResetAsync(request, cancellationToken);
+        await authService.RequestPasswordResetAsync(request, cancellationToken);
         return Ok(new { message = "If this email exists, we sent a reset link." });
     }
 
@@ -97,7 +85,7 @@ public class AuthController : ControllerBase
         [FromBody] ResetPasswordRequest request,
         CancellationToken cancellationToken)
     {
-        await _authService.ResetPasswordAsync(request, cancellationToken);
+        await authService.ResetPasswordAsync(request, cancellationToken);
         Response.Cookies.Delete(AuthCookieName, BuildAuthCookieOptions());
         return NoContent();
     }
@@ -112,7 +100,7 @@ public class AuthController : ControllerBase
             return Unauthorized();
         }
 
-        var response = await _authService.GetCurrentUserAsync(userId, cancellationToken);
+        var response = await authService.GetCurrentUserAsync(userId, cancellationToken);
         return response is null ? Unauthorized() : Ok(response);
     }
 
@@ -141,18 +129,18 @@ public class AuthController : ControllerBase
 
     private SameSiteMode GetConfiguredSameSiteMode()
     {
-        var configuredValue = _config["AuthCookie:SameSite"] ?? _config["AUTH_COOKIE_SAME_SITE"];
+        var configuredValue = config["AuthCookie:SameSite"] ?? config["AUTH_COOKIE_SAME_SITE"];
         if (Enum.TryParse<SameSiteMode>(configuredValue, ignoreCase: true, out var configuredMode))
         {
             return configuredMode;
         }
 
-        return _environment.IsDevelopment() ? SameSiteMode.None : SameSiteMode.Lax;
+        return environment.IsDevelopment() ? SameSiteMode.None : SameSiteMode.Lax;
     }
 
     private string BuildFrontendRedirect(string path)
     {
-        var frontendBaseUrl = _config["Frontend:BaseUrl"] ?? _config["FRONTEND_BASE_URL"] ?? "http://localhost:5173";
+        var frontendBaseUrl = config["Frontend:BaseUrl"] ?? config["FRONTEND_BASE_URL"] ?? "http://localhost:5173";
         var safePath = path.StartsWith("/", StringComparison.Ordinal) ? path : "/";
         return $"{frontendBaseUrl.TrimEnd('/')}{safePath}";
     }

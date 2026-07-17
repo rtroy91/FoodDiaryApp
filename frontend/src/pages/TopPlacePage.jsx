@@ -89,7 +89,7 @@ function formatReach(value = 0) {
 
 // #region Expanded Card
 function TopPlaceAccordionItem({ place, rank, mode, isExpanded, isPairedTabletExpansion, onMouseEnter }) {
-  const thumbnailUrl = place?.thumbnailUrl ?? null;
+  const storePhotoUrl = place?.storePhotoUrl ?? null;
   const location = formatFoodPlaceLocation(place);
   const rating = place.averageRating;
   const visitCount = place.visitCount ?? 0;
@@ -130,8 +130,8 @@ function TopPlaceAccordionItem({ place, rank, mode, isExpanded, isPairedTabletEx
       onFocus={onMouseEnter}
     >
       <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#F5EEE4]">
-        {thumbnailUrl ? (
-          <img src={thumbnailUrl} alt={place.name} width={64} height={64} className="h-full w-full object-cover" />
+        {storePhotoUrl ? (
+          <img src={storePhotoUrl} alt={place.name} width={64} height={64} className="h-full w-full object-cover" />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-stone-600">
             <ImageIcon size={20} />

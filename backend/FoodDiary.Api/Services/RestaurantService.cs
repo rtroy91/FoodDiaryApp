@@ -7,24 +7,52 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FoodDiary.Api.Services;
 
-public class RestaurantService : IRestaurantService
+public class RestaurantService(FoodDiaryContext db, IPhotoService photoService) : IRestaurantService
 {
-    private readonly FoodDiaryContext _db;
-
-    public RestaurantService(FoodDiaryContext db)
-    {
-        _db = db;
-    }
-
     public async Task<List<RestaurantResponse>> GetRestaurantListsAsync(CancellationToken cancellationToken)
     {
-        var restaurants = await _db.Restaurants
+        return await db.Restaurants
             .AsNoTracking()
-            .Include(r => r.OpeningHours)
             .OrderBy(r => r.Name)
+            .Select(r => new RestaurantResponse
+            {
+                Id = r.Id,
+                Name = r.Name,
+                Address = r.Address,
+                Barangay = r.Barangay,
+                City = r.City,
+                Province = r.Province,
+                Category = r.Category,
+                MenuPhotoUrl = r.MenuPhotoUrl,
+                StorePhotoUrl = r.StorePhotoUrl,
+                Promo = r.Promo,
+                OpeningHours = r.OpeningHours
+                    .OrderBy(h => h.Day)
+                    .Select(h => new RestaurantOpeningHourResponse
+                    {
+                        Day = h.Day,
+                        Open = h.Open,
+                        Close = h.Close
+                    })
+                    .ToList(),
+                Budget = r.Budget,
+                Latitude = r.Latitude,
+                Longitude = r.Longitude
+            })
             .ToListAsync(cancellationToken);
+    }
 
-        return restaurants.Select(MapToResponse).ToList();
+    public async Task<List<RestaurantOptionResponse>> GetRestaurantOptionsAsync(CancellationToken cancellationToken)
+    {
+        return await db.Restaurants
+            .AsNoTracking()
+            .OrderBy(r => r.Name)
+            .Select(r => new RestaurantOptionResponse
+            {
+                Id = r.Id,
+                Name = r.Name
+            })
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<IEnumerable<RestaurantResponse>> GetMostVisitedAsync(
@@ -32,26 +60,70 @@ public class RestaurantService : IRestaurantService
         int limit,
         CancellationToken cancellationToken)
     {
-        var restaurants = await _db.Restaurants
+        return await db.Restaurants
             .AsNoTracking()
-            .Include(r => r.OpeningHours)
             .Where(r => r.Entries.Any(e => e.UserId == userId))
             .OrderByDescending(r => r.Entries.Count(e => e.UserId == userId))
             .Take(limit)
+            .Select(r => new RestaurantResponse
+            {
+                Id = r.Id,
+                Name = r.Name,
+                Address = r.Address,
+                Barangay = r.Barangay,
+                City = r.City,
+                Province = r.Province,
+                Category = r.Category,
+                MenuPhotoUrl = r.MenuPhotoUrl,
+                StorePhotoUrl = r.StorePhotoUrl,
+                Promo = r.Promo,
+                OpeningHours = r.OpeningHours
+                    .OrderBy(h => h.Day)
+                    .Select(h => new RestaurantOpeningHourResponse
+                    {
+                        Day = h.Day,
+                        Open = h.Open,
+                        Close = h.Close
+                    })
+                    .ToList(),
+                Budget = r.Budget,
+                Latitude = r.Latitude,
+                Longitude = r.Longitude
+            })
             .ToListAsync(cancellationToken);
-
-        return restaurants.Select(MapToResponse);
     }
 
     public async Task<RestaurantResponse?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        var restaurant = await _db.Restaurants
+        return await db.Restaurants
             .AsNoTracking()
-            .Include(r => r.OpeningHours)
             .Where(r => r.Id == id)
+            .Select(r => new RestaurantResponse
+            {
+                Id = r.Id,
+                Name = r.Name,
+                Address = r.Address,
+                Barangay = r.Barangay,
+                City = r.City,
+                Province = r.Province,
+                Category = r.Category,
+                MenuPhotoUrl = r.MenuPhotoUrl,
+                StorePhotoUrl = r.StorePhotoUrl,
+                Promo = r.Promo,
+                OpeningHours = r.OpeningHours
+                    .OrderBy(h => h.Day)
+                    .Select(h => new RestaurantOpeningHourResponse
+                    {
+                        Day = h.Day,
+                        Open = h.Open,
+                        Close = h.Close
+                    })
+                    .ToList(),
+                Budget = r.Budget,
+                Latitude = r.Latitude,
+                Longitude = r.Longitude
+            })
             .FirstOrDefaultAsync(cancellationToken);
-
-        return restaurant is null ? null : MapToResponse(restaurant);
     }
 
     public async Task<RestaurantResponse> CreateAsync(CreateRestaurantRequest request, CancellationToken cancellationToken)
@@ -73,8 +145,8 @@ public class RestaurantService : IRestaurantService
             Longitude = request.Longitude
         };
 
-        _db.Restaurants.Add(restaurant);
-        await _db.SaveChangesAsync(cancellationToken);
+        db.Restaurants.Add(restaurant);
+        await db.SaveChangesAsync(cancellationToken);
 
         return MapToResponse(restaurant);
     }
@@ -84,7 +156,7 @@ public class RestaurantService : IRestaurantService
         UpdateRestaurantRequest request,
         CancellationToken cancellationToken)
     {
-        var restaurant = await _db.Restaurants
+        var restaurant = await db.Restaurants
             .Include(r => r.OpeningHours)
             .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
 
@@ -105,20 +177,31 @@ public class RestaurantService : IRestaurantService
         restaurant.OpeningHours.Clear();
         restaurant.OpeningHours.AddRange(MapOpeningHours(request.OpeningHours));
 
-        await _db.SaveChangesAsync(cancellationToken);
+        await db.SaveChangesAsync(cancellationToken);
 
         return MapToResponse(restaurant);
     }
 
     public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken)
     {
-        var restaurant = await _db.Restaurants
+        var restaurant = await db.Restaurants
+            .Include(r => r.Entries)
             .FirstOrDefaultAsync(r => r.Id == id, cancellationToken);
 
         if (restaurant is null) return false;
 
-        _db.Restaurants.Remove(restaurant);
-        await _db.SaveChangesAsync(cancellationToken);
+        var photoUrls = new[] { restaurant.MenuPhotoUrl, restaurant.StorePhotoUrl }
+            .Concat(restaurant.Entries.Select(e => e.PhotoUrl))
+            .Where(url => !string.IsNullOrWhiteSpace(url))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        db.Restaurants.Remove(restaurant);
+        await db.SaveChangesAsync(cancellationToken);
+
+        foreach (var photoUrl in photoUrls)
+            await photoService.DeleteAsync(photoUrl);
+
         return true;
     }
 

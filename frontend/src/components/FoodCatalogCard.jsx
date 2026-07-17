@@ -18,30 +18,19 @@ function formatReach(value = 0) {
   return value.toString();
 }
 
-function getThumbnailUrl(restaurant) {
-  return (
-    restaurant?.storePhotoUrl ??
-    restaurant?.thumbnailUrl ??
-    restaurant?.photoUrl ??
-    restaurant?.imageUrl ??
-    restaurant?.coverPhotoUrl ??
-    null
-  );
-}
-
 function FoodCatalogCardContent({ restaurant }) {
   const location = getLocation(restaurant);
   const rating = restaurant.averageRating;
   const reach = restaurant.visitCount ?? 0;
-  const thumbnailUrl = getThumbnailUrl(restaurant);
+  const storePhotoUrl = restaurant?.storePhotoUrl ?? null;
   const category = categoryLabel(restaurant.category);
   const visitsLabel = `${formatReach(reach)} ${reach > 1 ? "visits" : "visit"}`;
 
   return (
     <>
       <div className="h-20 w-20 overflow-hidden rounded-xl border border-stone-100 bg-[#F5EEE4]">
-        {thumbnailUrl ? (
-          <img src={thumbnailUrl} alt={restaurant.name} loading="eager" className="h-full w-full object-cover" />
+        {storePhotoUrl ? (
+          <img src={storePhotoUrl} alt={restaurant.name} loading="eager" className="h-full w-full object-cover" />
         ) : (
           <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-stone-600">
             <UtensilsCrossed size={22} />

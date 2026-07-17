@@ -8,15 +8,8 @@ namespace FoodDiary.Api.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/photos")]
-public class PhotosController : ControllerBase
+public class PhotosController(IPhotoService photoService) : ControllerBase
 {
-    private readonly IPhotoService _photoService;
-
-    public PhotosController(IPhotoService photoService)
-    {
-        _photoService = photoService;
-    }
-
     /// <summary>Upload a diary photo to local backend storage.</summary>
     [HttpPost("upload")]
     [RequestSizeLimit(5 * 1024 * 1024)]
@@ -30,7 +23,7 @@ public class PhotosController : ControllerBase
 
         var userId = GetUserId();
         var baseUrl = $"{Request.Scheme}://{Request.Host}";
-        var result = await _photoService.UploadAsync(userId, photo, baseUrl, uploadFolder, cancellationToken);
+        var result = await photoService.UploadAsync(userId, photo, baseUrl, uploadFolder, cancellationToken);
         return Ok(result);
     }
 

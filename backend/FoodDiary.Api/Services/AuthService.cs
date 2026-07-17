@@ -14,7 +14,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FoodDiary.Api.Services;
 
-public class AuthService : IAuthService
+public class AuthService(
+    FoodDiaryContext context,
+    IConfiguration config,
+    IEmailService emailService,
+    IHttpClientFactory httpClientFactory,
+    IJwtTokenService jwtTokenService,
+    IDataProtectionProvider dataProtectionProvider) : IAuthService
 {
     private const int DisplayNameMaxLength = 15;
     private const string GoogleAuthorizationEndpoint = "https://accounts.google.com/o/oauth2/v2/auth";
@@ -27,28 +33,8 @@ public class AuthService : IAuthService
     private const string GoogleRedirectUriEnvKey = "GOOGLE_REDIRECT_URI";
     private static readonly TimeSpan PasswordResetTokenLifetime = TimeSpan.FromMinutes(30);
     private static readonly TimeSpan GoogleStateLifetime = TimeSpan.FromMinutes(10);
-    private readonly FoodDiaryContext _context;
-    private readonly IConfiguration _config;
-    private readonly IEmailService _emailService;
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IJwtTokenService _jwtTokenService;
-    private readonly IDataProtector _googleStateProtector;
-
-    public AuthService(
-        FoodDiaryContext context,
-        IConfiguration config,
-        IEmailService emailService,
-        IHttpClientFactory httpClientFactory,
-        IJwtTokenService jwtTokenService,
-        IDataProtectionProvider dataProtectionProvider)
-    {
-        _context = context;
-        _config = config;
-        _emailService = emailService;
-        _httpClientFactory = httpClientFactory;
-        _jwtTokenService = jwtTokenService;
-        _googleStateProtector = dataProtectionProvider.CreateProtector("FoodDiary.GoogleOAuth.State.v1");
-    }
+    private readonly IDataProtector googleStateProtector =
+        dataProtectionProvider.CreateProtector("FoodDiary.GoogleOAuth.State.v1");
 
     public async Task<AuthSessionResult> RegisterAsync(RegisterRequest request, CancellationToken cancellationToken)
     {
@@ -58,7 +44,7 @@ public class AuthService : IAuthService
         if (displayName?.Length > DisplayNameMaxLength)
             throw new InvalidOperationException("Display name must be 15 characters or fewer.");
 
-        if (await _context.Users.AnyAsync(u => u.Email == email, cancellationToken))
+        if (await context.Users.AnyAsync(u => u.Email == email, cancellationToken))
             throw new InvalidOperationException("Email already registered.");
 
         var user = new User
@@ -69,8 +55,8 @@ public class AuthService : IAuthService
             Role = GetRoleForEmail(email)
         };
 
-        _context.Users.Add(user);
-        await _context.SaveChangesAsync(cancellationToken);
+        context.Users.Add(user);
+        await context.SaveChangesAsync(cancellationToken);
 
         return BuildAuthSession(user);
     }
@@ -78,7 +64,7 @@ public class AuthService : IAuthService
     public async Task<AuthSessionResult> LoginAsync(LoginRequest request, CancellationToken cancellationToken)
     {
         var email = NormalizeEmail(request.Email);
-        var user = await _context.Users
+        var user = await context.Users
             .FirstOrDefaultAsync(u => u.Email == email, cancellationToken)
             ?? throw new UnauthorizedAccessException("Invalid email or password.");
 
@@ -133,7 +119,7 @@ public class AuthService : IAuthService
             throw new UnauthorizedAccessException("Google account email could not be verified.");
         }
 
-        var user = await _context.Users
+        var user = await context.Users
             .FirstOrDefaultAsync(u => u.GoogleSubject == payload.Subject, cancellationToken);
 
         if (user is not null)
@@ -142,7 +128,7 @@ public class AuthService : IAuthService
             return user;
         }
 
-        var existingEmailUser = await _context.Users
+        var existingEmailUser = await context.Users
             .AsNoTracking()
             .FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
 
@@ -160,15 +146,15 @@ public class AuthService : IAuthService
             Role = GetRoleForEmail(email)
         };
 
-        _context.Users.Add(user);
+        context.Users.Add(user);
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
         return user;
     }
 
     public async Task<AuthResponse?> GetCurrentUserAsync(Guid userId, CancellationToken cancellationToken)
     {
-        var user = await _context.Users
+        var user = await context.Users
             .AsNoTracking()
             .FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
 
@@ -177,13 +163,13 @@ public class AuthService : IAuthService
 
     public async Task RequestPasswordResetAsync(ForgotPasswordRequest request, CancellationToken cancellationToken)
     {
-        if (!_emailService.IsConfigured)
+        if (!emailService.IsConfigured)
         {
             throw new InvalidOperationException("Password reset email is not configured.");
         }
 
         var email = NormalizeEmail(request.Email);
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
 
         if (user is null)
         {
@@ -193,23 +179,23 @@ public class AuthService : IAuthService
         var token = GenerateSecureToken();
         var tokenHash = HashToken(token);
 
-        _context.PasswordResetTokens.Add(new PasswordResetToken
+        context.PasswordResetTokens.Add(new PasswordResetToken
         {
             UserId = user.Id,
             TokenHash = tokenHash,
             ExpiresAt = DateTime.UtcNow.Add(PasswordResetTokenLifetime)
         });
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
 
         var resetUrl = BuildPasswordResetUrl(token);
-        await _emailService.SendPasswordResetEmailAsync(user.Email, resetUrl, cancellationToken);
+        await emailService.SendPasswordResetEmailAsync(user.Email, resetUrl, cancellationToken);
     }
 
     public async Task ResetPasswordAsync(ResetPasswordRequest request, CancellationToken cancellationToken)
     {
         var tokenHash = HashToken(request.Token);
-        var resetToken = await _context.PasswordResetTokens
+        var resetToken = await context.PasswordResetTokens
             .Include(t => t.User)
             .FirstOrDefaultAsync(t => t.TokenHash == tokenHash, cancellationToken)
             ?? throw new InvalidOperationException("This reset link is invalid or expired.");
@@ -222,12 +208,12 @@ public class AuthService : IAuthService
         resetToken.User.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
         resetToken.UsedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
     }
 
     // Private helpers
 
-    private AuthSessionResult BuildAuthSession(User user) => new(BuildAuthResponse(user), _jwtTokenService.Generate(user));
+    private AuthSessionResult BuildAuthSession(User user) => new(BuildAuthResponse(user), jwtTokenService.Generate(user));
 
     private static AuthResponse BuildAuthResponse(User user) => new()
     {
@@ -238,7 +224,7 @@ public class AuthService : IAuthService
 
     private string GetRoleForEmail(string email)
     {
-        var adminEmail = _config["Admin:InitialEmail"] ?? _config["INITIAL_ADMIN_EMAIL"];
+        var adminEmail = config["Admin:InitialEmail"] ?? config["INITIAL_ADMIN_EMAIL"];
         return !string.IsNullOrWhiteSpace(adminEmail) &&
                string.Equals(email.Trim(), adminEmail.Trim(), StringComparison.OrdinalIgnoreCase)
             ? "Admin"
@@ -253,7 +239,7 @@ public class AuthService : IAuthService
         if (user.Role != configuredRole && configuredRole == "Admin")
         {
             user.Role = configuredRole;
-            await _context.SaveChangesAsync(cancellationToken);
+            await context.SaveChangesAsync(cancellationToken);
         }
     }
 
@@ -283,7 +269,7 @@ public class AuthService : IAuthService
 
     private async Task<string> ExchangeGoogleCodeForIdTokenAsync(string code, CancellationToken cancellationToken)
     {
-        var client = _httpClientFactory.CreateClient();
+        var client = httpClientFactory.CreateClient();
         using var response = await client.PostAsync(
             GoogleTokenEndpoint,
             new FormUrlEncodedContent(new Dictionary<string, string>
@@ -315,14 +301,14 @@ public class AuthService : IAuthService
     private string ProtectGoogleState(GoogleAuthState state)
     {
         var json = JsonSerializer.Serialize(state);
-        return _googleStateProtector.Protect(json);
+        return googleStateProtector.Protect(json);
     }
 
     private GoogleAuthState UnprotectGoogleState(string protectedState)
     {
         try
         {
-            var json = _googleStateProtector.Unprotect(protectedState);
+            var json = googleStateProtector.Unprotect(protectedState);
             var state = JsonSerializer.Deserialize<GoogleAuthState>(json)
                 ?? throw new UnauthorizedAccessException("Google sign-in state is invalid.");
 
@@ -341,7 +327,7 @@ public class AuthService : IAuthService
 
     private string GetRequiredGoogleClientId()
     {
-        var clientId = _config[GoogleClientIdConfigKey] ?? _config[GoogleClientIdEnvKey];
+        var clientId = config[GoogleClientIdConfigKey] ?? config[GoogleClientIdEnvKey];
         if (string.IsNullOrWhiteSpace(clientId))
         {
             throw new InvalidOperationException("Google sign-in is not configured.");
@@ -352,7 +338,7 @@ public class AuthService : IAuthService
 
     private string GetRequiredGoogleClientSecret()
     {
-        var clientSecret = _config[GoogleClientSecretConfigKey] ?? _config[GoogleClientSecretEnvKey];
+        var clientSecret = config[GoogleClientSecretConfigKey] ?? config[GoogleClientSecretEnvKey];
         if (string.IsNullOrWhiteSpace(clientSecret))
         {
             throw new InvalidOperationException("Google sign-in client secret is not configured.");
@@ -363,7 +349,7 @@ public class AuthService : IAuthService
 
     private string GetRequiredGoogleRedirectUri()
     {
-        var redirectUri = _config[GoogleRedirectUriConfigKey] ?? _config[GoogleRedirectUriEnvKey];
+        var redirectUri = config[GoogleRedirectUriConfigKey] ?? config[GoogleRedirectUriEnvKey];
         if (string.IsNullOrWhiteSpace(redirectUri))
         {
             throw new InvalidOperationException("Google sign-in redirect URI is not configured.");
@@ -404,7 +390,7 @@ public class AuthService : IAuthService
 
     private string BuildPasswordResetUrl(string token)
     {
-        var frontendBaseUrl = _config["Frontend:BaseUrl"] ?? _config["FRONTEND_BASE_URL"] ?? "http://localhost:5173";
+        var frontendBaseUrl = config["Frontend:BaseUrl"] ?? config["FRONTEND_BASE_URL"] ?? "http://localhost:5173";
         return $"{frontendBaseUrl.TrimEnd('/')}/reset-password?token={Uri.EscapeDataString(token)}";
     }
 

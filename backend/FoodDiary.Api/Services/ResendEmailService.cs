@@ -4,28 +4,19 @@ using FoodDiary.Api.Interfaces;
 
 namespace FoodDiary.Api.Services;
 
-public sealed class ResendEmailService : IEmailService
+public sealed class ResendEmailService(HttpClient httpClient, IConfiguration config) : IEmailService
 {
-    private readonly HttpClient _httpClient;
-    private readonly IConfiguration _config;
-
-    public ResendEmailService(HttpClient httpClient, IConfiguration config)
-    {
-        _httpClient = httpClient;
-        _config = config;
-    }
-
-    public bool IsConfigured => !string.IsNullOrWhiteSpace(_config["Resend:ApiKey"] ?? _config["RESEND_API_KEY"]);
+    public bool IsConfigured => !string.IsNullOrWhiteSpace(config["Resend:ApiKey"] ?? config["RESEND_API_KEY"]);
 
     public async Task SendPasswordResetEmailAsync(string toEmail, string resetUrl, CancellationToken cancellationToken)
     {
-        var apiKey = _config["Resend:ApiKey"] ?? _config["RESEND_API_KEY"];
+        var apiKey = config["Resend:ApiKey"] ?? config["RESEND_API_KEY"];
         if (string.IsNullOrWhiteSpace(apiKey))
         {
             throw new InvalidOperationException("Resend API key is not configured.");
         }
 
-        var fromEmail = _config["Resend:FromEmail"] ?? _config["RESEND_FROM_EMAIL"] ?? "DiarEat Support <onboarding@resend.dev>";
+        var fromEmail = config["Resend:FromEmail"] ?? config["RESEND_FROM_EMAIL"] ?? "DiarEat Support <onboarding@resend.dev>";
         var subject = "Reset your DiarEat Account Password";
         var html = $"""
             <div style="font-family:Arial,sans-serif;line-height:1.6;color:#1C1107">
@@ -42,7 +33,7 @@ public sealed class ResendEmailService : IEmailService
             to = new[] { toEmail },
             subject,
             html,
-            text = $"Reset your iarEat password: {resetUrl}\n\nThis link expires in 30 minutes."
+            text = $"Reset your DiarEat password: {resetUrl}\n\nThis link expires in 30 minutes."
         };
 
         using var request = new HttpRequestMessage(HttpMethod.Post, "https://api.resend.com/emails")
@@ -51,7 +42,7 @@ public sealed class ResendEmailService : IEmailService
         };
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
 
-        using var response = await _httpClient.SendAsync(request, cancellationToken);
+        using var response = await httpClient.SendAsync(request, cancellationToken);
         if (!response.IsSuccessStatusCode)
         {
             var body = await response.Content.ReadAsStringAsync(cancellationToken);

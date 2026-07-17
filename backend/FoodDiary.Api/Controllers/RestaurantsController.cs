@@ -9,19 +9,19 @@ namespace FoodDiary.Api.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/restaurants")]
-public class RestaurantsController : ControllerBase
+public class RestaurantsController(IRestaurantService restaurantService) : ControllerBase
 {
-    private readonly IRestaurantService _restaurantService;
-
-    public RestaurantsController(IRestaurantService restaurantService)
-    {
-        _restaurantService = restaurantService;
-    }
-
     [HttpGet("restaurant-lists")]
     public async Task<IActionResult> GetRestaurantLists(CancellationToken cancellationToken)
     {
-        var result = await _restaurantService.GetRestaurantListsAsync(cancellationToken);
+        var result = await restaurantService.GetRestaurantListsAsync(cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("options")]
+    public async Task<IActionResult> GetRestaurantOptions(CancellationToken cancellationToken)
+    {
+        var result = await restaurantService.GetRestaurantOptionsAsync(cancellationToken);
         return Ok(result);
     }
 
@@ -29,14 +29,14 @@ public class RestaurantsController : ControllerBase
     public async Task<IActionResult> GetMostVisited([FromQuery] int limit = 10, CancellationToken cancellationToken = default)
     {
         var userId = GetUserId();
-        var result = await _restaurantService.GetMostVisitedAsync(userId, limit, cancellationToken);
+        var result = await restaurantService.GetMostVisitedAsync(userId, limit, cancellationToken);
         return Ok(result);
     }
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
     {
-        var result = await _restaurantService.GetByIdAsync(id, cancellationToken);
+        var result = await restaurantService.GetByIdAsync(id, cancellationToken);
         return result is null ? NotFound() : Ok(result);
     }
 
@@ -44,7 +44,7 @@ public class RestaurantsController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create([FromBody] CreateRestaurantRequest request, CancellationToken cancellationToken)
     {
-        var result = await _restaurantService.CreateAsync(request, cancellationToken);
+        var result = await restaurantService.CreateAsync(request, cancellationToken);
         return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
     }
 
@@ -52,7 +52,7 @@ public class RestaurantsController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateRestaurantRequest request, CancellationToken cancellationToken)
     {
-        var result = await _restaurantService.UpdateAsync(id, request, cancellationToken);
+        var result = await restaurantService.UpdateAsync(id, request, cancellationToken);
         return result is null ? NotFound() : Ok(result);
     }
 
@@ -60,7 +60,7 @@ public class RestaurantsController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
-        var deleted = await _restaurantService.DeleteAsync(id, cancellationToken);
+        var deleted = await restaurantService.DeleteAsync(id, cancellationToken);
         return deleted ? NoContent() : NotFound();
     }
 

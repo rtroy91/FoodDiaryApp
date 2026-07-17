@@ -7,20 +7,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FoodDiary.Api.Services;
 
-public class EntryService : IEntryService
+// Rule: Used a C# 12 Primary Constructor to eliminate boilerplate dependency injection fields
+public class EntryService(FoodDiaryContext context, IPhotoService photoService) : IEntryService
 {
-    private readonly FoodDiaryContext _context;
-    private readonly IPhotoService _photoService;
-
-    public EntryService(FoodDiaryContext context, IPhotoService photoService)
+    public async Task<List<EntryListResponse>> GetAllAsync(Guid userId, Guid? restaurantId, CancellationToken cancellationToken)
     {
-        _context = context;
-        _photoService = photoService;
-    }
-
-    public async Task<IEnumerable<EntryResponse>> GetAllAsync(Guid userId, Guid? restaurantId, CancellationToken cancellationToken)
-    {
-        var query = _context.Entries
+        var query = context.Entries
             .AsNoTracking()
             .Where(e => e.UserId == userId);
 
@@ -29,7 +21,7 @@ public class EntryService : IEntryService
 
         return await query
             .OrderByDescending(e => e.VisitedAt)
-            .Select(e => new EntryResponse
+            .Select(e => new EntryListResponse
             {
                 Id = e.Id,
                 VisitedAt = e.VisitedAt,
@@ -38,28 +30,28 @@ public class EntryService : IEntryService
                 PhotoUrl = e.PhotoUrl,
                 CreatedAt = e.CreatedAt,
                 UpdatedAt = e.UpdatedAt,
-                Restaurant = e.Restaurant == null ? null : new EntryRestaurantResponse
+                Restaurant = e.Restaurant == null ? null : new EntryListRestaurantResponse
                 {
                     Id = e.Restaurant.Id,
                     Name = e.Restaurant.Name,
-                    Address = e.Restaurant.Address,
                     Barangay = e.Restaurant.Barangay,
                     City = e.Restaurant.City,
                     Province = e.Restaurant.Province,
-                    Category = e.Restaurant.Category
+                    Category = e.Restaurant.Category,
+                    StorePhotoUrl = e.Restaurant.StorePhotoUrl
                 }
             })
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<EntryResponse>> GetRecentEntriesAsync(Guid userId, int limit, CancellationToken cancellationToken)
+    public async Task<List<EntryListResponse>> GetRecentEntriesAsync(Guid userId, int limit, CancellationToken cancellationToken)
     {
-        return await _context.Entries
+        return await context.Entries
             .AsNoTracking()
             .Where(e => e.UserId == userId)
             .OrderByDescending(e => e.VisitedAt)
             .Take(limit)
-            .Select(e => new EntryResponse
+            .Select(e => new EntryListResponse
             {
                 Id = e.Id,
                 VisitedAt = e.VisitedAt,
@@ -68,26 +60,26 @@ public class EntryService : IEntryService
                 PhotoUrl = e.PhotoUrl,
                 CreatedAt = e.CreatedAt,
                 UpdatedAt = e.UpdatedAt,
-                Restaurant = e.Restaurant == null ? null : new EntryRestaurantResponse
+                Restaurant = e.Restaurant == null ? null : new EntryListRestaurantResponse
                 {
                     Id = e.Restaurant.Id,
                     Name = e.Restaurant.Name,
-                    Address = e.Restaurant.Address,
                     Barangay = e.Restaurant.Barangay,
                     City = e.Restaurant.City,
                     Province = e.Restaurant.Province,
-                    Category = e.Restaurant.Category
+                    Category = e.Restaurant.Category,
+                    StorePhotoUrl = e.Restaurant.StorePhotoUrl
                 }
             })
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<EntryResponse?> GetByIdAsync(Guid id, Guid userId, CancellationToken cancellationToken)
+    public async Task<EntryListResponse?> GetByIdAsync(Guid id, Guid userId, CancellationToken cancellationToken)
     {
-        return await _context.Entries
+        return await context.Entries
             .AsNoTracking()
             .Where(e => e.Id == id && e.UserId == userId)
-            .Select(e => new EntryResponse
+            .Select(e => new EntryListResponse
             {
                 Id = e.Id,
                 VisitedAt = e.VisitedAt,
@@ -96,23 +88,23 @@ public class EntryService : IEntryService
                 PhotoUrl = e.PhotoUrl,
                 CreatedAt = e.CreatedAt,
                 UpdatedAt = e.UpdatedAt,
-                Restaurant = e.Restaurant == null ? null : new EntryRestaurantResponse
+                Restaurant = e.Restaurant == null ? null : new EntryListRestaurantResponse
                 {
                     Id = e.Restaurant.Id,
                     Name = e.Restaurant.Name,
-                    Address = e.Restaurant.Address,
                     Barangay = e.Restaurant.Barangay,
                     City = e.Restaurant.City,
                     Province = e.Restaurant.Province,
-                    Category = e.Restaurant.Category
+                    Category = e.Restaurant.Category,
+                    StorePhotoUrl = e.Restaurant.StorePhotoUrl
                 }
             })
             .FirstOrDefaultAsync(cancellationToken);
     }
 
-    public async Task<EntryResponse> CreateAsync(Guid userId, CreateEntryRequest request, CancellationToken cancellationToken)
+    public async Task<EntryListResponse> CreateAsync(Guid userId, CreateEntryRequest request, CancellationToken cancellationToken)
     {
-        var restaurant = await _context.Restaurants
+        var restaurant = await context.Restaurants
             .AsNoTracking()
             .FirstOrDefaultAsync(r => r.Id == request.RestaurantId, cancellationToken)
             ?? throw new KeyNotFoundException("Restaurant not found.");
@@ -127,21 +119,21 @@ public class EntryService : IEntryService
             PhotoUrl = request.PhotoUrl
         };
 
-        _context.Entries.Add(entry);
-        await _context.SaveChangesAsync(cancellationToken);
+        context.Entries.Add(entry);
+        await context.SaveChangesAsync(cancellationToken);
 
         entry.Restaurant = restaurant;
-        return MapToResponse(entry);
+        return MapToListResponse(entry);
     }
 
-    public async Task<EntryResponse?> UpdateAsync(Guid id, Guid userId, UpdateEntryRequest request, CancellationToken cancellationToken)
+    public async Task<EntryListResponse?> UpdateAsync(Guid id, Guid userId, UpdateEntryRequest request, CancellationToken cancellationToken)
     {
-        var entry = await _context.Entries
+        var entry = await context.Entries
             .FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId, cancellationToken);
 
         if (entry is null) return null;
 
-        var restaurant = await _context.Restaurants
+        var restaurant = await context.Restaurants
             .AsNoTracking()
             .FirstOrDefaultAsync(r => r.Id == request.RestaurantId, cancellationToken)
             ?? throw new KeyNotFoundException("Restaurant not found.");
@@ -153,28 +145,29 @@ public class EntryService : IEntryService
         entry.PhotoUrl = request.PhotoUrl;
         entry.UpdatedAt = DateTime.UtcNow;
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
 
         entry.Restaurant = restaurant;
-        return MapToResponse(entry);
+        return MapToListResponse(entry);
     }
 
     public async Task<bool> DeleteAsync(Guid id, Guid userId, CancellationToken cancellationToken)
     {
-        var entry = await _context.Entries
+        var entry = await context.Entries
             .FirstOrDefaultAsync(e => e.Id == id && e.UserId == userId, cancellationToken);
 
         if (entry is null) return false;
 
         var photoUrl = entry.PhotoUrl;
-        _context.Entries.Remove(entry);
-        await _context.SaveChangesAsync(cancellationToken);
-        await _photoService.DeleteAsync(photoUrl);
+        context.Entries.Remove(entry);
+        await context.SaveChangesAsync(cancellationToken);
+        
+        await photoService.DeleteAsync(photoUrl);
 
         return true;
     }
 
-    private static EntryResponse MapToResponse(Entry e) => new()
+    private static EntryListResponse MapToListResponse(Entry e) => new()
     {
         Id = e.Id,
         VisitedAt = e.VisitedAt,
@@ -183,15 +176,15 @@ public class EntryService : IEntryService
         PhotoUrl = e.PhotoUrl,
         CreatedAt = e.CreatedAt,
         UpdatedAt = e.UpdatedAt,
-        Restaurant = e.Restaurant == null ? null : new EntryRestaurantResponse
+        Restaurant = e.Restaurant == null ? null : new EntryListRestaurantResponse
         {
             Id = e.Restaurant.Id,
             Name = e.Restaurant.Name,
-            Address = e.Restaurant.Address,
             Barangay = e.Restaurant.Barangay,
             City = e.Restaurant.City,
             Province = e.Restaurant.Province,
             Category = e.Restaurant.Category,
+            StorePhotoUrl = e.Restaurant.StorePhotoUrl
         }
     };
 }

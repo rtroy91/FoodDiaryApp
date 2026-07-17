@@ -1,5 +1,11 @@
 namespace FoodDiary.Api.DTOs.Responses;
 
+public class RestaurantOptionResponse
+{
+    public Guid Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+}
+
 public class RestaurantResponse
 {
     public Guid Id { get; set; }

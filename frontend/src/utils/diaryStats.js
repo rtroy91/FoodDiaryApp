@@ -25,7 +25,6 @@ export function countUniqueVisitedPlaces(entries = []) {
     const restaurant = entry.restaurant;
     const key =
       restaurant?.id ??
-      entry.restaurantId ??
       [restaurant?.name, restaurant?.barangay, restaurant?.city, restaurant?.province].filter(Boolean).join("|");
 
     if (key) ids.add(key);

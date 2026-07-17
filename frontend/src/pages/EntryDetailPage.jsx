@@ -12,7 +12,7 @@ import {
   UtensilsCrossed,
   Wallet,
 } from "lucide-react";
-import { useAllEntries, useRestaurant } from "../hooks/useDiaryData";
+import { useEntries, useEntry, useRestaurant } from "../hooks/useDiaryData";
 import { categoryLabel } from "../utils/restaurants";
 
 const pageShellStyle = {
@@ -46,11 +46,11 @@ function getLocation(restaurant) {
 }
 
 function getEntryRestaurantId(entry) {
-  return entry?.restaurant?.id ?? entry?.restaurantId ?? null;
+  return entry?.restaurant?.id ?? null;
 }
 
 function getEntryRestaurantName(entry) {
-  return entry?.restaurant?.name ?? entry?.restaurantName ?? null;
+  return entry?.restaurant?.name ?? null;
 }
 
 function matchesRestaurant(entry, restaurant, selectedEntry, restaurantId) {
@@ -388,15 +388,13 @@ function CompactPromoPanel({ entries = [], restaurantPromo }) {
 export function EntryDetailPage() {
   const { id, restaurantId } = useParams();
   const isPlacePreview = Boolean(restaurantId);
-  const { data: entries = [], isLoading: isLoadingEntries } = useAllEntries();
   const { data: place, isLoading: isLoadingPlace } = useRestaurant(restaurantId);
-
-  const entry = useMemo(
-    () => (isPlacePreview ? null : entries.find((item) => String(item.id) === String(id))),
-    [entries, id, isPlacePreview]
-  );
+  const { data: entry = null, isLoading: isLoadingEntry } = useEntry(isPlacePreview ? null : id);
 
   const restaurant = isPlacePreview ? place : entry?.restaurant;
+  const relatedRestaurantId = restaurantId ?? getEntryRestaurantId(entry);
+  const { data: entries = [], isLoading: isLoadingEntries } = useEntries(relatedRestaurantId);
+
   const relatedEntries = useMemo(
     () =>
       [...entries]
@@ -413,7 +411,7 @@ export function EntryDetailPage() {
   const firstVisit = relatedEntries.length ? relatedEntries[relatedEntries.length - 1] : null;
   const photos = buildGalleryEntries(relatedEntries, selectedEntry);
   const menuPreview = getMenuPreview(restaurant);
-  const isLoading = isLoadingEntries || (isPlacePreview && isLoadingPlace);
+  const isLoading = isLoadingEntries || (!isPlacePreview && isLoadingEntry) || (isPlacePreview && isLoadingPlace);
 
   if (isLoading) {
     return (

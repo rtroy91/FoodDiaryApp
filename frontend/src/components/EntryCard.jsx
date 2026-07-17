@@ -279,7 +279,7 @@ function EntryDetailModal({ entry, location, onClose, onEdit, onDelete }) {
           <div className="flex min-h-0 flex-col justify-between">
             <div className="flex min-h-0 flex-1 flex-col">
               <div className="flex shrink-0 items-start justify-between gap-4 xl:pr-20">
-                {restaurant?.id || entry.restaurantId ? (
+                {restaurant?.id ? (
                   <Link
                     id={`entry-detail-title-${entry.id}`}
                     to={entryDetailsPath}

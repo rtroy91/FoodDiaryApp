@@ -7,6 +7,11 @@ export async function getEntries(restaurantId) {
   return data;
 }
 
+export async function getEntryById(id) {
+  const { data } = await apiClient.get(`/entries/${id}`);
+  return data;
+}
+
 export async function getRecentEntries(limit = 20) {
   const { data } = await apiClient.get("/entries/recent-entries", {
     params: { limit },

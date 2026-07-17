@@ -1,6 +1,6 @@
 import { useEffect, useId, useMemo, useState } from "react";
 import { Camera, ChevronDown, Clock, MapPin, Star, X } from "lucide-react";
-import { useCreateEntry, useRestaurantLists, useUpdateEntry } from "../hooks/useDiaryData";
+import { useCreateEntry, useRestaurantOptions, useUpdateEntry } from "../hooks/useDiaryData";
 import { uploadPhoto } from "../api/entries";
 
 function formatVisitDate(date) {
@@ -59,7 +59,7 @@ export function PublishDiaryForm({ restaurants = [], entry = null, onClose }) {
   const isEditing = Boolean(entry);
   const createEntry = useCreateEntry();
   const updateEntry = useUpdateEntry();
-  const { data: fetchedRestaurants = [] } = useRestaurantLists({
+  const { data: fetchedRestaurants = [] } = useRestaurantOptions({
     enabled: restaurants.length === 0,
   });
 
@@ -70,7 +70,7 @@ export function PublishDiaryForm({ restaurants = [], entry = null, onClose }) {
   const [isUploading, setIsUploading] = useState(false);
   const [showValidation, setShowValidation] = useState(false);
   const [form, setForm] = useState({
-    restaurantId: entry?.restaurant?.id ?? entry?.restaurantId ?? "",
+    restaurantId: entry?.restaurant?.id ?? "",
     rating: entry?.rating ?? 0,
     caption: entry?.caption ?? "",
   });

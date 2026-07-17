@@ -5,10 +5,10 @@ namespace FoodDiary.Api.Interfaces;
 
 public interface IEntryService
 {
-    Task<IEnumerable<EntryResponse>> GetAllAsync(Guid userId, Guid? restaurantId, CancellationToken cancellationToken);
-    Task<List<EntryResponse>> GetRecentEntriesAsync(Guid userId, int limit, CancellationToken cancellationToken);
-    Task<EntryResponse?> GetByIdAsync(Guid id, Guid userId, CancellationToken cancellationToken);
-    Task<EntryResponse> CreateAsync(Guid userId, CreateEntryRequest request, CancellationToken cancellationToken);
-    Task<EntryResponse?> UpdateAsync(Guid id, Guid userId, UpdateEntryRequest request, CancellationToken cancellationToken);
+    Task<List<EntryListResponse>> GetAllAsync(Guid userId, Guid? restaurantId, CancellationToken cancellationToken);
+    Task<List<EntryListResponse>> GetRecentEntriesAsync(Guid userId, int limit, CancellationToken cancellationToken);
+    Task<EntryListResponse?> GetByIdAsync(Guid id, Guid userId, CancellationToken cancellationToken);
+    Task<EntryListResponse> CreateAsync(Guid userId, CreateEntryRequest request, CancellationToken cancellationToken);
+    Task<EntryListResponse?> UpdateAsync(Guid id, Guid userId, UpdateEntryRequest request, CancellationToken cancellationToken);
     Task<bool> DeleteAsync(Guid id, Guid userId, CancellationToken cancellationToken);
 }

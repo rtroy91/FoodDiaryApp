@@ -19,6 +19,16 @@ export function useRestaurantLists(options = {}) {
   });
 }
 
+export function useRestaurantOptions(options = {}) {
+  const userKey = getCurrentUserQueryKey();
+
+  return useQuery({
+    queryKey: ["restaurants", "options", userKey],
+    queryFn: restaurantsApi.getRestaurantOptions,
+    ...options,
+  });
+}
+
 export function useRestaurant(id) {
   const userKey = getCurrentUserQueryKey();
 
@@ -36,6 +46,16 @@ export function useEntries(restaurantId) {
     queryKey: ["entries", restaurantId, userKey],
     queryFn: () => entriesApi.getEntries(restaurantId),
     enabled: Boolean(restaurantId),
+  });
+}
+
+export function useEntry(id) {
+  const userKey = getCurrentUserQueryKey();
+
+  return useQuery({
+    queryKey: ["entries", "detail", id, userKey],
+    queryFn: () => entriesApi.getEntryById(id),
+    enabled: Boolean(id),
   });
 }
 
@@ -101,7 +121,6 @@ export function useCreateEntry() {
     mutationFn: entriesApi.createEntry,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["entries"] });
-      queryClient.invalidateQueries({ queryKey: ["restaurants"] }); // visit counts change
     },
   });
 }
@@ -112,7 +131,6 @@ export function useUpdateEntry() {
     mutationFn: ({ id, payload }) => entriesApi.updateEntry(id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["entries"] });
-      queryClient.invalidateQueries({ queryKey: ["restaurants"] });
     },
   });
 }
@@ -123,7 +141,6 @@ export function useDeleteEntry() {
     mutationFn: entriesApi.deleteEntry,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["entries"] });
-      queryClient.invalidateQueries({ queryKey: ["restaurants"] });
     },
   });
 }

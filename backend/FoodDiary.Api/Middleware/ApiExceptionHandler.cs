@@ -10,14 +10,26 @@ public sealed class ApiExceptionHandler(ILogger<ApiExceptionHandler> logger) : I
         Exception exception,
         CancellationToken cancellationToken)
     {
-        var (statusCode, title) = exception switch
+        var (statusCode, title, detail) = exception switch
         {
-            KeyNotFoundException => (StatusCodes.Status404NotFound, "Not Found"),
-            UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, "Unauthorized"),
+            KeyNotFoundException => (
+                StatusCodes.Status404NotFound,
+                "Not Found",
+                "The requested resource was not found."),
+            UnauthorizedAccessException => (
+                StatusCodes.Status401Unauthorized,
+                "Unauthorized",
+                "You are not authorized to perform this action."),
             InvalidOperationException ex when ex.Message.Contains("already registered", StringComparison.OrdinalIgnoreCase) =>
-                (StatusCodes.Status409Conflict, "Conflict"),
-            InvalidOperationException => (StatusCodes.Status400BadRequest, "Bad Request"),
-            _ => (StatusCodes.Status500InternalServerError, "Internal Server Error")
+                (StatusCodes.Status409Conflict, "Conflict", "Email already registered."),
+            InvalidOperationException => (
+                StatusCodes.Status400BadRequest,
+                "Bad Request",
+                "The request could not be processed."),
+            _ => (
+                StatusCodes.Status500InternalServerError,
+                "Internal Server Error",
+                "Internal Server Error")
         };
 
         if (statusCode >= StatusCodes.Status500InternalServerError)
@@ -31,7 +43,7 @@ public sealed class ApiExceptionHandler(ILogger<ApiExceptionHandler> logger) : I
         {
             Status = statusCode,
             Title = title,
-            Detail = statusCode >= StatusCodes.Status500InternalServerError ? title : exception.Message,
+            Detail = detail,
             Instance = httpContext.Request.Path
         }, cancellationToken);
 

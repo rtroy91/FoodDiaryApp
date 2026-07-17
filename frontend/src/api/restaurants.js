@@ -5,6 +5,11 @@ export async function GetRestaurantLists() {
   return data;
 }
 
+export async function getRestaurantOptions() {
+  const { data } = await apiClient.get("/restaurants/options");
+  return data;
+}
+
 export async function getRestaurantById(id) {
   const { data } = await apiClient.get(`/restaurants/${id}`);
   return data;

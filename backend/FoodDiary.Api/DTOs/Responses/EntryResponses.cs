@@ -1,6 +1,6 @@
 namespace FoodDiary.Api.DTOs.Responses;
 
-public class EntryResponse
+public class EntryListResponse
 {
     public Guid Id { get; set; }
     public DateTime VisitedAt { get; set; }
@@ -10,16 +10,16 @@ public class EntryResponse
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
 
-    public EntryRestaurantResponse? Restaurant { get; set; }
+    public EntryListRestaurantResponse? Restaurant { get; set; }
 }
 
-public class EntryRestaurantResponse
+public class EntryListRestaurantResponse
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
-    public string? Address { get; set; }
     public string? Barangay { get; set; }
     public string? City { get; set; }
     public string? Province { get; set; }
     public string? Category { get; set; }
+    public string? StorePhotoUrl { get; set; }
 }

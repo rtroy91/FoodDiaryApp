@@ -16,7 +16,7 @@ export function buildPlaceStats(restaurants = [], entries = []) {
 
   entries.forEach((entry) => {
     const restaurant = entry.restaurant;
-    const id = restaurant?.id ?? entry.restaurantId;
+    const id = restaurant?.id;
     if (!id) return;
 
     const current = byId.get(id) ?? {
@@ -26,13 +26,11 @@ export function buildPlaceStats(restaurants = [], entries = []) {
       visitCount: 0,
       ratingTotal: 0,
       averageRating: null,
-      thumbnailUrl: null,
     };
 
     current.visitCount += 1;
     current.ratingTotal += entry.rating ?? 0;
     current.averageRating = current.ratingTotal / current.visitCount;
-    current.thumbnailUrl ??= entry.photoUrl ?? null;
     byId.set(id, current);
   });
 
