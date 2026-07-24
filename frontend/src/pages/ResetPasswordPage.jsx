@@ -146,7 +146,7 @@ export function ResetPasswordPage() {
                 className="flex min-h-12 w-full touch-manipulation items-center justify-center gap-2 rounded-2xl bg-[#B83224] px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-[#8F261C] disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {submitting ? (
-                  "Resetting password..."
+                  "Resetting password…"
                 ) : (
                   <>
                     Reset password

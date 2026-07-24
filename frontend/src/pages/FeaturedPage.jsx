@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ConnectionErrorState } from "../components/ConnectionErrorState";
 import { DiaryFab } from "../components/DiaryFab";
@@ -20,23 +20,12 @@ function getPaginationDotClass(index, activeIndex, total) {
   return "h-1.5 w-1.5 bg-stone-500";
 }
 
-function getCarouselMotionClass(motion) {
-  if (motion === "exit-next") return "-translate-x-5 opacity-0";
-  if (motion === "exit-previous") return "translate-x-5 opacity-0";
-  if (motion === "enter-next") return "translate-x-5 opacity-0";
-  if (motion === "enter-previous") return "-translate-x-5 opacity-0";
-
-  return "translate-x-0 opacity-100";
-}
-
 export function FeaturedPage() {
   const { data: entries, isLoading: loadingEntries, isError: isEntriesError } = useRecentEntries(10);
   const { data: allEntries, isLoading: loadingAllEntries } = useAllEntries();
 
   const [showVisitModal, setShowVisitModal] = useState(false);
   const [activeEntryIndex, setActiveEntryIndex] = useState(0);
-  const [carouselMotion, setCarouselMotion] = useState("idle");
-  const carouselTimerRef = useRef(null);
 
   const stats = useMemo(() => {
     return getDiaryStats(allEntries ?? []);
@@ -46,41 +35,19 @@ export function FeaturedPage() {
   const recentEntries = entries ?? [];
   const activeEntry = recentEntries.length > 0 ? recentEntries[activeEntryIndex % recentEntries.length] : null;
 
-  useEffect(() => {
-    return () => {
-      if (carouselTimerRef.current) {
-        window.clearTimeout(carouselTimerRef.current);
-      }
-    };
-  }, []);
-
-  function moveEntry(direction) {
-    if (recentEntries.length <= 1 || carouselMotion !== "idle") return;
-
-    setCarouselMotion(`exit-${direction}`);
-
-    carouselTimerRef.current = window.setTimeout(() => {
-      setActiveEntryIndex((current) => {
-        if (!recentEntries.length) return 0;
-
-        return direction === "next"
-          ? (current + 1) % recentEntries.length
-          : (current - 1 + recentEntries.length) % recentEntries.length;
-      });
-
-      setCarouselMotion(`enter-${direction}`);
-      window.requestAnimationFrame(() => {
-        window.requestAnimationFrame(() => setCarouselMotion("idle"));
-      });
-    }, 120);
+  function moveEntry(offset) {
+    setActiveEntryIndex((current) => {
+      const total = recentEntries.length;
+      return total ? (current + offset + total) % total : 0;
+    });
   }
 
   function showPreviousEntry() {
-    moveEntry("previous");
+    moveEntry(-1);
   }
 
   function showNextEntry() {
-    moveEntry("next");
+    moveEntry(1);
   }
 
   return (
@@ -138,25 +105,21 @@ export function FeaturedPage() {
                 <button
                   type="button"
                   onClick={showPreviousEntry}
-                  disabled={carouselMotion !== "idle"}
+                  disabled={recentEntries.length <= 1}
                   aria-label="Show previous entry"
                   className="flex h-11 w-11 items-center justify-center rounded-full border border-[#DDE5EF] bg-white text-[#253248] transition hover:bg-[#F7FAFD] disabled:cursor-not-allowed disabled:opacity-55"
                 >
                   <ChevronLeft size={20} />
                 </button>
 
-                <div
-                  className={`min-w-0 transform-gpu transition-[opacity,transform] duration-200 ease-out ${getCarouselMotionClass(
-                    carouselMotion
-                  )}`}
-                >
+                <div className="min-w-0">
                   <EntryCard entry={activeEntry} featured />
                 </div>
 
                 <button
                   type="button"
                   onClick={showNextEntry}
-                  disabled={carouselMotion !== "idle"}
+                  disabled={recentEntries.length <= 1}
                   aria-label="Show next entry"
                   className="flex h-11 w-11 items-center justify-center rounded-full border border-[#DDE5EF] bg-white text-[#253248] transition hover:bg-[#F7FAFD] disabled:cursor-not-allowed disabled:opacity-55"
                 >
@@ -178,7 +141,7 @@ export function FeaturedPage() {
                       className="flex h-7 w-7 items-center justify-center rounded-full transition-colors hover:bg-[#E8DFC8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E04B39]/35"
                     >
                       <span
-                        className={`rounded-full transition-all duration-300 ${getPaginationDotClass(
+                        className={`rounded-full transition-[width,height,background-color] duration-300 motion-reduce:transition-none ${getPaginationDotClass(
                           index,
                           activeEntryIndex % recentEntries.length,
                           recentEntries.length
@@ -195,7 +158,12 @@ export function FeaturedPage() {
         {!loadingEntries && <DiaryFab onLogEntry={() => setShowVisitModal(true)} />}
       </DiaryPageLayout>
       {showVisitModal && (
-        <Modal onClose={() => setShowVisitModal(false)} closeOnBackdrop={false} closeOnEscape={false}>
+        <Modal
+          onClose={() => setShowVisitModal(false)}
+          closeOnBackdrop={false}
+          closeOnEscape={false}
+          ariaLabelledBy="publish-diary-title"
+        >
           <PublishDiaryForm onClose={() => setShowVisitModal(false)} />
         </Modal>
       )}

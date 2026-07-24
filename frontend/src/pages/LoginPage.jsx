@@ -128,16 +128,16 @@ export function LoginPage() {
                 </button>
               </FormInput>
               <div className="flex min-h-11 items-center justify-between gap-4">
-                <div className="flex items-center gap-2 text-xs font-semibold text-stone-700">
+                <label className="flex min-h-11 cursor-pointer items-center gap-2 text-xs font-semibold text-stone-700">
                   <input
                     type="checkbox"
+                    name="rememberMe"
                     checked={rememberMe}
                     onChange={(event) => setRememberMe(event.target.checked)}
                     className="h-4 w-4 rounded border-[#BFAF99] text-[#B83224] accent-[#B83224] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B83224]/25"
-                    aria-label="Remember me"
                   />
                   <span>Remember me</span>
-                </div>
+                </label>
 
                 <Link
                   to="/forgot-password"
@@ -159,7 +159,7 @@ export function LoginPage() {
                 className="flex min-h-12 w-full touch-manipulation items-center justify-center gap-2 rounded-2xl bg-[#B83224] px-4 py-3 text-sm font-bold text-white transition-colors hover:bg-[#8F261C] disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {submitting ? (
-                  "Signing in..."
+                  "Signing in…"
                 ) : (
                   <>
                     Sign in

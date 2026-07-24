@@ -161,7 +161,7 @@ public class EntryService(FoodDiaryContext context, IPhotoService photoService) 
         var photoUrl = entry.PhotoUrl;
         context.Entries.Remove(entry);
         await context.SaveChangesAsync(cancellationToken);
-        
+
         await photoService.DeleteAsync(photoUrl);
 
         return true;

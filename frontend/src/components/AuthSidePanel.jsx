@@ -14,7 +14,14 @@ export function AuthSidePanel({ appFeatures, title, compactOnMobile = false }) {
 
   return (
     <section className={sectionClassName}>
-      <img src={authSideShapes} alt="" className="absolute inset-0 h-full w-full object-cover" aria-hidden="true" />
+      <img
+        src={authSideShapes}
+        alt=""
+        width="1440"
+        height="900"
+        className="absolute inset-0 h-full w-full object-cover"
+        aria-hidden="true"
+      />
 
       <div className={contentClassName}>
         <div className="max-w-xl mt-4">
@@ -25,13 +32,20 @@ export function AuthSidePanel({ appFeatures, title, compactOnMobile = false }) {
             {title}
           </h1>
           <span className="inline-flex items-center rounded-full py-2 font-['Fraunces'] text-xl font-light text-blue-100 sm:text-2xl">
-            <img src="/favicon.svg" alt="" className="h-8 w-8 shrink-0" aria-hidden="true" />
+            <img src="/favicon.svg" alt="" width="32" height="32" className="h-8 w-8 shrink-0" aria-hidden="true" />
             <span>iarEat</span>
           </span>
         </div>
 
         <div className={mediaClassName}>
-          <img src={foodHero} alt="Food illustration" className="mx-auto h-96 w-auto object-contain" />
+          <img
+            src={foodHero}
+            alt="Food illustration"
+            width="747"
+            height="800"
+            fetchPriority="high"
+            className="mx-auto h-96 w-auto object-contain"
+          />
         </div>
 
         <ul className={featuresClassName}>

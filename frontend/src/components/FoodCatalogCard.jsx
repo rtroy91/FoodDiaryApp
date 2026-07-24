@@ -2,13 +2,7 @@ import { Link } from "react-router-dom";
 import Skeleton from "react-loading-skeleton";
 import { ImageIcon, MapPin, Star, UtensilsCrossed } from "lucide-react";
 import { isAdmin } from "../api/auth";
-import { categoryLabel } from "../utils/restaurants";
-
-function getLocation(restaurant) {
-  return [restaurant?.barangay ? "Brgy. " + restaurant.barangay : null, restaurant?.city, restaurant?.province]
-    .filter(Boolean)
-    .join(", ");
-}
+import { categoryLabel, getRestaurantLocation } from "../utils/restaurants";
 
 function formatReach(value = 0) {
   if (value >= 1000) {
@@ -19,7 +13,7 @@ function formatReach(value = 0) {
 }
 
 function FoodCatalogCardContent({ restaurant }) {
-  const location = getLocation(restaurant);
+  const location = getRestaurantLocation(restaurant);
   const rating = restaurant.averageRating;
   const reach = restaurant.visitCount ?? 0;
   const storePhotoUrl = restaurant?.storePhotoUrl ?? null;
@@ -30,7 +24,15 @@ function FoodCatalogCardContent({ restaurant }) {
     <>
       <div className="h-20 w-20 overflow-hidden rounded-xl border border-stone-100 bg-[#F5EEE4]">
         {storePhotoUrl ? (
-          <img src={storePhotoUrl} alt={restaurant.name} loading="eager" className="h-full w-full object-cover" />
+          <img
+            src={storePhotoUrl}
+            alt={restaurant.name}
+            width="80"
+            height="80"
+            loading="lazy"
+            decoding="async"
+            className="h-full w-full object-cover"
+          />
         ) : (
           <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-stone-600">
             <UtensilsCrossed size={22} />
@@ -128,7 +130,7 @@ export function FoodCatalogCardSkeleton() {
 export function FoodCatalogCard({ restaurant, isSelected = false, onSelect }) {
   const to = isAdmin() ? `/place-details/${restaurant.id}` : `/entries/place/${restaurant.id}`;
   const cardClassName = [
-    "grid w-full min-w-0 cursor-pointer grid-cols-[5rem_minmax(0,1fr)] items-center gap-4 overflow-hidden rounded-2xl border bg-white px-3 py-2.5 text-left shadow-none transition-all hover:bg-stone-50",
+    "grid w-full min-w-0 cursor-pointer grid-cols-[5rem_minmax(0,1fr)] items-center gap-4 overflow-hidden rounded-2xl border bg-white px-3 py-2.5 text-left shadow-none transition-[background-color,border-color,box-shadow] hover:bg-stone-50",
     isSelected ? "border-[#E04B39]/40 ring-2 ring-[#E04B39]/10" : "border-stone-100",
     onSelect ? "outline-none focus-visible:ring-2 focus-visible:ring-[#E04B39]/25" : "",
   ].join(" ");

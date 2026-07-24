@@ -6,7 +6,14 @@ export function DiaryHeader({ userName, subtitle = "Here's your food history at 
 
   return (
     <div className="relative h-48 shrink-0 overflow-hidden bg-[#1C1107]">
-      <img src={headerShapes} alt="" className="absolute inset-0 h-full w-full object-cover" aria-hidden="true" />
+      <img
+        src={headerShapes}
+        alt=""
+        width="1440"
+        height="192"
+        className="absolute inset-0 h-full w-full object-cover"
+        aria-hidden="true"
+      />
 
       <div className="relative z-10 mx-auto flex max-w-140 items-end justify-between gap-4 px-5 pb-7 pt-20">
         <div className="min-w-0 flex-1">

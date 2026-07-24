@@ -1,10 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Link, Navigate, useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Camera,
   ChevronDown,
-  Clock3,
   Edit3,
   Flame,
   Image as ImageIcon,
@@ -14,25 +13,24 @@ import {
   TrendingUp,
   Trash2,
   UtensilsCrossed,
-  Wallet,
 } from "lucide-react";
 import { useDeleteRestaurant, useEntries, useRestaurant } from "../hooks/useDiaryData";
-import { categoryLabel } from "../utils/restaurants";
+import { PlaceProfile } from "../components/PlaceProfile";
+import { categoryLabel, getRestaurantLocation } from "../utils/restaurants";
 import { Modal } from "../components/Modal";
-import { RestaurantForm } from "../components/RestaurantForm";
 import { isAdmin } from "../api/auth";
+
+const RestaurantForm = lazy(() =>
+  import("../components/RestaurantForm").then(({ RestaurantForm }) => ({
+    default: RestaurantForm,
+  }))
+);
 
 const pageShellStyle = {
   boxSizing: "border-box",
   maxWidth: "1240px",
   width: "100%",
 };
-
-function getLocation(restaurant) {
-  return [restaurant?.barangay ? `Brgy. ${restaurant.barangay}` : null, restaurant?.city, restaurant?.province]
-    .filter(Boolean)
-    .join(", ");
-}
 
 function formatDate(value) {
   if (!value) return "No date";
@@ -196,7 +194,11 @@ function MenuPreview({ menuItems, expanded, onToggle }) {
               <img
                 src={primaryItem.imageUrl}
                 alt={primaryItem.name}
-                className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                width="640"
+                height="384"
+                loading="lazy"
+                decoding="async"
+                className="h-full w-full object-cover transition-transform duration-300 motion-reduce:transition-none group-hover:scale-105"
               />
             ) : (
               <ImageFallback label="Menu preview" />
@@ -223,7 +225,15 @@ function MenuPreview({ menuItems, expanded, onToggle }) {
             <div className="flex items-start gap-3">
               <div className="h-14 w-14 shrink-0 overflow-hidden rounded-2xl bg-[#E8DFC8]">
                 {item.imageUrl ? (
-                  <img src={item.imageUrl} alt={item.name} className="h-full w-full object-cover" />
+                  <img
+                    src={item.imageUrl}
+                    alt={item.name}
+                    width="112"
+                    height="112"
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover"
+                  />
                 ) : (
                   <ImageFallback label={item.name} />
                 )}
@@ -321,7 +331,9 @@ function DeletePlaceSheet({ restaurant, onCancel, onDeleted }) {
 
   return (
     <div className="w-full max-w-md rounded-[28px] bg-[#FFFDF9] p-5 shadow-[0_20px_70px_rgba(28,17,7,0.18)]">
-      <h2 className="text-lg font-extrabold tracking-tight text-[#1C1107]">Delete Place?</h2>
+      <h2 id="delete-place-title" className="text-lg font-extrabold tracking-tight text-[#1C1107]">
+        Delete Place?
+      </h2>
       <p className="mt-3 text-sm leading-6 text-[#756450]">
         Are you sure you want to delete {restaurant.name}? This will also remove diary entries linked to this place.
       </p>
@@ -334,7 +346,7 @@ function DeletePlaceSheet({ restaurant, onCancel, onDeleted }) {
         disabled={deleteRestaurant.isPending}
         className="mt-5 w-full rounded-2xl bg-[#E04B39] py-3.5 text-sm font-extrabold text-white shadow-[0_12px_30px_rgba(224,75,57,0.25)] transition hover:bg-[#c93c2f] disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {deleteRestaurant.isPending ? "Deleting..." : "Delete Place"}
+        {deleteRestaurant.isPending ? "Deleting…" : "Delete Place"}
       </button>
       <button
         type="button"
@@ -370,7 +382,11 @@ function FoodHighlights({ photos = [] }) {
           <img
             src={entry.photoUrl}
             alt={entry.caption || "Food highlight"}
-            className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+            width="640"
+            height="480"
+            loading="lazy"
+            decoding="async"
+            className="h-full w-full object-cover transition-transform duration-300 motion-reduce:transition-none group-hover:scale-105"
           />
           {entry.caption && (
             <div className="pointer-events-none absolute inset-x-0 bottom-0 flex min-h-16 items-end bg-linear-to-t from-black/65 to-transparent p-3">
@@ -379,130 +395,6 @@ function FoodHighlights({ photos = [] }) {
           )}
         </div>
       ))}
-    </div>
-  );
-}
-
-function DetailTile({ icon: Icon, label, value, compact = false, className = "" }) {
-  if (compact) {
-    return (
-      <div className={`flex items-start gap-3 rounded-2xl bg-[#F5EEE4] px-3 py-2.5 ${className}`}>
-        <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/75 text-[#6F5130]">
-          <Icon size={15} />
-        </div>
-        <div className="min-w-0">
-          <p className="text-[11px] font-semibold text-stone-500">{label}</p>
-          <div className="mt-0.5 text-sm font-bold leading-5 text-[#1C1107]">{value || "Not added"}</div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className={`rounded-[22px] bg-[#F5EEE4] p-4 ${className}`}>
-      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-2xl bg-white/70 text-[#6F5130]">
-        <Icon size={18} />
-      </div>
-      <p className="text-xs font-semibold text-stone-500">{label}</p>
-      <div className="mt-1 text-sm font-bold leading-5 text-[#1C1107]">{value || "Not added"}</div>
-    </div>
-  );
-}
-
-function AddressTile({ value, restaurantId, className = "" }) {
-  return (
-    <Link
-      to={`/food-map?placeId=${restaurantId}`}
-      className={`group relative flex items-start gap-3 rounded-2xl bg-[#F5EEE4] px-3 py-2.5 text-[#1C1107] no-underline transition hover:bg-[#EFE5D8] ${className}`}
-      title="View on map"
-      aria-label="View address on map"
-    >
-      <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/75 text-[#6F5130]">
-        <MapPin size={15} />
-      </div>
-      <div className="min-w-0">
-        <p className="text-[11px] font-semibold text-stone-500">Address</p>
-        <div className="mt-0.5 text-sm font-bold leading-5 text-[#1C1107]">{value || "Not added"}</div>
-      </div>
-    </Link>
-  );
-}
-
-const OPENING_DAY_LABELS = {
-  1: "Mon",
-  2: "Tue",
-  3: "Wed",
-  4: "Thu",
-  5: "Fri",
-  6: "Sat",
-  7: "Sun",
-};
-
-function formatOpeningHours(value) {
-  if (!Array.isArray(value)) return value;
-  if (!value.length) return "N/A";
-
-  return [...value]
-    .sort((a, b) => a.day - b.day)
-    .map((item) => ({
-      day: OPENING_DAY_LABELS[item.day] ?? `Day ${item.day}`,
-      hours: item.open && item.close ? `${item.open} - ${item.close}` : "Closed",
-      isClosed: !item.open || !item.close,
-    }));
-}
-
-function OpeningHoursValue({ value }) {
-  if (typeof value === "string") return value;
-
-  return (
-    <div className="grid gap-1.5">
-      {value.map((item) => (
-        <div key={item.day} className="grid grid-cols-[2.25rem_1fr] items-baseline gap-2 text-xs leading-4">
-          <span className="font-extrabold text-[#1C1107]">{item.day}</span>
-          <span className={item.isClosed ? "font-semibold text-stone-500" : "font-bold text-[#1C1107]"}>
-            {item.hours}
-          </span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function BudgetValue({ value }) {
-  if (!value) return "N/A";
-
-  const match = value.match(/^(.*?)\s*(\(.*\))$/);
-  if (!match) return value;
-
-  return (
-    <span>
-      <span>{match[1].trim()}</span>
-      <span className="block">{match[2]}</span>
-    </span>
-  );
-}
-
-function PlaceProfile({ restaurant, category, fullAddress }) {
-  const openingHours =
-    formatOpeningHours(restaurant.openingHours) ?? restaurant.hours ?? restaurant.businessHours ?? "N/A";
-
-  return (
-    <div className="grid gap-2 sm:grid-cols-2">
-      <AddressTile value={fullAddress || "N/A"} restaurantId={restaurant.id} className="sm:col-span-2" />
-      <DetailTile icon={UtensilsCrossed} label="Category" value={category} compact />
-      <DetailTile
-        icon={Clock3}
-        label="Opening hours"
-        value={<OpeningHoursValue value={openingHours} />}
-        compact
-        className="sm:row-span-2"
-      />
-      <DetailTile
-        icon={Wallet}
-        label="Budget"
-        value={<BudgetValue value={restaurant.priceRange || restaurant.budget} />}
-        compact
-      />
     </div>
   );
 }
@@ -539,7 +431,7 @@ function VisitorSignal({ entries = [], restaurantPromo }) {
 function EntryPreviewList({ entries = [], loading }) {
   if (loading) {
     return (
-      <p className="rounded-3xl bg-[#F5EEE4] py-10 text-center text-sm text-stone-500">Loading food diary entries...</p>
+      <p className="rounded-3xl bg-[#F5EEE4] py-10 text-center text-sm text-stone-500">Loading food diary entries…</p>
     );
   }
 
@@ -568,6 +460,10 @@ function EntryPreviewList({ entries = [], loading }) {
               <img
                 src={entry.photoUrl}
                 alt={entry.caption || "Food diary entry"}
+                width="480"
+                height="360"
+                loading="lazy"
+                decoding="async"
                 className="h-full w-full object-cover"
               />
             ) : (
@@ -611,7 +507,7 @@ export function FoodPlaceDetailPage() {
     [entries]
   );
 
-  const location = getLocation(restaurant);
+  const location = getRestaurantLocation(restaurant);
   const fullAddress = [restaurant?.address, location].filter(Boolean).join(", ");
   const photos = getPhotoEntries(sortedEntries, restaurant);
   const avg = averageRating(sortedEntries, restaurant?.averageRating);
@@ -629,16 +525,14 @@ export function FoodPlaceDetailPage() {
 
   if (loadingRestaurant) {
     return (
-      <div className="min-h-screen bg-[#FDFBF7] px-4 py-16 text-center text-sm text-stone-500">
-        Loading food place...
-      </div>
+      <div className="min-h-screen bg-[#FDFBF7] px-4 py-16 text-center text-sm text-stone-500">Loading food place…</div>
     );
   }
 
   if (!canViewPlaceDetail && loadingEntries) {
     return (
       <div className="min-h-screen bg-[#FDFBF7] px-4 py-16 text-center text-sm text-stone-500">
-        Opening diary entry...
+        Opening diary entry…
       </div>
     );
   }
@@ -687,6 +581,8 @@ export function FoodPlaceDetailPage() {
                       <img
                         src={restaurant.storePhotoUrl}
                         alt={`${restaurant.name} store icon`}
+                        width="56"
+                        height="56"
                         className="h-full w-full object-cover"
                       />
                     ) : (
@@ -763,13 +659,25 @@ export function FoodPlaceDetailPage() {
       </div>
 
       {isEditingPlace && (
-        <Modal onClose={() => setIsEditingPlace(false)} closeOnBackdrop={false} closeOnEscape={false}>
-          <RestaurantForm restaurant={restaurant} onClose={() => setIsEditingPlace(false)} />
+        <Modal
+          onClose={() => setIsEditingPlace(false)}
+          closeOnBackdrop={false}
+          closeOnEscape={false}
+          ariaLabelledBy="restaurant-form-title"
+        >
+          <Suspense fallback={<div className="rounded-3xl bg-white p-8 text-center">Loading form…</div>}>
+            <RestaurantForm restaurant={restaurant} onClose={() => setIsEditingPlace(false)} />
+          </Suspense>
         </Modal>
       )}
 
       {isConfirmingDelete && (
-        <Modal onClose={() => setIsConfirmingDelete(false)} placement="center" closeOnBackdrop={false}>
+        <Modal
+          onClose={() => setIsConfirmingDelete(false)}
+          placement="center"
+          closeOnBackdrop={false}
+          ariaLabelledBy="delete-place-title"
+        >
           <DeletePlaceSheet
             restaurant={restaurant}
             onCancel={() => setIsConfirmingDelete(false)}

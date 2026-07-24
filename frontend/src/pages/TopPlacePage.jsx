@@ -369,8 +369,13 @@ export function TopPlacePage() {
       </div>
 
       {showAddModal && canManageRestaurants && (
-        <Modal onClose={() => setShowAddModal(false)} closeOnBackdrop={false} closeOnEscape={false}>
-          <Suspense fallback={null}>
+        <Modal
+          onClose={() => setShowAddModal(false)}
+          closeOnBackdrop={false}
+          closeOnEscape={false}
+          ariaLabelledBy="restaurant-form-title"
+        >
+          <Suspense fallback={<div className="rounded-3xl bg-white p-8 text-center">Loading form…</div>}>
             <RestaurantForm onClose={() => setShowAddModal(false)} />
           </Suspense>
         </Modal>

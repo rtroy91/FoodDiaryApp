@@ -5,13 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { Modal } from "./Modal";
 import { PublishDiaryForm } from "./PublishDiaryForm";
 import { useDeleteEntry } from "../hooks/useDiaryData";
-import { categoryLabel } from "../utils/restaurants";
-
-function getLocation(restaurant) {
-  return [restaurant?.barangay ? "Brgy. " + restaurant.barangay : null, restaurant?.city, restaurant?.province]
-    .filter(Boolean)
-    .join(", ");
-}
+import { categoryLabel, getRestaurantLocation } from "../utils/restaurants";
 
 function timeAgo(dateStr) {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -120,7 +114,9 @@ function DeleteEntrySheet({ entry, onCancel, onDeleted }) {
 
   return (
     <div className="w-full max-w-md rounded-[28px] bg-[#FFFDF9] p-5 shadow-[0_20px_70px_rgba(28,17,7,0.18)]">
-      <h2 className="text-lg font-extrabold tracking-tight text-[#1C1107]">Delete Post?</h2>
+      <h2 id="delete-entry-title" className="text-lg font-extrabold tracking-tight text-[#1C1107]">
+        Delete Post?
+      </h2>
       <p className="mt-3 text-sm leading-6 text-[#756450]">
         Are you sure you want to delete your visit to {restaurantName}? This action cannot be undone.
       </p>
@@ -133,7 +129,7 @@ function DeleteEntrySheet({ entry, onCancel, onDeleted }) {
         disabled={deleteEntry.isPending}
         className="mt-5 w-full rounded-2xl bg-[#B83224] py-3.5 text-sm font-extrabold text-white shadow-[0_12px_30px_rgba(184,50,36,0.25)] transition hover:bg-[#8F261C] disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {deleteEntry.isPending ? "Deleting..." : "Delete Post"}
+        {deleteEntry.isPending ? "Deleting…" : "Delete Post"}
       </button>
       <button
         type="button"
@@ -241,12 +237,14 @@ function EntryDetailModal({ entry, location, onClose, onEdit, onDelete }) {
   }
 
   return (
-    <Modal onClose={onClose} placement="center" backdropClassName="bg-black/60 px-4 py-6 backdrop-blur-md sm:py-8">
+    <Modal
+      onClose={onClose}
+      placement="center"
+      ariaLabelledBy={`entry-detail-title-${entry.id}`}
+      backdropClassName="bg-black/60 px-4 py-6 backdrop-blur-md sm:py-8"
+    >
       <article
         className="entry-detail-modal relative flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-[#FFFDF9] shadow-[0_30px_90px_rgba(0,0,0,0.34)] outline-none"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={`entry-detail-title-${entry.id}`}
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex shrink-0 justify-end gap-2 px-6 pb-2 pt-4 xl:absolute xl:right-6 xl:top-6 xl:z-30 xl:p-0">
@@ -267,6 +265,10 @@ function EntryDetailModal({ entry, location, onClose, onEdit, onDelete }) {
               <img
                 src={entry.photoUrl}
                 alt={restaurant?.name ?? "Restaurant photo"}
+                width="800"
+                height="800"
+                loading="lazy"
+                decoding="async"
                 className="h-full w-full object-cover"
               />
             ) : (
@@ -345,7 +347,7 @@ export function EntryCard({ entry, featured = false }) {
   const [isViewingDetails, setIsViewingDetails] = useState(false);
   const [shouldReturnToDetails, setShouldReturnToDetails] = useState(false);
   const restaurant = entry.restaurant;
-  const location = getLocation(restaurant);
+  const location = getRestaurantLocation(restaurant);
   const wasEdited = Boolean(entry.updatedAt);
 
   function openDetails() {
@@ -393,6 +395,11 @@ export function EntryCard({ entry, featured = false }) {
           <img
             src={entry.photoUrl}
             alt={restaurant?.name ?? "Restaurant photo"}
+            width="640"
+            height="448"
+            loading={featured ? "eager" : "lazy"}
+            fetchPriority={featured ? "high" : "auto"}
+            decoding="async"
             className="h-full w-full object-cover"
           />
         ) : (
@@ -462,12 +469,17 @@ export function EntryCard({ entry, featured = false }) {
   const modals = (
     <>
       {isEditing && (
-        <Modal onClose={closeEditing} closeOnBackdrop={false} closeOnEscape={false}>
+        <Modal
+          onClose={closeEditing}
+          closeOnBackdrop={false}
+          closeOnEscape={false}
+          ariaLabelledBy="publish-diary-title"
+        >
           <PublishDiaryForm entry={entry} onClose={closeEditing} />
         </Modal>
       )}
       {isConfirmingDelete && (
-        <Modal onClose={cancelDelete} placement="center" closeOnBackdrop={false}>
+        <Modal onClose={cancelDelete} placement="center" closeOnBackdrop={false} ariaLabelledBy="delete-entry-title">
           <DeleteEntrySheet entry={entry} onCancel={cancelDelete} onDeleted={finishDelete} />
         </Modal>
       )}

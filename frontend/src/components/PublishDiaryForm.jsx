@@ -191,7 +191,7 @@ export function PublishDiaryForm({ restaurants = [], entry = null, onClose }) {
   return (
     <div className="w-full max-w-md overflow-hidden rounded-[28px] bg-[#FFFDF9] shadow-[0_20px_70px_rgba(28,17,7,0.18)]">
       <div className="flex items-center justify-between border-b border-[#EFE4D5] px-5 py-4">
-        <h2 className="text-base font-extrabold tracking-tight text-[#1C1107]">
+        <h2 id="publish-diary-title" className="text-base font-extrabold tracking-tight text-[#1C1107]">
           {isEditing ? "Edit post" : "New post"}
         </h2>
         <button
@@ -214,7 +214,13 @@ export function PublishDiaryForm({ restaurants = [], entry = null, onClose }) {
           >
             {photoPreview ? (
               <>
-                <img src={photoPreview} alt="Selected food preview" className="h-full w-full object-cover" />
+                <img
+                  src={photoPreview}
+                  alt="Selected food preview"
+                  width="576"
+                  height="576"
+                  className="h-full w-full object-cover"
+                />
                 <span className="absolute bottom-3 left-3 rounded-full bg-black/55 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-sm">
                   Change photo
                 </span>
@@ -227,16 +233,18 @@ export function PublishDiaryForm({ restaurants = [], entry = null, onClose }) {
                 <span className="text-sm font-extrabold">+ Add food photo</span>
               </div>
             )}
-            <input type="file" accept="image/*" onChange={handlePhotoChange} className="hidden" />
+            <input type="file" name="entryPhoto" accept="image/*" onChange={handlePhotoChange} className="hidden" />
           </div>
         </label>
 
         <label className="mt-3 block border-b border-[#EFE4D5] pb-2">
           <span className="sr-only">Caption</span>
           <textarea
+            name="caption"
             value={form.caption}
             onChange={(e) => handleChange("caption", e.target.value)}
-            placeholder="Write a caption..."
+            placeholder="Write a caption…"
+            autoComplete="off"
             maxLength={CAPTION_MAX_LENGTH}
             rows={5}
             className="block w-full resize-none bg-transparent px-1 text-sm leading-6 text-[#1F1B16] outline-none placeholder:text-[#A79884]"
@@ -254,6 +262,7 @@ export function PublishDiaryForm({ restaurants = [], entry = null, onClose }) {
             <span className="sr-only">Place Name</span>
             <div className="relative min-w-0 flex-1">
               <select
+                name="restaurantId"
                 value={form.restaurantId}
                 onChange={(e) => handleChange("restaurantId", e.target.value)}
                 className="w-full appearance-none bg-transparent pr-7 text-sm font-semibold text-[#1F1B16] outline-none"
@@ -306,14 +315,18 @@ export function PublishDiaryForm({ restaurants = [], entry = null, onClose }) {
           </div>
         </div>
 
-        {errorMessage && <p className="mt-3 text-sm font-semibold text-[#E04B39]">{errorMessage}</p>}
+        {errorMessage && (
+          <p className="mt-3 text-sm font-semibold text-[#E04B39]" role="alert">
+            {errorMessage}
+          </p>
+        )}
 
         <button
           type="submit"
           disabled={isSaving}
           className="mt-4 w-full rounded-2xl bg-[#E04B39] py-3.5 text-sm font-extrabold text-white shadow-[0_12px_30px_rgba(224,75,57,0.25)] transition hover:bg-[#c93c2f] disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isSaving ? (isEditing ? "Saving..." : "Publishing...") : isEditing ? "Save Changes" : "Publish to Diary"}
+          {isSaving ? (isEditing ? "Saving…" : "Publishing…") : isEditing ? "Save Changes" : "Publish to Diary"}
         </button>
       </form>
     </div>

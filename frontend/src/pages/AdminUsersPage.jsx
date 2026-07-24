@@ -56,7 +56,7 @@ export function AdminUsersPage() {
             </span>
           </div>
 
-          {isLoading && <p className="px-5 py-10 text-center text-sm text-stone-500">Loading users...</p>}
+          {isLoading && <p className="px-5 py-10 text-center text-sm text-stone-500">Loading users…</p>}
           {isError && <p className="px-5 py-10 text-center text-sm font-bold text-[#E04B39]">Unable to load users.</p>}
 
           {!isLoading && !isError && (

@@ -59,18 +59,18 @@ export function NavBar() {
       </a>
 
       <header className={headerClassName}>
-        <nav className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
-          <div className="flex min-w-0 items-center gap-4 sm:gap-8">
+        <nav className="mx-auto grid w-full max-w-6xl grid-cols-[auto_1fr_auto] items-center gap-x-3 gap-y-2 px-4 py-3 sm:flex sm:justify-between sm:gap-6 sm:px-6 sm:py-4">
+          <div className="contents sm:flex sm:min-w-0 sm:items-center sm:gap-8">
             <NavLink
               to="/"
               className="flex shrink-0 items-center gap-2 font-['Fraunces'] text-xl font-light text-white no-underline"
               aria-label="DiarEat home"
             >
-              <img src="/favicon.svg" alt="" className="h-8 w-8 shrink-0" aria-hidden="true" />
+              <img src="/favicon.svg" alt="" width="32" height="32" className="h-8 w-8 shrink-0" aria-hidden="true" />
               <span className="hidden min-[420px]:inline">DiarEat</span>
             </NavLink>
 
-            <div className="flex min-w-0 items-center gap-1 sm:gap-2">
+            <div className="order-3 col-span-3 -mx-1 flex min-w-0 items-center gap-1 overflow-x-auto px-1 pb-1 sm:order-none sm:col-span-1 sm:mx-0 sm:gap-2 sm:overflow-visible sm:px-0 sm:pb-0">
               {navItems.map(({ to, label, end }) => (
                 <NavLink
                   key={to}
@@ -80,7 +80,7 @@ export function NavBar() {
                     const isHomeActive = to === "/" && isEntriesRoute;
 
                     return [
-                      "whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-medium no-underline transition-colors duration-200 sm:px-4 sm:text-sm",
+                      "shrink-0 whitespace-nowrap rounded-full px-3 py-2 text-xs font-medium no-underline transition-colors duration-200 sm:px-4 sm:text-sm",
                       isActive || isHomeActive ? "bg-[#B83224] text-white" : "text-stone-50 hover:text-stone-200",
                     ].join(" ");
                   }}
@@ -94,10 +94,10 @@ export function NavBar() {
           <button
             type="button"
             onClick={handleLogout}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-stone-700/50 px-3 py-1 text-sm font-medium text-stone-400 transition-colors hover:border-red-400/40 hover:text-red-400"
+            className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-1.5 justify-self-end rounded-lg border border-stone-700/50 px-3 py-2 text-sm font-medium text-stone-300 transition-colors hover:border-red-400/40 hover:text-red-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F0E76F]"
             aria-label="Log out"
           >
-            <LogOut size={14} />
+            <LogOut size={16} aria-hidden="true" />
             <span className="hidden sm:inline">Log out</span>
           </button>
         </nav>

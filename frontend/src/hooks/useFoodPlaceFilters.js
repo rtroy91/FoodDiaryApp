@@ -89,20 +89,10 @@ export function useFoodPlaceFilters(places = [], { onFilterChange } = {}) {
     notifyFilterChange();
   }
 
-  function resetFilters() {
-    setSearchTerm("");
-    setCategory("all");
-    setCityCode("");
-    setCity("all");
-    setBarangay("all");
-    notifyFilterChange();
-  }
-
   return {
     searchTerm,
     category,
     cityCode,
-    city,
     barangay,
     cityOptions,
     barangayOptions,
@@ -111,14 +101,10 @@ export function useFoodPlaceFilters(places = [], { onFilterChange } = {}) {
     loadingBarangays,
     hasActiveFilters,
     filteredPlaces,
-    setSearchTerm: handleSearchChange,
-    setCategory: handleCategoryChange,
-    setBarangay: handleBarangayChange,
     handleSearchChange,
     clearSearch,
     handleCategoryChange,
     handleCityChange,
     handleBarangayChange,
-    resetFilters,
   };
 }

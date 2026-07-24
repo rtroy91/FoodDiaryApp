@@ -2,6 +2,12 @@ export function categoryLabel(category, fallback = "Other") {
   return category ? category.replace(/_/g, " ") : fallback;
 }
 
+export function getRestaurantLocation(restaurant) {
+  return [restaurant?.barangay ? `Brgy. ${restaurant.barangay}` : null, restaurant?.city, restaurant?.province]
+    .filter(Boolean)
+    .join(", ");
+}
+
 export function buildPlaceStats(restaurants = [], entries = []) {
   const byId = new Map();
 

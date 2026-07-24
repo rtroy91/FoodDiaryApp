@@ -14,7 +14,7 @@ export function useRestaurantLists(options = {}) {
 
   return useQuery({
     queryKey: ["restaurants", "mine", userKey],
-    queryFn: restaurantsApi.GetRestaurantLists,
+    queryFn: restaurantsApi.getRestaurantLists,
     ...options,
   });
 }

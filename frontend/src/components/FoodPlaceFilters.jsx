@@ -83,7 +83,7 @@ export function FoodPlaceFilters({
         onChange={onCityChange}
         disabled={loadingCities || cityError || cityOptions.length === 0}
         showPlaceholder={false}
-        options={[{ value: "", label: loadingCities ? "Loading cities..." : "Select City" }, ...cityOptions]}
+        options={[{ value: "", label: loadingCities ? "Loading cities…" : "Select City" }, ...cityOptions]}
       />
 
       <SelectInput
@@ -93,7 +93,7 @@ export function FoodPlaceFilters({
         disabled={!cityCode || loadingBarangays}
         showPlaceholder={false}
         options={[
-          { value: "all", label: loadingBarangays ? "Loading barangays..." : "Select Barangay" },
+          { value: "all", label: loadingBarangays ? "Loading barangays…" : "Select Barangay" },
           ...barangayOptions.map((item) => ({
             value: item,
             label: item,

@@ -13,7 +13,7 @@ export function DiaryFab({ onLogEntry }) {
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4">
       <div
-        className={`flex flex-col items-end transition-all duration-200 ${
+        className={`flex flex-col items-end transition-[transform,opacity] duration-200 motion-reduce:transition-none ${
           isOpen ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-2 opacity-0"
         }`}
       >
@@ -56,7 +56,7 @@ export function DiaryFab({ onLogEntry }) {
         onClick={() => setIsOpen((current) => !current)}
         aria-expanded={isOpen}
         aria-label={isOpen ? "Close quick actions" : "Open quick actions"}
-        className="group flex h-12 w-12 items-center justify-center rounded-full bg-[#DE4E3A] text-white shadow-lg transition-all duration-150 hover:scale-105 hover:bg-[#c94331] hover:shadow-xl active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E04B39]/35"
+        className="group flex h-12 w-12 items-center justify-center rounded-full bg-[#DE4E3A] text-white shadow-lg transition-[transform,background-color,box-shadow] duration-150 motion-reduce:transition-none hover:scale-105 hover:bg-[#c94331] hover:shadow-xl active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E04B39]/35"
       >
         {isOpen ? <X size={20} /> : <Menu size={20} />}
       </button>

@@ -1,19 +1,9 @@
 import { useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
-import {
-  ArrowLeft,
-  CalendarDays,
-  Camera,
-  Clock3,
-  Image as ImageIcon,
-  MapPin,
-  Star,
-  Store,
-  UtensilsCrossed,
-  Wallet,
-} from "lucide-react";
+import { ArrowLeft, CalendarDays, Camera, Clock3, Image as ImageIcon, MapPin, Star, Store } from "lucide-react";
 import { useEntries, useEntry, useRestaurant } from "../hooks/useDiaryData";
-import { categoryLabel } from "../utils/restaurants";
+import { PlaceProfile } from "../components/PlaceProfile";
+import { categoryLabel, getRestaurantLocation } from "../utils/restaurants";
 
 const pageShellStyle = {
   boxSizing: "border-box",
@@ -37,12 +27,6 @@ function formatDate(value, variant = "long") {
 function getYear(value) {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? "Unknown" : String(date.getFullYear());
-}
-
-function getLocation(restaurant) {
-  return [restaurant?.barangay ? `Brgy. ${restaurant.barangay}` : null, restaurant?.city, restaurant?.province]
-    .filter(Boolean)
-    .join(", ");
 }
 
 function getEntryRestaurantId(entry) {
@@ -105,133 +89,6 @@ function SectionLabel({ eyebrow, title }) {
 
 function HubPanel({ children, className = "" }) {
   return <section className={`rounded-[28px] border border-[#E8DFC8] bg-white p-5 ${className}`}>{children}</section>;
-}
-
-function DetailTile({ icon: Icon, label, value, className = "" }) {
-  return (
-    <div className={`flex items-start gap-3 rounded-2xl bg-[#F5EEE4] px-3 py-2.5 ${className}`}>
-      <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/75 text-[#6F5130]">
-        <Icon size={15} />
-      </div>
-      <div className="min-w-0">
-        <p className="text-[11px] font-semibold text-stone-500">{label}</p>
-        <div className="mt-0.5 text-sm font-bold leading-5 text-[#1C1107]">{value || "Not added"}</div>
-      </div>
-    </div>
-  );
-}
-
-function AddressTile({ value, restaurantId, className = "" }) {
-  return (
-    <Link
-      to={`/food-map?placeId=${restaurantId}`}
-      className={`group relative flex items-start gap-3 rounded-2xl bg-[#F5EEE4] px-3 py-2.5 text-[#1C1107] no-underline transition hover:bg-[#EFE5D8] ${className}`}
-      title="View on map"
-      aria-label="View address on map"
-    >
-      <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/75 text-[#6F5130]">
-        <MapPin size={15} />
-      </div>
-      <div className="min-w-0">
-        <p className="text-[11px] font-semibold text-stone-500">Address</p>
-        <div className="mt-0.5 text-sm font-bold leading-5 text-[#1C1107]">{value || "Not added"}</div>
-      </div>
-    </Link>
-  );
-}
-
-const OPENING_DAY_LABELS = {
-  1: "Mon",
-  2: "Tue",
-  3: "Wed",
-  4: "Thu",
-  5: "Fri",
-  6: "Sat",
-  7: "Sun",
-};
-
-function formatStandardTime(value) {
-  if (!value || typeof value !== "string") return value;
-
-  const match = value.match(/^(\d{1,2}):(\d{2})/);
-  if (!match) return value;
-
-  const hour = Number(match[1]);
-  const minute = match[2];
-  if (Number.isNaN(hour) || hour > 23) return value;
-
-  const period = hour >= 12 ? "PM" : "AM";
-  const standardHour = hour % 12 || 12;
-
-  return `${standardHour}:${minute} ${period}`;
-}
-
-function formatOpeningHours(value) {
-  if (!Array.isArray(value)) return value;
-  if (!value.length) return "N/A";
-
-  return [...value]
-    .sort((a, b) => a.day - b.day)
-    .map((item) => ({
-      day: OPENING_DAY_LABELS[item.day] ?? `Day ${item.day}`,
-      hours:
-        item.open && item.close ? `${formatStandardTime(item.open)} - ${formatStandardTime(item.close)}` : "Closed",
-      isClosed: !item.open || !item.close,
-    }));
-}
-
-function OpeningHoursValue({ value }) {
-  if (typeof value === "string") return value;
-
-  return (
-    <div className="grid gap-1.5">
-      {value.map((item) => (
-        <div key={item.day} className="grid grid-cols-[2.25rem_1fr] items-baseline gap-2 text-xs leading-4">
-          <span className="font-extrabold text-[#1C1107]">{item.day}</span>
-          <span className={item.isClosed ? "font-semibold text-stone-500" : "font-bold text-[#1C1107]"}>
-            {item.hours}
-          </span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function BudgetValue({ value }) {
-  if (!value) return "N/A";
-
-  const match = value.match(/^(.*?)\s*(\(.*\))$/);
-  if (!match) return value;
-
-  return (
-    <span>
-      <span>{match[1].trim()}</span>
-      <span className="block">{match[2]}</span>
-    </span>
-  );
-}
-
-function PlaceProfile({ restaurant, category, fullAddress }) {
-  const openingHours =
-    formatOpeningHours(restaurant.openingHours) ?? restaurant.hours ?? restaurant.businessHours ?? "N/A";
-
-  return (
-    <div className="grid gap-2 sm:grid-cols-[45fr_55fr]">
-      <AddressTile value={fullAddress || "N/A"} restaurantId={restaurant.id} className="sm:col-span-2" />
-      <DetailTile icon={UtensilsCrossed} label="Category" value={category} />
-      <DetailTile
-        icon={Clock3}
-        label="Opening hours"
-        value={<OpeningHoursValue value={openingHours} />}
-        className="sm:row-span-2"
-      />
-      <DetailTile
-        icon={Wallet}
-        label="Budget"
-        value={<BudgetValue value={restaurant.priceRange || restaurant.budget} />}
-      />
-    </div>
-  );
 }
 
 function HeaderStatCard({ icon: Icon, label, value }) {
@@ -331,7 +188,11 @@ function PhotoGallery({ photos = [] }) {
           <img
             src={photo.photoUrl}
             alt={photo.caption || "Food diary photo"}
-            className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+            width="640"
+            height="480"
+            loading="lazy"
+            decoding="async"
+            className="h-full w-full object-cover transition-transform duration-300 motion-reduce:transition-none group-hover:scale-105"
           />
           {photo.caption && (
             <div className="pointer-events-none absolute inset-x-0 bottom-0 flex min-h-16 items-end bg-linear-to-t from-black/65 to-transparent p-3">
@@ -351,7 +212,11 @@ function CompactMenuPanel({ menuPreview }) {
         <img
           src={menuPreview.imageUrl}
           alt={menuPreview.name}
-          className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+          width="480"
+          height="320"
+          loading="lazy"
+          decoding="async"
+          className="h-full w-full object-cover transition-transform duration-300 motion-reduce:transition-none group-hover:scale-105"
         />
       ) : (
         <div className="flex h-full w-full items-center justify-center text-[#9B8B72]">
@@ -404,7 +269,7 @@ export function EntryDetailPage() {
   );
 
   const selectedEntry = entry ?? relatedEntries[0] ?? null;
-  const location = getLocation(restaurant);
+  const location = getRestaurantLocation(restaurant);
   const fullAddress = [restaurant?.address, location].filter(Boolean).join(", ");
   const category = categoryLabel(restaurant?.category, "Food place");
   const avgRating = averageRating(relatedEntries, restaurant?.averageRating);
@@ -416,7 +281,7 @@ export function EntryDetailPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#FDFBF7] px-4 py-16 text-center text-sm text-stone-500">
-        Loading diary profile...
+        Loading diary profile…
       </div>
     );
   }
@@ -461,6 +326,8 @@ export function EntryDetailPage() {
                   <img
                     src={restaurant.storePhotoUrl}
                     alt={`${restaurant.name} store icon`}
+                    width="112"
+                    height="112"
                     className="h-full w-full object-cover"
                   />
                 ) : (
@@ -505,7 +372,7 @@ export function EntryDetailPage() {
           <div className="grid grid-cols-1 gap-2 lg:grid-cols-[40fr_35fr_15fr]">
             <HubPanel>
               <SectionLabel title="Directory Information" />
-              <PlaceProfile restaurant={restaurant} category={category} fullAddress={fullAddress} />
+              <PlaceProfile restaurant={restaurant} category={category} fullAddress={fullAddress} balancedColumns />
             </HubPanel>
 
             <HubPanel>

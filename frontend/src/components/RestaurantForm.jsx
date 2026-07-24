@@ -1,18 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import L from "leaflet";
-import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
-import { Image as ImageIcon, LocateFixed, MapPin, Search, Store, X } from "lucide-react";
+import { Image as ImageIcon, MapPin, Store, X } from "lucide-react";
 import { useCreateRestaurant, useUpdateRestaurant } from "../hooks/useDiaryData";
 import { uploadPhoto } from "../api/entries";
 import { useBataanCities, useBarangaysByCity } from "../hooks/usePsgc";
 import { BATAAN_PROVINCE_NAME } from "../api/psgc";
 import { FormInput } from "./FormInput";
+import { RestaurantLocationPicker } from "./RestaurantLocationPicker";
 import { SelectInput } from "./SelectInput";
 
 const BATAAN_CENTER = { lat: 14.676, lon: 120.536 };
-const BATAAN_ZOOM = 10;
 const WEEK_DAYS = [
   { day: 1, label: "Monday", short: "Mon" },
   { day: 2, label: "Tuesday", short: "Tue" },
@@ -41,90 +38,6 @@ const BUDGET_OPTIONS = [
   },
 ];
 
-function makePinIcon() {
-  return L.divIcon({
-    className: "",
-    iconSize: [38, 38],
-    iconAnchor: [19, 38],
-    html: `
-      <span style="
-        display:block;
-        width:38px;
-        height:38px;
-        border-radius:999px 999px 999px 4px;
-        background:#E04B39;
-        border:4px solid #F0E76F;
-        box-shadow:0 10px 22px rgba(28,17,7,0.28);
-        transform:rotate(-45deg);
-      ">
-        <span style="
-          display:block;
-          width:8px;
-          height:8px;
-          margin:11px auto 0;
-          border-radius:999px;
-          background:#FFFBF4;
-        "></span>
-      </span>
-    `,
-  });
-}
-
-function PinMapController({ pinLocation, onMovePin }) {
-  const map = useMap();
-  const hasMounted = useRef(false);
-
-  useEffect(() => {
-    if (!hasMounted.current) {
-      hasMounted.current = true;
-      return;
-    }
-
-    map.flyTo([pinLocation.lat, pinLocation.lon], Math.max(map.getZoom(), 13), {
-      duration: 0.45,
-    });
-  }, [map, pinLocation]);
-
-  useMapEvents({
-    click(e) {
-      onMovePin({ lat: e.latlng.lat, lon: e.latlng.lng });
-    },
-  });
-
-  return null;
-}
-
-function LocationPinMap({ pinLocation, onMovePin }) {
-  const pinIcon = useMemo(() => makePinIcon(), []);
-
-  return (
-    <MapContainer
-      center={[pinLocation.lat, pinLocation.lon]}
-      zoom={BATAAN_ZOOM}
-      scrollWheelZoom
-      className="h-64 w-full"
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      <PinMapController pinLocation={pinLocation} onMovePin={onMovePin} />
-      <Marker
-        draggable
-        position={[pinLocation.lat, pinLocation.lon]}
-        icon={pinIcon}
-        eventHandlers={{
-          dragend(e) {
-            const marker = e.target;
-            const next = marker.getLatLng();
-            onMovePin({ lat: next.lat, lon: next.lng });
-          },
-        }}
-      />
-    </MapContainer>
-  );
-}
-
 function PhotoIconUpload({ label, preview, inputRef, icon: Icon, onChange }) {
   return (
     <div>
@@ -136,11 +49,16 @@ function PhotoIconUpload({ label, preview, inputRef, icon: Icon, onChange }) {
         aria-label={`Upload ${label.toLowerCase()}`}
         title={`Upload ${label.toLowerCase()}`}
       >
-        {preview ? <img src={preview} alt="" className="h-full w-full object-cover" /> : <Icon size={28} />}
+        {preview ? (
+          <img src={preview} alt="" width="320" height="192" className="h-full w-full object-cover" />
+        ) : (
+          <Icon size={28} aria-hidden="true" />
+        )}
       </button>
       <input
         ref={inputRef}
         type="file"
+        name={`${label.toLowerCase().replaceAll(" ", "-")}-upload`}
         accept="image/*"
         onChange={(e) => onChange(e.target.files?.[0] ?? null)}
         className="sr-only"
@@ -390,7 +308,7 @@ export function RestaurantForm({ restaurant, onClose }) {
   }
 
   async function confirmPinnedLocation() {
-    setLocationStatus("Reading pinned address...");
+    setLocationStatus("Reading pinned address…");
 
     try {
       const result = await reverseGeocodePin(pinLocation);
@@ -415,7 +333,7 @@ export function RestaurantForm({ restaurant, onClose }) {
     e?.preventDefault();
     if (!locationSearch.trim()) return;
 
-    setLocationStatus("Searching...");
+    setLocationStatus("Searching…");
     setLocationResults([]);
 
     try {
@@ -442,7 +360,7 @@ export function RestaurantForm({ restaurant, onClose }) {
       return;
     }
 
-    setLocationStatus("Finding your location...");
+    setLocationStatus("Finding your location…");
     navigator.geolocation.getCurrentPosition(
       async ({ coords }) => {
         try {
@@ -522,7 +440,11 @@ export function RestaurantForm({ restaurant, onClose }) {
   return (
     <div className="w-full max-w-2xl rounded-3xl bg-white shadow-[0_8px_40px_rgba(28,17,7,0.12)]">
       <div className="flex items-center justify-between border-b border-[#F0EAE0] px-6 py-5">
-        <h2 className="text-xl font-semibold text-[#1C1107]" style={{ fontFamily: '"Fraunces", serif' }}>
+        <h2
+          id="restaurant-form-title"
+          className="text-xl font-semibold text-[#1C1107]"
+          style={{ fontFamily: '"Fraunces", serif' }}
+        >
           {isEditing ? "Edit place" : "Add a new place"}
         </h2>
         <button
@@ -536,12 +458,14 @@ export function RestaurantForm({ restaurant, onClose }) {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4 px-6 py-5">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" role="list" aria-label="Form progress">
           {["Place Details", "Directory Extras"].map((step, index) => (
             <div
               key={step}
               className={`h-1.5 flex-1 rounded-full ${index <= currentStep ? "bg-[#E04B39]" : "bg-[#E8DFC8]"}`}
-              aria-label={step}
+              role="listitem"
+              aria-current={index === currentStep ? "step" : undefined}
+              title={step}
             />
           ))}
         </div>
@@ -554,21 +478,32 @@ export function RestaurantForm({ restaurant, onClose }) {
           <>
             <FormInput
               label="Place Name"
+              id="restaurant-name"
+              name="name"
               value={form.name}
               onChange={(value) => handleChange("name", value)}
-              placeholder="e.g. Jollibee Balanga"
+              placeholder="e.g. Jollibee Balanga…"
+              autoComplete="organization"
               required
             />
 
             <div>
               <div className="mb-1.5 flex items-center justify-between gap-3">
-                <label className="text-[11px] font-semibold uppercase tracking-widest text-[#7A6A54]">Address</label>
+                <label
+                  htmlFor="restaurant-address"
+                  className="text-[11px] font-semibold uppercase tracking-widest text-[#7A6A54]"
+                >
+                  Address
+                </label>
               </div>
               <div className="flex rounded-2xl border border-[#E8DFC8] bg-[#FFFBF4] transition focus-within:border-[#E89951]">
                 <input
+                  id="restaurant-address"
+                  name="address"
                   value={form.address}
                   onChange={(e) => handleChange("address", e.target.value)}
-                  placeholder="Street, building, landmark"
+                  placeholder="Street, building, landmark…"
+                  autoComplete="street-address"
                   className="min-w-0 flex-1 rounded-l-2xl bg-transparent px-4 py-3 text-sm text-[#1C1107] outline-none"
                 />
                 <button
@@ -588,17 +523,25 @@ export function RestaurantForm({ restaurant, onClose }) {
               )}
             </div>
 
-            <FormInput label="Province" value={BATAAN_PROVINCE_NAME} onChange={() => {}} disabled />
+            <FormInput
+              label="Province"
+              id="restaurant-province"
+              name="province"
+              value={BATAAN_PROVINCE_NAME}
+              readOnly
+            />
 
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <SelectInput
                   label="City / Municipality"
+                  id="restaurant-city"
+                  name="cityCode"
                   value={resolvedCityCode}
                   onChange={handleCityChange}
                   required
                   disabled={loadingCities || citiesError}
-                  placeholder={loadingCities ? "Loading..." : "Select city"}
+                  placeholder={loadingCities ? "Loading…" : "Select city"}
                   options={cityOptions}
                 />
                 {citiesError && <p className="mt-1 text-[10px] text-[#E04B39]">Couldn't load cities.</p>}
@@ -606,20 +549,25 @@ export function RestaurantForm({ restaurant, onClose }) {
 
               <SelectInput
                 label="Barangay"
+                id="restaurant-barangay"
+                name="barangay"
                 value={resolvedBarangay}
                 onChange={handleBarangayChange}
                 required
                 disabled={!resolvedCityCode || loadingBarangays}
-                placeholder={loadingBarangays ? "Loading..." : "Select barangay"}
+                placeholder={loadingBarangays ? "Loading…" : "Select barangay"}
                 options={barangayOptions}
               />
             </div>
 
             <FormInput
               label="Category"
+              id="restaurant-category"
+              name="category"
               value={form.category}
               onChange={(value) => handleChange("category", value)}
-              placeholder="e.g. Fast food"
+              placeholder="e.g. Fast food…"
+              autoComplete="off"
             />
           </>
         ) : (
@@ -643,9 +591,12 @@ export function RestaurantForm({ restaurant, onClose }) {
 
             <FormInput
               label="Promo"
+              id="restaurant-promo"
+              name="promo"
               value={form.promo}
               onChange={(value) => handleChange("promo", value)}
-              placeholder="e.g. Free fries today"
+              placeholder="e.g. Free fries today…"
+              autoComplete="off"
             />
 
             <div className="rounded-2xl border border-[#E8DFC8] bg-[#FFFBF4] p-4">
@@ -663,6 +614,7 @@ export function RestaurantForm({ restaurant, onClose }) {
                       <span className="flex items-center gap-2">
                         <input
                           type="checkbox"
+                          name={`opening-day-${day}`}
                           checked={isOpen}
                           onChange={(e) => handleOpeningDayToggle(day, e.target.checked)}
                           className="h-4 w-4 rounded border-[#D8CDBB] accent-[#E04B39]"
@@ -671,6 +623,7 @@ export function RestaurantForm({ restaurant, onClose }) {
                       </span>
                       <input
                         type="time"
+                        name={`opening-time-${day}`}
                         value={hours?.open ?? ""}
                         onChange={(e) => handleOpeningTimeChange(day, "open", e.target.value)}
                         disabled={!isOpen}
@@ -679,6 +632,7 @@ export function RestaurantForm({ restaurant, onClose }) {
                       />
                       <input
                         type="time"
+                        name={`closing-time-${day}`}
                         value={hours?.close ?? ""}
                         onChange={(e) => handleOpeningTimeChange(day, "close", e.target.value)}
                         disabled={!isOpen}
@@ -693,6 +647,8 @@ export function RestaurantForm({ restaurant, onClose }) {
 
             <SelectInput
               label="Budget"
+              id="restaurant-budget"
+              name="budget"
               value={form.budget}
               onChange={(value) => handleChange("budget", value)}
               placeholder="Select budget range"
@@ -702,7 +658,10 @@ export function RestaurantForm({ restaurant, onClose }) {
         )}
 
         {errorMessage && (
-          <div className="rounded-2xl border border-[#E04B39]/20 bg-[#E04B39]/10 px-4 py-3 text-xs text-[#C44A3C]">
+          <div
+            className="rounded-2xl border border-[#E04B39]/20 bg-[#E04B39]/10 px-4 py-3 text-xs text-[#C44A3C]"
+            role="alert"
+          >
             {errorMessage}
           </div>
         )}
@@ -738,7 +697,7 @@ export function RestaurantForm({ restaurant, onClose }) {
               className="rounded-2xl bg-[#E04B39] py-3.5 text-sm font-semibold text-white transition hover:bg-[#c93c2f] disabled:cursor-not-allowed disabled:opacity-70"
             >
               {isSaving || createRestaurant.isPending || updateRestaurant.isPending
-                ? "Saving..."
+                ? "Saving…"
                 : isEditing
                   ? "Save Changes"
                   : "Add Place"}
@@ -748,100 +707,25 @@ export function RestaurantForm({ restaurant, onClose }) {
       </form>
 
       {showPinModal && (
-        <div className="fixed inset-0 z-60 flex items-start justify-center bg-black/40 px-4 py-10 pt-24 backdrop-blur-sm">
-          <div className="w-full max-w-lg rounded-3xl bg-white shadow-[0_8px_40px_rgba(28,17,7,0.18)]">
-            <div className="flex items-center justify-between border-b border-[#F0EAE0] px-5 py-4">
-              <div>
-                <h3 className="text-lg font-semibold text-[#1C1107]" style={{ fontFamily: '"Fraunces", serif' }}>
-                  Pin location
-                </h3>
-                <p className="mt-0.5 text-xs text-stone-500">Move the pin, then use it to fill the location details.</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowPinModal(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-full text-stone-500 transition hover:bg-[#F5F0E8] hover:text-[#1C1107]"
-                aria-label="Close pin location"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="space-y-4 px-5 py-5">
-              <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
-                <label className="flex h-12 items-center gap-3 rounded-2xl border border-[#E8DFC8] bg-[#FFFBF4] px-4">
-                  <Search size={16} className="shrink-0 text-stone-400" />
-                  <input
-                    value={locationSearch}
-                    onChange={(e) => setLocationSearch(e.target.value)}
-                    placeholder="Search a place or street"
-                    className="min-w-0 flex-1 bg-transparent text-sm text-[#1C1107] outline-none placeholder:text-stone-400"
-                  />
-                </label>
-                <button
-                  type="button"
-                  onClick={searchPinnedLocation}
-                  className="inline-flex h-12 items-center justify-center rounded-2xl bg-[#1C1107] px-4 text-xs font-semibold text-[#A5CF83]"
-                >
-                  Search
-                </button>
-              </div>
-
-              <button
-                type="button"
-                onClick={useCurrentLocation}
-                className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-2xl border border-[#E8DFC8] bg-[#FFFBF4] text-xs font-semibold text-[#1C1107]"
-              >
-                <LocateFixed size={15} />
-                Use current location
-              </button>
-
-              <div className="relative overflow-hidden rounded-2xl border border-[#E8DFC8] bg-[#F5F0E8]">
-                <LocationPinMap pinLocation={pinLocation} onMovePin={setPinLocation} />
-                <div className="absolute bottom-3 left-3 rounded-full bg-white/90 px-3 py-1.5 text-[10px] font-semibold text-stone-600 shadow">
-                  Click the map or drag the pin
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between gap-3">
-                <p className="text-[10px] text-stone-500">
-                  {pinLocation.lat.toFixed(5)}, {pinLocation.lon.toFixed(5)}
-                </p>
-                <button
-                  type="button"
-                  onClick={confirmPinnedLocation}
-                  className="rounded-2xl bg-[#E04B39] px-4 py-2.5 text-xs font-semibold text-white"
-                >
-                  Use this pin
-                </button>
-              </div>
-
-              {locationStatus && <p className="text-center text-xs text-stone-500">{locationStatus}</p>}
-
-              <div className="max-h-64 space-y-2 overflow-auto">
-                {locationResults.map((result) => (
-                  <button
-                    key={`${result.place_id}-${result.lat}-${result.lon}`}
-                    type="button"
-                    onClick={() => {
-                      setPinLocation({
-                        lat: Number(result.lat),
-                        lon: Number(result.lon),
-                      });
-                      setLocationStatus("");
-                    }}
-                    className="w-full rounded-2xl border border-[#E8DFC8] bg-[#FFFBF4] px-4 py-3 text-left transition hover:border-[#E89951]"
-                  >
-                    <p className="text-sm font-semibold text-[#1C1107]">
-                      {result.name || result.display_name?.split(",")[0]}
-                    </p>
-                    <p className="mt-1 text-xs leading-snug text-stone-500">{result.display_name}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
+        <RestaurantLocationPicker
+          onClose={() => setShowPinModal(false)}
+          locationSearch={locationSearch}
+          onLocationSearchChange={setLocationSearch}
+          onSearch={searchPinnedLocation}
+          onUseCurrentLocation={useCurrentLocation}
+          pinLocation={pinLocation}
+          onMovePin={setPinLocation}
+          onConfirm={confirmPinnedLocation}
+          locationStatus={locationStatus}
+          locationResults={locationResults}
+          onSelectResult={(result) => {
+            setPinLocation({
+              lat: Number(result.lat),
+              lon: Number(result.lon),
+            });
+            setLocationStatus("");
+          }}
+        />
       )}
     </div>
   );

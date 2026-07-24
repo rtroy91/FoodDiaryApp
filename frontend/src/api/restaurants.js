@@ -1,6 +1,6 @@
 import { apiClient } from "./client";
 
-export async function GetRestaurantLists() {
+export async function getRestaurantLists() {
   const { data } = await apiClient.get("/restaurants/restaurant-lists");
   return data;
 }

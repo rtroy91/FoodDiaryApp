@@ -68,7 +68,12 @@ export function EntriesPage() {
         {!isLoading && <DiaryFab onLogEntry={() => setShowVisitModal(true)} />}
       </DiaryPageLayout>
       {showVisitModal && (
-        <Modal onClose={() => setShowVisitModal(false)} closeOnBackdrop={false} closeOnEscape={false}>
+        <Modal
+          onClose={() => setShowVisitModal(false)}
+          closeOnBackdrop={false}
+          closeOnEscape={false}
+          ariaLabelledBy="publish-diary-title"
+        >
           <PublishDiaryForm onClose={() => setShowVisitModal(false)} />
         </Modal>
       )}

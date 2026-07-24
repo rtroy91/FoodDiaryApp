@@ -168,7 +168,8 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .field-limit-shake {
+  .field-limit-shake,
+  .entry-detail-modal {
     animation: none;
   }
 }

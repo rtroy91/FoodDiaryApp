@@ -8,7 +8,9 @@ export function NotFoundPage() {
         <img
           src={deadlinkEmoji}
           alt=""
-          className="mx-auto mb-6 flex items-center justify-center h-48 w-48"
+          width="192"
+          height="192"
+          className="mx-auto mb-6 flex h-48 w-48 items-center justify-center"
           aria-hidden="true"
         />
 
